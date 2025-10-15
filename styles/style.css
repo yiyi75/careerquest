@@ -454,6 +454,7 @@ body {
     font-weight: 600;
 }
 
+<<<<<<< HEAD
 /* ===== STAGE PROGRESS OVERVIEW ===== */
 .stage-progress-overview {
     background: rgba(255, 255, 255, 0.8);
@@ -534,6 +535,8 @@ body {
     }
 }
 
+=======
+>>>>>>> e4f7a29 (style change)
 /* ===== ROADMAP STYLES ===== */
 .roadmap-container {
     position: relative;
