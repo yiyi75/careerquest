@@ -712,12 +712,12 @@ class UIManager {
         document.getElementById('playerStreak').textContent = this.questManager.player.streak;
         
         // Quest progress panel stats (use the new IDs with 'Progress' suffix)
-        document.getElementById('currentDayProgress').textContent = this.questManager.currentQuest.currentDay;
-        document.getElementById('totalDaysProgress').textContent = this.questManager.player.totalDays;
+        // document.getElementById('currentDayProgress').textContent = this.questManager.currentQuest.currentDay;
+        // document.getElementById('totalDaysProgress').textContent = this.questManager.player.totalDays;
         
         // Update distance traveled
-        const progress = this.questManager.getQuestProgress();
-        document.getElementById('distanceTraveled').textContent = `${Math.round(progress.distanceTraveled)}%`;
+        // const progress = this.questManager.getQuestProgress();
+        // document.getElementById('distanceTraveled').textContent = `${Math.round(progress.distanceTraveled)}%`;
     }
 
     renderAchievements() {
