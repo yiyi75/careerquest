@@ -26,9 +26,13 @@
                         <span class="stat-label">Streak</span>
                         <span class="stat-value" id="playerStreak">0</span>
                     </div>
+                    <div class="stat">
+                        <span class="stat-label">Total Days</span>
+                        <span class="stat-value" id="totalDaysProgress">0</span>
+                    </div>
                 </div>
 
-                <div class="quest-days">
+                <!-- <div class="quest-days">
                     <div class="stat">
                         <span class="stat-label">Current Day</span>
                         <span class="stat-value" id="currentDay">1</span>
@@ -37,7 +41,7 @@
                         <span class="stat-label">Total Days</span>
                         <span class="stat-value" id="totalDays">0</span>
                     </div>
-                </div>
+                </div> -->
             </div>
         </header>
 
@@ -73,11 +77,11 @@
                     <div class="player-journey-stats">
                         <div class="stat">
                             <span class="stat-label">Current Day</span>
-                            <span class="stat-value" id="currentDay">1</span>
+                            <span class="stat-value" id="currentDayProgress">1</span>
                         </div>
                         <div class="stat">
                             <span class="stat-label">Total Days</span>
-                            <span class="stat-value" id="totalDays">0</span>
+                            <span class="stat-value" id="totalDaysProgress">0</span>
                         </div>
                         <div class="stat">
                             <span class="stat-label">Distance Traveled</span>
@@ -215,6 +219,23 @@
                 <div class="edit-task">
                     <input type="text" class="edit-task-title" placeholder="Task description (e.g., Practice SQL)">
                     <button class="btn btn-danger remove-edit-task">×</button>
+                </div>
+            </template>
+
+            <template id="stageTaskTemplate">
+                <div class="stage-task" data-task-id="">
+                    <div class="task-content">
+                        <input type="checkbox" class="task-checkbox">
+                        <span class="task-title"></span>
+                        <button class="btn btn-sm daily-toggle-btn btn-outline" 
+                                title="Make this a daily practice task">
+                            Make Daily
+                        </button>
+                    </div>
+                    <div class="task-info">
+                        <span class="task-xp">+<span>0</span> XP</span>
+                        <span class="daily-badge hidden" title="Resets daily">Daily</span>
+                    </div>
                 </div>
             </template>
 

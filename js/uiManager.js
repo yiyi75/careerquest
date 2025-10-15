@@ -99,6 +99,8 @@ class UIManager {
         this.questManager.createQuest(questTitle, stages);
         this.showQuestProgress();
         this.renderQuestProgress();
+
+        this.updatePlayerStats();
     }
 
     showQuestProgress() {
@@ -139,8 +141,15 @@ class UIManager {
 
             const progressPercent = this.questManager.getStageProgress(index);
             stop.querySelector('.stage-name').textContent = stage.title;
-            stop.querySelector('.stage-progress-text').textContent = 
-                stage.completed ? 'Completed!' : `${Math.round(progressPercent)}% Complete`;
+            
+            // Show different text based on completion state
+            if (stage.completed) {
+                stop.querySelector('.stage-progress-text').textContent = 'Completed!';
+            } else if (progressPercent === 100) {
+                stop.querySelector('.stage-progress-text').textContent = 'Ready to Complete!';
+            } else {
+                stop.querySelector('.stage-progress-text').textContent = `${Math.round(progressPercent)}% Complete`;
+            }
             
             roadmapStops.appendChild(stopElement);
         });
@@ -148,32 +157,36 @@ class UIManager {
         this.updateRoadProgress();
     }
 
-    updateRoadProgress() {
+
+     updateRoadProgress() {
         const progress = this.questManager.getQuestProgress();
         const roadProgress = document.getElementById('roadProgress');
         const progressTraveler = document.getElementById('progressTraveler');
         const travelerTooltip = document.getElementById('travelerTooltip');
         
+        // Road progress shows overall completion including partial stages
         const progressPercent = progress.overall;
         roadProgress.style.width = `${progressPercent}%`;
         
-        // Calculate traveler position based on stage completion
+        // Traveler position is based on completed stages + current stage progress
         const completedStages = progress.completedStages;
         const totalStages = progress.totalStages;
         
         let travelerPosition;
         if (completedStages === totalStages) {
+            // At destination
             travelerPosition = 100;
         } else if (completedStages === 0) {
-            travelerPosition = 0;
+            // At start, show progress of first stage
+            const firstStageProgress = this.questManager.getStageProgress(0);
+            travelerPosition = (firstStageProgress / 100) * (100 / totalStages);
         } else {
+            // Completed stages + current stage progress
+            const completedPercentage = (completedStages / totalStages) * 100;
             const currentStageIndex = completedStages;
-            if (currentStageIndex < totalStages) {
-                const currentStageProgress = this.questManager.getStageProgress(currentStageIndex);
-                travelerPosition = (completedStages / totalStages) * 100 + (currentStageProgress / totalStages);
-            } else {
-                travelerPosition = (completedStages / totalStages) * 100;
-            }
+            const currentStageProgress = this.questManager.getStageProgress(currentStageIndex);
+            const currentStageContribution = (currentStageProgress / 100) * (100 / totalStages);
+            travelerPosition = completedPercentage + currentStageContribution;
         }
         
         progressTraveler.style.left = `${travelerPosition}%`;
@@ -182,7 +195,11 @@ class UIManager {
         const currentStage = this.questManager.currentQuest.stages.find(stage => !stage.completed);
         if (currentStage) {
             const currentStageProgress = this.questManager.getStageProgress(currentStage.id - 1);
-            travelerTooltip.textContent = `Working on: ${currentStage.title} (${Math.round(currentStageProgress)}%)`;
+            if (currentStageProgress === 100) {
+                travelerTooltip.textContent = `Ready to complete: ${currentStage.title}`;
+            } else {
+                travelerTooltip.textContent = `Working on: ${currentStage.title} (${Math.round(currentStageProgress)}%)`;
+            }
         } else if (progress.overall === 100) {
             travelerTooltip.textContent = 'Destination reached! 🎉';
         } else {
@@ -222,25 +239,29 @@ class UIManager {
         document.getElementById('overallStageProgressFill').style.width = `${progress.overall}%`;
 
         quest.stages.forEach((stage, stageIndex) => {
+            const stageProgress = this.questManager.getStageProgress(stageIndex);
+            const isReadyToComplete = stageProgress === 100 && !stage.completed;
+            
             const stageElement = document.createElement('div');
-            stageElement.className = `stage-section ${stage.completed ? 'completed' : ''}`;
+            stageElement.className = `stage-section ${stage.completed ? 'completed' : ''} ${isReadyToComplete ? 'ready-to-complete' : ''}`;
             stageElement.innerHTML = `
                 <div class="stage-header">
                     <h4 class="stage-title">${stage.title}</h4>
                     <div class="stage-actions">
                         <div class="stage-progress">
-                            <span>${this.getStageProgress(stage)}% Complete</span>
+                            <span>${stageProgress}% Complete</span>
+                            ${isReadyToComplete ? '<span class="ready-badge">Ready!</span>' : ''}
                         </div>
-                        <button class="btn btn-outline btn-sm complete-stage-btn" 
+                        <button class="btn ${isReadyToComplete ? 'btn-success' : 'btn-outline'} btn-sm complete-stage-btn" 
                                 data-stage-id="${stageIndex}"
                                 ${stage.completed ? 'disabled' : ''}>
-                            ${stage.completed ? '✓ Completed' : 'Mark Complete'}
+                            ${stage.completed ? '✓ Completed' : (isReadyToComplete ? 'Complete Stage' : 'Mark Complete')}
                         </button>
                     </div>
                 </div>
                 <div class="stage-progress-bar">
                     <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${this.getStageProgress(stage)}%"></div>
+                        <div class="progress-fill" style="width: ${stageProgress}%"></div>
                     </div>
                 </div>
                 <div class="stage-tasks-grid" id="tasks-${stageIndex}"></div>
@@ -258,23 +279,29 @@ class UIManager {
         stage.steps.forEach((task, taskIndex) => {
             const taskElement = document.createElement('div');
             taskElement.className = `stage-task ${task.completedToday ? 'completed' : ''} ${task.isDaily ? 'daily' : ''}`;
+            
+            // Show different tooltip for daily tasks
+            const dailyTooltip = task.isDaily ? 'title="This task resets daily. Completing it counts toward stage progress for today."' : '';
+            
             taskElement.innerHTML = `
                 <div class="task-content">
                     <input type="checkbox" class="task-checkbox" 
                            data-stage-id="${stageIndex}" 
                            data-task-id="${taskIndex}"
                            ${task.completedToday ? 'checked' : ''}
-                           ${stage.completed && !task.isDaily ? 'disabled' : ''}>
+                           ${stage.completed ? 'disabled' : ''}
+                           ${dailyTooltip}>
                     <span class="task-title">${task.title}</span>
                     <button class="btn btn-sm daily-toggle-btn ${task.isDaily ? 'btn-warning' : 'btn-outline'}" 
                             data-stage-id="${stageIndex}" 
-                            data-task-id="${taskIndex}">
+                            data-task-id="${taskIndex}"
+                            title="${task.isDaily ? 'Remove daily status' : 'Make this a daily practice task'}">
                         ${task.isDaily ? '⭐ Daily' : 'Make Daily'}
                     </button>
                 </div>
                 <div class="task-info">
                     <span class="task-xp">+${task.xp} XP</span>
-                    ${task.isDaily ? '<span class="daily-badge">Daily</span>' : ''}
+                    ${task.isDaily ? '<span class="daily-badge" title="Resets daily">Daily</span>' : ''}
                 </div>
             `;
             tasksContainer.appendChild(taskElement);
@@ -288,7 +315,6 @@ class UIManager {
         return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
     }
 
-    // ===== TASK AND STAGE INTERACTIONS =====
     handleTaskCompletion(checkbox) {
         const taskId = parseInt(checkbox.getAttribute('data-task-id'));
         const stageId = parseInt(checkbox.getAttribute('data-stage-id'));
@@ -308,8 +334,10 @@ class UIManager {
                 this.showLevelUpAnimation(result.newLevel);
             }
             
+            // CHANGED: Only show stage completion if it actually happened
+            // and only for non-daily tasks or when explicitly completed
             if (result.chapterCompleted) {
-                this.showStageCompleteAnimation(this.questManager.currentQuest.stages[stageId].title);
+                this.showStageCompleteAnimation(this.questManager.currentQuest.stages[stageId].title, result.autoCompleted);
             }
             
             this.renderAchievements();
@@ -317,12 +345,46 @@ class UIManager {
     }
 
     handleDailyToggle(button) {
-        const taskId = parseInt(button.getAttribute('data-task-id'));
-        const stageId = parseInt(button.getAttribute('data-stage-id'));
-        const success = this.questManager.toggleDailyTask(stageId, taskId);
-        if (success) {
-            this.renderAllStageDetails();
+            const taskId = parseInt(button.getAttribute('data-task-id'));
+            const stageId = parseInt(button.getAttribute('data-stage-id'));
+            
+            const success = this.questManager.toggleDailyTask(stageId, taskId);
+            if (success) {
+                // Show feedback about what changed
+                const task = this.questManager.currentQuest.stages[stageId].steps[taskId];
+                if (task.isDaily) {
+                    this.showToast('Task marked as daily practice! It will reset each day.', 'info');
+                } else {
+                    this.showToast('Task removed from daily practice.', 'info');
+                }
+                
+                this.renderAllStageDetails();
+            }
         }
+
+    // Show quick toast messages
+    showToast(message, type = 'info') {
+        const toast = document.createElement('div');
+        toast.className = `toast-message toast-${type}`;
+        toast.textContent = message;
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: ${type === 'info' ? '#2196F3' : type === 'success' ? '#4CAF50' : '#FF9800'};
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            z-index: 2004;
+            animation: slideDown 0.3s ease;
+        `;
+        
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.animation = 'slideUp 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
     }
 
     completeStage(stageId) {
@@ -550,16 +612,28 @@ class UIManager {
         }, 3000);
     }
 
-    showStageCompleteAnimation(stageTitle) {
+     showStageCompleteAnimation(stageTitle, autoCompleted = false) {
         const message = document.createElement('div');
         message.className = 'stage-complete-message';
-        message.innerHTML = `
-            <div class="message-content">
-                <h3>🎉 Stage Complete!</h3>
-                <p>You've completed "${stageTitle}"!</p>
-                <button class="btn btn-primary close-message">Continue Journey</button>
-            </div>
-        `;
+        
+        if (autoCompleted) {
+            message.innerHTML = `
+                <div class="message-content">
+                    <h3>🎉 Stage Auto-Completed!</h3>
+                    <p>You finished all tasks in "${stageTitle}"!</p>
+                    <p class="auto-complete-note">The stage was automatically marked as complete.</p>
+                    <button class="btn btn-primary close-message">Continue Journey</button>
+                </div>
+            `;
+        } else {
+            message.innerHTML = `
+                <div class="message-content">
+                    <h3>🎉 Stage Complete!</h3>
+                    <p>You've completed "${stageTitle}"!</p>
+                    <button class="btn btn-primary close-message">Continue Journey</button>
+                </div>
+            `;
+        }
         
         message.style.cssText = `
             position: fixed;
@@ -632,11 +706,18 @@ class UIManager {
     }
 
     updatePlayerStats() {
+        // Header stats (these use the original IDs)
         document.getElementById('playerLevel').textContent = this.questManager.player.level;
         document.getElementById('playerXP').textContent = this.questManager.player.xp;
         document.getElementById('playerStreak').textContent = this.questManager.player.streak;
-        document.getElementById('currentDay').textContent = this.questManager.currentQuest.currentDay;
-        document.getElementById('totalDays').textContent = this.questManager.player.totalDays;
+        
+        // Quest progress panel stats (use the new IDs with 'Progress' suffix)
+        document.getElementById('currentDayProgress').textContent = this.questManager.currentQuest.currentDay;
+        document.getElementById('totalDaysProgress').textContent = this.questManager.player.totalDays;
+        
+        // Update distance traveled
+        const progress = this.questManager.getQuestProgress();
+        document.getElementById('distanceTraveled').textContent = `${Math.round(progress.distanceTraveled)}%`;
     }
 
     renderAchievements() {

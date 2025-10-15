@@ -368,6 +368,64 @@ body {
     background: #f8f9fa;
 }
 
+/* ===== TOAST MESSAGES ===== */
+@keyframes slideDown {
+    0% { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    100% { transform: translateX(-50%) translateY(0); opacity: 1; }
+}
+
+@keyframes slideUp {
+    0% { transform: translateX(-50%) translateY(0); opacity: 1; }
+    100% { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+}
+
+.toast-message {
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    font-weight: 500;
+}
+
+/* ===== DAILY TASK STYLES ===== */
+.stage-task.daily {
+    position: relative;
+}
+
+.stage-task.daily::before {
+    content: '🔄';
+    position: absolute;
+    left: -25px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.8em;
+    opacity: 0.6;
+}
+
+.daily-badge {
+    background: #FFC107;
+    color: #333;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: 600;
+    cursor: help;
+}
+
+/* ===== TOOLTIP ENHANCEMENTS ===== */
+.task-checkbox[title], .daily-toggle-btn[title], .daily-badge[title] {
+    cursor: help;
+}
+
+/* ===== STAGE COMPLETION STATES ===== */
+.stage-section.all-daily .stage-header::after {
+    content: '📅 All Daily Tasks';
+    background: #E3F2FD;
+    color: #1976D2;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 500;
+    margin-left: 10px;
+}
+
 /* Task Content */
 .task-content {
     display: flex;
@@ -453,8 +511,66 @@ body {
     font-size: 0.8em;
     font-weight: 600;
 }
+/* ===== STAGE STATES ===== */
+.stage-section.ready-to-complete {
+    background: rgba(255, 235, 59, 0.1);
+    border-color: #FFC107;
+    animation: pulse-glow 2s infinite;
+}
 
-<<<<<<< HEAD
+.ready-badge {
+    background: #FFC107;
+    color: #333;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+@keyframes pulse-glow {
+    0%, 100% { 
+        box-shadow: 0 0 0 rgba(255, 193, 7, 0.4);
+    }
+    50% { 
+        box-shadow: 0 0 20px rgba(255, 193, 7, 0.8);
+    }
+}
+
+/* Roadmap ready state */
+.roadmap-stop.active[data-stage-progress="100"] .stop-marker {
+    border-color: #FFC107;
+    background: #FFC107;
+    animation: bounce 1s infinite;
+}
+
+.roadmap-stop.active[data-stage-progress="100"] .stage-progress-text {
+    color: #FFC107;
+    font-weight: 600;
+}
+
+/* Auto-complete message */
+.auto-complete-note {
+    font-size: 0.9em;
+    color: #666;
+    font-style: italic;
+    margin: 10px 0;
+}
+
+/* ===== PROGRESS INDICATORS ===== */
+.stage-progress-bar .progress-fill {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    transition: width 0.5s ease;
+}
+
+.stage-section.ready-to-complete .stage-progress-bar .progress-fill {
+    background: linear-gradient(135deg, #FFC107, #FF9800);
+}
+
+.stage-section.completed .stage-progress-bar .progress-fill {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
 /* ===== STAGE PROGRESS OVERVIEW ===== */
 .stage-progress-overview {
     background: rgba(255, 255, 255, 0.8);
@@ -535,8 +651,6 @@ body {
     }
 }
 
-=======
->>>>>>> e4f7a29 (style change)
 /* ===== ROADMAP STYLES ===== */
 .roadmap-container {
     position: relative;
