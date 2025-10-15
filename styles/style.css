@@ -1,0 +1,1145 @@
+/* ===== RESET & BASE STYLES ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    color: #333;
+}
+
+.app-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* ===== LAYOUT COMPONENTS ===== */
+/* Panel Styles */
+.panel {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 30px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+/* Header Styles */
+.header {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 20px;
+    margin-bottom: 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header h1 {
+    font-size: 2.5em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Quest Header */
+.quest-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.quest-header h2 {
+    font-size: 2em;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.quest-title-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.quest-title-section h2 {
+    margin: 0;
+    flex: 1;
+}
+
+.quest-controls {
+    display: flex;
+    gap: 10px;
+}
+
+/* ===== STATS & PROGRESS ===== */
+/* Player Stats */
+.player-stats, .player-journey-stats {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+}
+
+.player-journey-stats {
+    margin-top: 15px;
+}
+
+.stat {
+    text-align: center;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.9em;
+    color: #666;
+    font-weight: 500;
+}
+
+.stat-value {
+    display: block;
+    font-size: 1.8em;
+    font-weight: 700;
+    color: #667eea;
+}
+
+/* Progress Bars */
+.progress-bar {
+    width: 100%;
+    height: 12px;
+    background: #e1e5e9;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border-radius: 6px;
+    transition: width 0.5s ease;
+    width: 0%;
+}
+
+.overall-progress {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.overall-progress .progress-bar {
+    flex: 1;
+}
+
+/* ===== BUTTONS ===== */
+.btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+.btn:disabled:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Button Variants */
+.btn-primary {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid #667eea;
+    color: #667eea;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ff4757, #ff3838);
+    color: white;
+    padding: 8px 12px;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #ff3838, #ff1e1e);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 71, 87, 0.3);
+}
+
+.btn-warning {
+    background: linear-gradient(135deg, #FF9800, #F57C00);
+    color: white;
+}
+
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 0.9em;
+}
+
+/* ===== FORM ELEMENTS ===== */
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #333;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid #e1e5e9;
+    border-radius: 12px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ===== STAGES & TASKS ===== */
+/* Stage Containers */
+.stages-container, .edit-stages-container {
+    margin: 30px 0;
+}
+
+.all-stages-container {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Stage Elements */
+.stage, .stage-section, .edit-stage {
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #e1e5e9;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.stage:hover, .stage-section:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.stage-section.completed {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: #4CAF50;
+}
+
+/* Stage Headers */
+.stage-header, .edit-stage-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.stage-title, .edit-stage-title {
+    font-size: 1.2em;
+    font-weight: 600;
+    border: none;
+    background: transparent;
+    padding: 8px 0;
+    flex: 1;
+}
+
+.stage-title:focus, .edit-stage-title:focus {
+    outline: none;
+    border-bottom: 2px solid #667eea;
+}
+
+.stage-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.stage-progress {
+    font-weight: 500;
+    color: #666;
+}
+
+/* Task Containers */
+.steps-container, .edit-tasks-container {
+    margin-left: 20px;
+}
+
+.stage-tasks-grid, .stage-tasks {
+    display: grid;
+    gap: 10px;
+}
+
+/* Task Elements */
+.step, .edit-task {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    margin-bottom: 8px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+}
+
+.stage-task {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 15px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 8px;
+    border: 2px solid #e1e5e9;
+    transition: all 0.3s ease;
+}
+
+.stage-task:hover {
+    border-color: #667eea;
+    transform: translateX(5px);
+}
+
+/* Task States */
+.stage-task.completed {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: #4CAF50;
+}
+
+.stage-task.completed .task-title {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.stage-task.daily {
+    background: rgba(255, 193, 7, 0.1);
+    border-color: #FFC107;
+}
+
+.stage-task.locked {
+    opacity: 0.5;
+    background: #f8f9fa;
+}
+
+/* Task Content */
+.task-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.step-title, .edit-task-title, .task-title {
+    border: none;
+    background: transparent;
+    padding: 6px 0;
+    flex: 1;
+}
+
+.step-title:focus, .edit-task-title:focus {
+    outline: none;
+    border-bottom: 1px solid #667eea;
+}
+
+.task-title {
+    font-size: 1em;
+    font-weight: 500;
+}
+
+/* Checkboxes */
+.task-checkbox, .level-checkbox {
+    border-radius: 6px;
+    border: 2px solid #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.task-checkbox {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+}
+
+.level-checkbox {
+    width: 20px;
+    height: 20px;
+}
+
+.task-checkbox:checked, .level-checkbox:checked {
+    background: #4CAF50;
+    border-color: #4CAF50;
+}
+
+.task-checkbox:disabled, .level-checkbox:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+/* Task Info */
+.task-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.task-xp, .level-xp {
+    font-weight: 600;
+    color: #FF9800;
+    background: rgba(255, 152, 0, 0.1);
+    border-radius: 6px;
+    font-size: 0.9em;
+}
+
+.task-xp {
+    padding: 2px 6px;
+}
+
+.level-xp {
+    padding: 4px 8px;
+}
+
+.daily-badge {
+    background: #FFC107;
+    color: #333;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.8em;
+    font-weight: 600;
+}
+
+/* ===== STAGE PROGRESS OVERVIEW ===== */
+.stage-progress-overview {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    border: 2px solid #e1e5e9;
+}
+
+.stage-progress-overview .progress-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-weight: 600;
+    color: #333;
+}
+
+.stage-progress-overview .progress-bar {
+    height: 16px;
+    background: #e1e5e9;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.stage-progress-overview .progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 8px;
+    transition: width 0.5s ease;
+}
+
+/* Individual Stage Progress Bars */
+.stage-progress-bar {
+    margin: 15px 0;
+}
+
+.stage-progress-bar .progress-bar {
+    height: 8px;
+    background: #e1e5e9;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.stage-progress-bar .progress-fill {
+    height: 100%;
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.stage-section.completed .stage-progress-bar .progress-fill {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+}
+
+/* Roadmap Progress States */
+.roadmap-stop .stage-progress-text {
+    font-size: 0.8em;
+    font-weight: 500;
+    margin-top: 5px;
+}
+
+.roadmap-stop.completed .stage-progress-text {
+    color: #4CAF50;
+    font-weight: 600;
+}
+
+/* ===== RESPONSIVE UPDATES ===== */
+@media (max-width: 768px) {
+    .stage-progress-overview {
+        padding: 15px;
+    }
+    
+    .stage-progress-overview .progress-info {
+        flex-direction: column;
+        gap: 8px;
+        text-align: center;
+    }
+}
+
+/* ===== ROADMAP STYLES ===== */
+.roadmap-container {
+    position: relative;
+    margin: 40px 0;
+    padding: 0 20px;
+}
+
+.roadmap {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 200px;
+}
+
+.roadmap-stops {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    flex: 1;
+    position: relative;
+    z-index: 2;
+}
+
+.roadmap-stop {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    position: relative;
+    z-index: 3;
+    flex: 1;
+    max-width: 150px;
+}
+
+/* Stop Marker */
+.stop-marker {
+    position: relative;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: white;
+    border: 3px solid #e1e5e9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stop-marker .marker-icon {
+    font-size: 1.5em;
+}
+
+.stop-label h4 {
+    margin: 0 0 5px 0;
+    font-size: 0.9em;
+    font-weight: 600;
+}
+
+.stop-label p {
+    margin: 0;
+    font-size: 0.8em;
+    color: #666;
+}
+
+/* Stop States */
+.roadmap-stop.active .stop-marker {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    transform: scale(1.1);
+}
+
+.roadmap-stop.completed .stop-marker {
+    border-color: #4CAF50;
+    background: #4CAF50;
+    color: white;
+}
+
+.roadmap-stop.locked .stop-marker {
+    border-color: #ccc;
+    background: #f8f9fa;
+    opacity: 0.6;
+}
+
+.roadmap-stop.completed .completion-badge {
+    display: block;
+}
+
+.completion-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #4CAF50;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: none;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+/* Road Path */
+.road-path {
+    position: absolute;
+    top: 30px;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: #e1e5e9;
+    border-radius: 4px;
+    z-index: 1;
+}
+
+.road-progress {
+    height: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 4px;
+    width: 0%;
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+/* Progress Traveler */
+.progress-traveler {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    transform: translateX(-50%);
+    z-index: 4;
+    transition: left 1s ease-in-out;
+}
+
+.traveler-icon {
+    font-size: 2em;
+    animation: bounce 2s infinite;
+}
+
+.traveler-tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8em;
+    white-space: nowrap;
+    margin-bottom: 10px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.traveler-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: #333;
+}
+
+.progress-traveler:hover .traveler-tooltip {
+    opacity: 1;
+}
+
+/* ===== CHAPTERS & LEVELS ===== */
+.chapter {
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.chapter:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+}
+
+.chapter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chapter-title {
+    font-size: 1.4em;
+    font-weight: 600;
+    color: #333;
+}
+
+.chapter-progress {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    min-width: 150px;
+}
+
+.chapter-progress .progress-bar {
+    flex: 1;
+}
+
+.progress-text {
+    font-weight: 600;
+    color: #4CAF50;
+    min-width: 40px;
+}
+
+.today-progress {
+    font-size: 0.9em;
+    color: #666;
+    margin-left: 10px;
+}
+
+/* Levels */
+.levels-container {
+    display: grid;
+    gap: 12px;
+}
+
+.level {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    border: 2px solid #e1e5e9;
+    transition: all 0.3s ease;
+}
+
+.level:hover {
+    border-color: #667eea;
+    transform: translateX(5px);
+}
+
+.level-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+}
+
+.level-title {
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+.level.completed .level-title {
+    text-decoration: line-through;
+    color: #888;
+}
+
+/* ===== ACHIEVEMENTS ===== */
+.achievements-panel {
+    margin-top: 40px;
+}
+
+.achievements-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.achievement {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 12px;
+    border: 2px solid #e1e5e9;
+    transition: all 0.3s ease;
+}
+
+.achievement.unlocked {
+    border-color: #FFD700;
+    background: linear-gradient(135deg, #FFF9C4, #FFEB3B);
+}
+
+.achievement.locked {
+    opacity: 0.6;
+}
+
+.achievement-icon {
+    font-size: 2em;
+}
+
+.achievement-info {
+    flex: 1;
+}
+
+.achievement-title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.achievement-description {
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* ===== MODALS & OVERLAYS ===== */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+}
+
+.modal-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.modal-content.large {
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-content h3 {
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.modal-content p {
+    margin-bottom: 25px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+/* Edit Forms */
+.edit-quest-form {
+    margin: 20px 0;
+}
+
+.edit-form {
+    background: rgba(255, 255, 255, 0.9);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 10px 0;
+    border: 2px solid #667eea;
+}
+
+.edit-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+/* Celebration & Messages */
+.celebration, .reset-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.reset-message {
+    z-index: 2001;
+}
+
+.celebration-content, .reset-message-content {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 400px;
+    animation: popIn 0.5s ease;
+}
+
+.reset-message-content h3 {
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.reset-message-content p {
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.celebration h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #FFD700, #FF9800);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* ===== STATE & UTILITY CLASSES ===== */
+.locked {
+    opacity: 0.6;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.locked .level-checkbox {
+    cursor: not-allowed;
+}
+
+.completed-today {
+    background: rgba(76, 175, 80, 0.1);
+    border-color: #4CAF50;
+}
+
+.completed-permanent .level-title {
+    text-decoration: line-through;
+    color: #888;
+}
+
+.unlocking {
+    animation: pulse 2s ease-in-out;
+}
+
+.progress-update {
+    animation: progressPulse 0.5s ease;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+@keyframes roadProgress {
+    0% { width: var(--old-progress); }
+    100% { width: var(--new-progress); }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+@keyframes slideIn {
+    0% { transform: translateX(-100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes progressPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+.road-progress.animating {
+    animation: roadProgress 1s ease-in-out;
+}
+
+.unlock-message {
+    background: linear-gradient(135deg, #FFD700, #FF9800);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+    margin: 10px 0;
+    animation: slideIn 0.5s ease;
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+@media (max-width: 768px) {
+    .app-container {
+        padding: 10px;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .player-stats, .player-journey-stats {
+        gap: 20px;
+        flex-wrap: wrap;
+    }
+    
+    .quest-title-section {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    #resetQuestBtn {
+        margin-left: 0;
+    }
+    
+    .quest-controls {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .chapter-header {
+        flex-direction: column;
+        gap: 15px;
+        align-items: flex-start;
+    }
+    
+    .chapter-progress {
+        width: 100%;
+    }
+    
+    .achievements-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .modal-actions {
+        flex-direction: column;
+    }
+    
+    /* Roadmap Mobile */
+    .roadmap {
+        flex-direction: column;
+        min-height: auto;
+    }
+    
+    .roadmap-stops {
+        flex-direction: column;
+        gap: 30px;
+        width: 100%;
+    }
+    
+    .roadmap-stop {
+        max-width: none;
+        width: 100%;
+    }
+    
+    .road-path {
+        top: 0;
+        left: 30px;
+        right: auto;
+        width: 8px;
+        height: 100%;
+    }
+    
+    .road-progress {
+        width: 100%;
+        height: 0%;
+    }
+    
+    .progress-traveler {
+        top: 0;
+        left: 15px;
+        transform: translateY(-50%);
+    }
+    
+    /* Stage Header Mobile */
+    .stage-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .stage-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .stage-task {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .task-content {
+        width: 100%;
+    }
+    
+    .task-info {
+        width: 100%;
+        justify-content: space-between;
+    }
+}

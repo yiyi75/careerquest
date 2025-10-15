@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Quest - Gamified Goal Tracker</title>
+    <link rel="stylesheet" href="styles/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1>🎮 Career Quest</h1>
+                <div class="player-stats">
+                    <div class="stat">
+                        <span class="stat-label">Level</span>
+                        <span class="stat-value" id="playerLevel">1</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">XP</span>
+                        <span class="stat-value" id="playerXP">0</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Streak</span>
+                        <span class="stat-value" id="playerStreak">0</span>
+                    </div>
+                </div>
+
+                <div class="quest-days">
+                    <div class="stat">
+                        <span class="stat-label">Current Day</span>
+                        <span class="stat-value" id="currentDay">1</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Total Days</span>
+                        <span class="stat-value" id="totalDays">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Quest Creation Panel -->
+            <section class="panel quest-creation-panel" id="questCreationPanel">
+                <h2>🎯 Create Your Career Quest</h2>
+                <div class="form-group">
+                    <label for="questTitle">Ultimate Career Goal:</label>
+                    <input type="text" id="questTitle" placeholder="e.g., Become Data Scientist at Google">
+                </div>
+                
+                <div class="stages-container" id="stagesContainer">
+                    <!-- Stages will be dynamically added here -->
+                </div>
+                
+                <button class="btn btn-primary" id="addStageBtn">+ Add Stage</button>
+                <button class="btn btn-success" id="startQuestBtn">Start Quest! 🚀</button>
+                <!-- <button class="btn btn-outline" id="toggleEditBtn">Edit Quest</button> -->
+            </section>
+
+            <!-- Quest Progress Panel -->
+            <section class="panel quest-progress-panel hidden" id="questProgressPanel">
+                <div class="quest-header">
+                    <div class="quest-title-section">
+                        <h2 id="currentQuestTitle">Career Quest</h2>
+                        <div class="quest-controls">
+                            <button class="btn btn-outline" id="toggleEditBtn">Edit Quest</button>
+                            <button class="btn btn-danger" id="resetQuestBtn">Reset Quest</button>
+                        </div>
+                    </div>
+                    <div class="player-journey-stats">
+                        <div class="stat">
+                            <span class="stat-label">Current Day</span>
+                            <span class="stat-value" id="currentDay">1</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Total Days</span>
+                            <span class="stat-value" id="totalDays">0</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-label">Distance Traveled</span>
+                            <span class="stat-value" id="distanceTraveled">0%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roadmap Container -->
+                <div class="roadmap-container">
+                    <div class="roadmap">
+                        <!-- Starting Point -->
+                        <div class="roadmap-stop start-point active">
+                            <div class="stop-marker">
+                                <div class="marker-icon">🚀</div>
+                            </div>
+                            <div class="stop-label">
+                                <h4>Start</h4>
+                                <p>Begin your journey</p>
+                            </div>
+                        </div>
+
+                        <!-- Dynamic Stops will be added here -->
+                        <div class="roadmap-stops" id="roadmapStops"></div>
+
+                        <!-- Destination -->
+                        <div class="roadmap-stop destination-point">
+                            <div class="stop-marker">
+                                <div class="marker-icon">🎯</div>
+                            </div>
+                            <div class="stop-label">
+                                <h4>Destination</h4>
+                                <p id="destinationTitle">Career Goal</p>
+                            </div>
+                        </div>
+
+                        <!-- Progress Traveler -->
+                        <div class="progress-traveler" id="progressTraveler">
+                            <div class="traveler-icon">🧭</div>
+                            <div class="traveler-tooltip" id="travelerTooltip">Starting journey...</div>
+                        </div>
+
+                        <!-- Road Path -->
+                        <div class="road-path">
+                            <div class="road-progress" id="roadProgress"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stage Details Panel -->
+                <div class="stage-details-panel">
+                    <h3 id="currentStageTitle">Current Stage</h3>
+                    <div class="stage-progress">
+                        <div class="progress-info">
+                            <span>Stage Progress</span>
+                            <span id="stageProgressText">0%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="stageProgressFill"></div>
+                        </div>
+                    </div>
+                    <div class="stage-tasks" id="stageTasks">
+                        <!-- Tasks will be dynamically added here -->
+                    </div>
+                </div>
+
+                <div class="achievements-panel">
+                    <h3>🏆 Journey Achievements</h3>
+                    <div class="achievements-grid" id="achievementsGrid"></div>
+                </div>
+            </section>
+
+            <!-- Edit Quest Modal -->
+            <div class="modal hidden" id="editQuestModal">
+                <div class="modal-content large">
+                    <h3>Edit Your Career Quest</h3>
+                    <div class="edit-quest-form">
+                        <div class="form-group">
+                            <label for="editQuestTitle">Career Goal:</label>
+                            <input type="text" id="editQuestTitle" placeholder="e.g., Become Data Scientist at Google">
+                        </div>
+                        
+                        <div class="edit-stages-container" id="editStagesContainer">
+                            <!-- Stages will be dynamically added here -->
+                        </div>
+                        
+                        <button class="btn btn-outline" id="addEditStageBtn">+ Add Stage</button>
+                        
+                        <div class="modal-actions">
+                            <button class="btn btn-success" id="saveQuestBtn">Save Changes</button>
+                            <button class="btn btn-outline" id="cancelEditBtn">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <template id="roadmapStopTemplate">
+                <div class="roadmap-stop stage-point" data-stage-id="">
+                    <div class="stop-marker">
+                        <div class="marker-icon">📍</div>
+                        <div class="completion-badge hidden">✓</div>
+                    </div>
+                    <div class="stop-label">
+                        <h4 class="stage-name">Stage</h4>
+                        <p class="stage-progress-text">0% Complete</p>
+                    </div>
+                    <div class="stop-connector"></div>
+                </div>
+            </template>
+
+            <template id="stageTaskTemplate">
+                <div class="stage-task" data-task-id="">
+                    <div class="task-content">
+                        <input type="checkbox" class="task-checkbox">
+                        <span class="task-title"></span>
+                    </div>
+                    <div class="task-xp">+<span>0</span> XP</div>
+                </div>
+            </template>
+
+            <template id="editStageTemplate">
+                <div class="edit-stage">
+                    <div class="edit-stage-header">
+                        <input type="text" class="edit-stage-title" placeholder="Stage name (e.g., Preparation)">
+                        <button class="btn btn-danger remove-edit-stage">×</button>
+                    </div>
+                    <div class="edit-tasks-container">
+                        <!-- Tasks will be added here -->
+                    </div>
+                    <button class="btn btn-outline add-edit-task">+ Add Task</button>
+                </div>
+            </template>
+
+            <template id="editTaskTemplate">
+                <div class="edit-task">
+                    <input type="text" class="edit-task-title" placeholder="Task description (e.g., Practice SQL)">
+                    <button class="btn btn-danger remove-edit-task">×</button>
+                </div>
+            </template>
+
+            <!-- Completion Celebration -->
+            <div class="celebration hidden" id="celebration">
+                <div class="celebration-content">
+                    <h1>🎉 Level Up! 🎉</h1>
+                    <p>You've reached level <span id="newLevel">2</span>!</p>
+                    <button class="btn btn-primary" id="closeCelebration">Awesome!</button>
+                </div>
+            </div>
+            <!-- Reset Confirmation Modal -->
+            <div class="modal hidden" id="resetModal">
+                <div class="modal-content">
+                    <h3>Reset Quest?</h3>
+                    <p>Are you sure you want to reset your current quest? This will delete all your progress, XP, and achievements for this quest.</p>
+                    <div class="modal-actions">
+                        <button class="btn btn-danger" id="confirmResetBtn">Yes, Reset</button>
+                        <button class="btn btn-outline" id="cancelResetBtn">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Templates -->
+    <template id="stageTemplate">
+        <div class="stage">
+            <div class="stage-header">
+                <input type="text" class="stage-title" placeholder="Stage name (e.g., Preparation)">
+                <button class="btn btn-danger remove-stage">×</button>
+            </div>
+            <div class="steps-container">
+                <!-- Steps will be added here -->
+            </div>
+            <button class="btn btn-outline add-step">+ Add Step</button>
+        </div>
+    </template>
+
+    <template id="stepTemplate">
+        <div class="step">
+            <input type="text" class="step-title" placeholder="Step description (e.g., Practice SQL)">
+            <button class="btn btn-danger remove-step">×</button>
+        </div>
+    </template>
+
+    <template id="chapterTemplate">
+        <div class="chapter" data-chapter-id="">
+            <div class="chapter-header">
+                <h3 class="chapter-title"></h3>
+                <div class="chapter-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill"></div>
+                    </div>
+                    <span class="progress-text">0%</span>
+                    <span class="today-progress">Today: 0/0</span>
+                </div>
+            </div>
+            <div class="levels-container">
+                <!-- Levels will be added here -->
+            </div>
+        </div>
+    </template>
+
+    <template id="levelTemplate">
+        <div class="level" data-level-id="">
+            <div class="level-content">
+                <input type="checkbox" class="level-checkbox">
+                <span class="level-title"></span>
+            </div>
+            <div class="level-xp">+<span>0</span> XP</div>
+        </div>
+    </template>
+
+    <template id="achievementTemplate">
+        <div class="achievement locked">
+            <div class="achievement-icon">🔒</div>
+            <div class="achievement-info">
+                <h4 class="achievement-title">Secret Achievement</h4>
+                <p class="achievement-description">Complete tasks to unlock</p>
+            </div>
+        </div>
+    </template>
+
+    <script src="js/questManager.js"></script>
+    <script src="js/uiManager.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
