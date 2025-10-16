@@ -351,8 +351,8 @@ body {
 }
 
 .stage-title, .edit-stage-title {
-    font-size: 1em;
-    font-weight: normal;
+    font-size: 1.1em;
+    font-weight: bold;
     border: none;
     background: transparent;
     padding: 8px 0;
@@ -486,7 +486,7 @@ body {
     flex: 1;
     color: #e6e6e6;
     font-family: 'Press Start 2P', monospace;
-    font-size: 0.7em;
+    font-size: 0.9em;
 }
 
 .step-title:focus, .edit-task-title:focus {
@@ -495,7 +495,7 @@ body {
 }
 
 .task-title {
-    font-size: 0.8em;
+    font-size: 0.9em;
 }
 
 /* Pixel Checkboxes */
@@ -555,7 +555,7 @@ body {
     padding: 4px 8px;
     border: 2px solid #e68900;
     border-radius: 0;
-    font-size: 0.6em;
+    font-size: 0.8em;
     font-weight: bold;
 }
 
@@ -565,7 +565,7 @@ body {
     padding: 4px 8px;
     border: 2px solid #e68900;
     border-radius: 0;
-    font-size: 0.6em;
+    font-size: 0.8em;
     font-weight: bold;
     margin-left: 8px;
 }
@@ -629,14 +629,14 @@ body {
 
 .stop-label h4 {
     margin: 0 0 5px 0;
-    font-size: 0.7em;
+    font-size: 1em;
     font-weight: normal;
     color: #e6e6e6;
 }
 
 .stop-label p {
     margin: 0;
-    font-size: 0.6em;
+    font-size: 0.8em;
     color: #a8a8a8;
 }
 
@@ -662,7 +662,7 @@ body {
     width: 18px;
     height: 18px;
     display: none;
-    font-size: 0.6em;
+    font-size: 0.8em;
     font-weight: bold;
     border: 2px solid #45a049;
 }
@@ -723,7 +723,7 @@ body {
     color: white;
     padding: 8px 12px;
     border: 2px solid #f95959;
-    font-size: 0.6em;
+    font-size: 0.8em;
     white-space: nowrap;
     margin-bottom: 8px;
     opacity: 0;
@@ -844,7 +844,7 @@ body {
 }
 
 .achievement-description {
-    font-size: 0.6em;
+    font-size: 0.8em;
     color: #a8a8a8;
     line-height: 1.4;
 }
@@ -901,7 +901,7 @@ body {
     margin-bottom: 20px;
     color: #e6e6e6;
     line-height: 1.5;
-    font-size: 0.7em;
+    font-size: 0.8em;
 }
 
 .modal-actions {
@@ -911,8 +911,8 @@ body {
     flex-wrap: wrap;
 }
 
-/* Celebration & Messages */
-.celebration, .reset-message {
+/* ===== PIXEL CELEBRATION & COMPLETION MESSAGES ===== */
+.celebration, .stage-complete-message, .reset-message {
     position: fixed;
     top: 0;
     left: 0;
@@ -925,30 +925,306 @@ body {
     z-index: 1000;
 }
 
-.reset-message {
-    z-index: 2001;
-}
-
-.celebration-content, .reset-message-content {
+.celebration-content, .stage-complete-message .message-content, .reset-message-content {
     background: #16213e;
-    padding: 30px;
     border: 4px solid #f95959;
+    padding: 30px;
     text-align: center;
-    max-width: 400px;
+    max-width: 500px;
+    width: 90%;
     animation: pixelPopIn 0.5s ease;
     box-shadow: 8px 8px 0px #0f3460;
+    position: relative;
 }
 
-@keyframes pixelPopIn {
-    0% { transform: scale(0.5); opacity: 0; }
-    100% { transform: scale(1); opacity: 1; }
+.celebration-content::before, 
+.stage-complete-message .message-content::before,
+.reset-message-content::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: 8px;
+    bottom: 8px;
+    background: #0f3460;
+    z-index: -1;
 }
 
+/* Celebration Specific Styles */
 .celebration h1 {
-    font-size: 2em;
+    font-size: 1.8em;
     margin-bottom: 20px;
     color: #f95959;
     text-shadow: 3px 3px 0px #0f3460;
+    letter-spacing: 1px;
+}
+
+.celebration p {
+    font-size: 1em;
+    margin-bottom: 25px;
+    color: #e6e6e6;
+    line-height: 1.5;
+}
+
+#newLevel {
+    color: #FF9800;
+    font-weight: bold;
+    font-size: 1.2em;
+    text-shadow: 2px 2px 0px #0f3460;
+}
+
+/* Stage Complete Message */
+.stage-complete-message .message-content h3 {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+    color: #f95959;
+    text-shadow: 2px 2px 0px #0f3460;
+}
+
+.stage-complete-message .message-content p {
+    font-size: 0.9em;
+    margin-bottom: 15px;
+    color: #e6e6e6;
+    line-height: 1.5;
+}
+
+.auto-complete-note {
+    font-size: 0.8em;
+    color: #FF9800;
+    font-style: italic;
+    margin: 15px 0;
+    background: rgba(255, 152, 0, 0.1);
+    padding: 10px;
+    border: 2px solid #FF9800;
+}
+
+/* Quest Complete Celebration - KEEP DARK BLUE BACKGROUND */
+.quest-complete-message .message-content {
+    border-color: #4CAF50;
+    background: #16213e; /* Keep dark blue background */
+}
+
+.quest-complete-message .message-content::before {
+    background: #0f3460; /* Keep dark blue shadow */
+}
+
+.quest-complete-message .message-content h3 {
+    color: #4CAF50;
+    text-shadow: 2px 2px 0px #0f3460;
+}
+
+.quest-complete-message .message-content p {
+    color: #e6e6e6; /* Keep light text color */
+}
+
+/* Special celebration for quest completion - KEEP DARK BLUE */
+.quest-complete-celebration .celebration-content {
+    border-color: #FFD700;
+    background: #16213e; /* Keep dark blue background */
+}
+
+.quest-complete-celebration .celebration-content::before {
+    background: #0f3460; /* Keep dark blue shadow */
+}
+
+.quest-complete-celebration h1 {
+    color: #FFD700;
+    text-shadow: 3px 3px 0px #0f3460;
+    font-size: 2em;
+}
+
+.quest-complete-celebration p {
+    color: #0f3460; /* Keep light text color, not black */
+    font-weight: normal; /* Remove bold if it was making it look different */
+}
+
+/* Close Buttons in Popups */
+.celebration-content .btn,
+.stage-complete-message .message-content .btn,
+.reset-message-content .btn {
+    margin-top: 15px;
+    font-size: 0.8em;
+    padding: 12px 24px;
+}
+
+/* Confetti for Celebrations */
+@keyframes confettiFall {
+    0% { 
+        transform: translateY(-100px) rotate(0deg) translateX(0); 
+        opacity: 1;
+    }
+    100% { 
+        transform: translateY(100vh) rotate(360deg) translateX(20px); 
+        opacity: 0;
+    }
+}
+
+.confetti {
+    position: fixed;
+    width: 12px;
+    height: 12px;
+    background: #f95959;
+    animation: confettiFall 3s linear forwards;
+    z-index: 1001;
+}
+
+.confetti:nth-child(2n) {
+    background: #4CAF50;
+}
+
+.confetti:nth-child(3n) {
+    background: #FF9800;
+}
+
+.confetti:nth-child(4n) {
+    background: #2196F3;
+}
+
+.confetti:nth-child(5n) {
+    background: #9C27B0;
+}
+
+/* Achievement Unlock Popup */
+.achievement-unlock-popup {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #16213e; /* Dark blue background */
+    border: 4px solid #FF9800;
+    padding: 20px;
+    border-radius: 0;
+    box-shadow: 6px 6px 0px #0f3460;
+    z-index: 1002;
+    animation: slideInRight 0.5s ease;
+    max-width: 300px;
+}
+
+.achievement-unlock-popup::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: 8px;
+    bottom: 8px;
+    background: #0f3460;
+    z-index: -1;
+}
+
+.achievement-unlock-popup h4 {
+    color: #FF9800;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+}
+
+.achievement-unlock-popup p {
+    color: #e6e6e6; /* Light text color */
+    font-size: 0.7em;
+    margin-bottom: 5px;
+}
+
+.achievement-unlock-popup .xp-reward {
+    color: #FF9800;
+    font-weight: bold;
+    font-size: 0.8em;
+}
+
+@keyframes slideInRight {
+    0% { transform: translateX(100%); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+    0% { transform: translateX(0); opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0; }
+}
+
+/* Edit Success Message */
+.edit-success-message {
+    background: #16213e; /* Dark blue background */
+    border: 4px solid #4CAF50;
+    color: #e6e6e6; /* Light text color */
+    padding: 15px 25px;
+    border-radius: 0;
+    box-shadow: 6px 6px 0px #0f3460;
+    font-size: 0.8em;
+}
+
+.edit-success-message::before {
+    content: '';
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    right: 8px;
+    bottom: 8px;
+    background: #0f3460;
+    z-index: -1;
+}
+
+/* Toast Messages */
+.toast-message {
+    background: #16213e; /* Dark blue background */
+    border: 3px solid;
+    padding: 15px 20px;
+    border-radius: 0;
+    font-size: 0.7em;
+    box-shadow: 4px 4px 0px #0f3460;
+    font-weight: normal;
+    position: relative;
+}
+
+.toast-message::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: 6px;
+    bottom: 6px;
+    background: #0f3460;
+    z-index: -1;
+}
+
+.toast-info {
+    border-color: #2196F3;
+    color: #e6e6e6; /* Light text color */
+}
+
+.toast-success {
+    border-color: #4CAF50;
+    color: #e6e6e6; /* Light text color */
+}
+
+.toast-warning {
+    border-color: #FF9800;
+    color: #e6e6e6; /* Light text color */
+}
+
+/* Pixel animations for celebrations */
+@keyframes pixelPopIn {
+    0% { 
+        transform: scale(0.8) translateY(-20px); 
+        opacity: 0; 
+    }
+    50% { 
+        transform: scale(1.05) translateY(5px); 
+    }
+    100% { 
+        transform: scale(1) translateY(0); 
+        opacity: 1; 
+    }
+}
+
+@keyframes pixelBounceCelebration {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-8px); }
+    60% { transform: translateY(-4px); }
+}
+
+.celebration-content, .stage-complete-message .message-content {
+    animation: pixelPopIn 0.6s ease;
+}
+
+.celebration-content h1 {
+    animation: pixelBounceCelebration 2s infinite;
 }
 
 /* ===== FIREBASE STYLES ===== */
@@ -1086,6 +1362,22 @@ body {
     .progress-traveler {
         display: none;
     }
+    
+    /* Celebration messages mobile */
+    .celebration-content, 
+    .stage-complete-message .message-content, 
+    .reset-message-content {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .celebration h1 {
+        font-size: 1.5em;
+    }
+    
+    .stage-complete-message .message-content h3 {
+        font-size: 1.3em;
+    }
 }
 
 /* Pixel Scrollbar */
@@ -1116,14 +1408,4 @@ body {
 @keyframes pixelSlideUp {
     0% { transform: translateX(-50%) translateY(0); opacity: 1; }
     100% { transform: translateX(-50%) translateY(-100%); opacity: 0; }
-}
-
-.toast-message {
-    background: #0f3460;
-    border: 3px solid #f95959;
-    padding: 12px 20px;
-    border-radius: 0;
-    font-size: 0.7em;
-    box-shadow: 4px 4px 0px #0f3460;
-    font-weight: normal;
 }

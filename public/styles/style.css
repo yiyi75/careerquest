@@ -322,33 +322,6 @@ body {
     gap: 10px;
 }
 
-.edit-daily-badge {
-    margin-left: 8px;
-    background: #FFF3E0;
-    color: #E65100;
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 0.8em;
-    border: 1px solid #FFB74D;
-}
-
-.edit-task {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    padding: 8px;
-    background: #f9f9f9;
-    border-radius: 4px;
-}
-
-.edit-task-title {
-    flex: 1;
-    padding: 6px 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
 /* Task Elements */
 .step, .edit-task {
     display: flex;

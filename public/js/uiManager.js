@@ -487,7 +487,7 @@ class UIManager {
         container.appendChild(task);
         this.animateAdd(container.lastElementChild);
     }
-    
+
     removeEditTask(taskElement) {
         this.animateRemove(taskElement, () => taskElement.remove());
     }
@@ -686,7 +686,7 @@ class UIManager {
         }, 3000);
     }
 
-     showStageCompleteAnimation(stageTitle, autoCompleted = false) {
+    showStageCompleteAnimation(stageTitle, autoCompleted = false) {
         const message = document.createElement('div');
         message.className = 'stage-complete-message';
         
@@ -724,12 +724,21 @@ class UIManager {
         
         const content = message.querySelector('.message-content');
         content.style.cssText = `
-            background: white;
+            background: #16213e;
+            border: 4px solid #f95959;
             padding: 30px;
-            border-radius: 15px;
+            border-radius: 0;
             text-align: center;
             max-width: 400px;
-            animation: popIn 0.5s ease;
+            animation: pixelPopIn 0.5s ease;
+            box-shadow: 8px 8px 0px #0f3460;
+            position: relative;
+        `;
+        
+        // Add the dark blue background layer
+        content.innerHTML = `
+            <div style="position: absolute; top: -8px; left: -8px; right: 8px; bottom: 8px; background: #0f3460; z-index: -1;"></div>
+            ${content.innerHTML}
         `;
         
         document.body.appendChild(message);
@@ -737,13 +746,6 @@ class UIManager {
             message.remove();
             this.renderQuestProgress();
         });
-        
-        setTimeout(() => {
-            if (document.body.contains(message)) {
-                message.remove();
-                this.renderQuestProgress();
-            }
-        }, 5000);
     }
 
     animateXP(xpGained) {
@@ -895,7 +897,7 @@ class UIManager {
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: #0f3460;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -904,17 +906,27 @@ class UIManager {
         
         const content = message.querySelector('.reset-message-content');
         content.style.cssText = `
-            background: white;
+            background: #16213e;
+            border: 4px solid #f95959;
             padding: 30px;
-            border-radius: 15px;
+            border-radius: 0;
             text-align: center;
             max-width: 400px;
-            animation: popIn 0.5s ease;
+            animation: pixelPopIn 0.5s ease;
+            box-shadow: 8px 8px 0px #0f3460;
+            position: relative;
+        `;
+        
+        // Add the dark blue background layer
+        content.innerHTML = `
+            <div style="position: absolute; top: -8px; left: -8px; right: 8px; bottom: 8px; background: #0f3460; z-index: -1;"></div>
+            ${content.innerHTML}
         `;
         
         document.body.appendChild(message);
-        message.querySelector('.close-reset-message').addEventListener('click', () => message.remove());
-        setTimeout(() => { if (document.body.contains(message)) message.remove(); }, 5000);
+        message.querySelector('.close-reset-message').addEventListener('click', () => {
+            message.remove();
+        });
     }
 
     showQuestCreation() {
