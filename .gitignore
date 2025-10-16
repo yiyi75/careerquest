@@ -9,15 +9,16 @@ firebase-debug.*.log*
 
 # Firebase cache
 .firebase/
+.firebaserc
+package-lock.json
+package.json
+database.rules.json
 
 # Firebase config
 js/firebaseConfig.js
 public/js/firebaseConfig.js
 firebaseConfig.js
-firebase,json
-package-lock.json
-package.json
-database.rules.json
+
 
 
 # Uncomment this if you'd like others to create their own Firebase project.
