@@ -6,9 +6,20 @@
     <title>Career Quest - Gamified Goal Tracker</title>
     <link rel="stylesheet" href="styles/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+
 </head>
 <body>
     <div class="app-container">
+        <!-- Firebase Loading Indicator -->
+        <div class="firebase-loading hidden" id="firebaseLoading">
+            <div class="loading-spinner">🔄</div>
+            <p>Connecting to your quest...</p>
+        </div>
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -320,6 +331,7 @@
         </div>
     </template>
 
+    <script src="js/firebaseConfig.js"></script>
     <script src="js/questManager.js"></script>
     <script src="js/uiManager.js"></script>
     <script src="js/app.js"></script>

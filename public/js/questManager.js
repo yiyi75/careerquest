@@ -1,5 +1,6 @@
 class QuestManager {
-    constructor() {
+    constructor(firebaseManager) {
+        this.firebaseManager = firebaseManager;
         this.currentQuest = null;
         this.player = {
             level: 1,
@@ -26,6 +27,14 @@ class QuestManager {
         ];
     }
 
+    // Safety check for Firebase
+    isReadyForFirebase() {
+        return this.currentQuest && 
+               this.currentQuest.title && 
+               this.currentQuest.stages && 
+               Array.isArray(this.currentQuest.stages);
+    }
+
     createQuest(title, stages) {
         this.currentQuest = {
             title: title,
@@ -37,21 +46,26 @@ class QuestManager {
                     title: step,
                     completed: false,
                     completedToday: false,
-                    isDaily: false, // Mark tasks as daily
+                    isDaily: false,
                     xp: this.calculateStepXP(stage.steps.length)
                 })),
                 completed: false,
-                unlocked: true // CHANGED: All stages unlocked from start
+                unlocked: true
             })),
-            startedAt: new Date(),
+            startedAt: new Date().toISOString(),
             completed: false,
             currentDay: 1
         };
-
+        
         this.player.totalDays = 1;
         
         this.initializeDailyReset();
-        this.saveToLocalStorage();
+        
+        // Save to Firebase with safety check
+        setTimeout(() => {
+            this.saveToFirebase();
+        }, 100);
+        
         return this.currentQuest;
     }
 
@@ -61,7 +75,6 @@ class QuestManager {
             todaysProgress: {}
         };
         
-        // Reset only daily tasks for the new day
         if (this.currentQuest) {
             this.currentQuest.stages.forEach(chapter => {
                 chapter.steps.forEach(step => {
@@ -76,33 +89,33 @@ class QuestManager {
     checkDailyReset() {
         const today = new Date().toDateString();
         if (this.dailyReset.lastReset !== today) {
-            // New day!
             this.dailyReset.lastReset = today;
             this.dailyReset.todaysProgress = {};
             
-            // Increment total days
-            tthis.currentQuest.currentDay++;
+            this.currentQuest.currentDay++;
             
-            const startDate = new Date(this.currentQuest.startedAt);
-                    const currentDate = new Date();
-                    const timeDiff = currentDate - startDate;
-                    this.player.totalDays = Math.max(1, Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1);
-                    
-                    // Reset daily tasks
-                    if (this.currentQuest) {
-                        this.currentQuest.stages.forEach(chapter => {
-                            chapter.steps.forEach(step => {
-                                if (step.isDaily) {
-                                    step.completedToday = false;
-                                }
-                            });
-                        });
-                    }
+            // Calculate total days based on start date
+            if (this.currentQuest && this.currentQuest.startedAt) {
+                const startDate = new Date(this.currentQuest.startedAt);
+                const currentDate = new Date();
+                const timeDiff = currentDate - startDate;
+                this.player.totalDays = Math.max(1, Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1);
+            }
             
-            this.saveToLocalStorage();
-            return true; // Reset occurred
+            if (this.currentQuest) {
+                this.currentQuest.stages.forEach(chapter => {
+                    chapter.steps.forEach(step => {
+                        if (step.isDaily) {
+                            step.completedToday = false;
+                        }
+                    });
+                });
+            }
+            
+            this.saveToFirebase(); // CHANGED: Use Firebase instead of localStorage
+            return true;
         }
-        return false; // No reset needed
+        return false;
     }
 
     calculateStepXP(totalSteps) {
@@ -110,7 +123,6 @@ class QuestManager {
         return Math.max(25, Math.floor(baseXP / Math.sqrt(totalSteps)));
     }
 
-    // Complete any task (not just current stage)
     completeStep(chapterId, levelId) {
         if (!this.currentQuest) return null;
 
@@ -133,7 +145,6 @@ class QuestManager {
         if (!level.completedToday) {
             level.completedToday = true;
             
-            // Track in daily progress
             if (!this.dailyReset.todaysProgress[chapterId]) {
                 this.dailyReset.todaysProgress[chapterId] = new Set();
             }
@@ -144,15 +155,15 @@ class QuestManager {
             const xpResult = this.addXP(level.xp);
             this.updateStreak();
             
-            // Check for daily achievements
             if (level.isDaily) {
                 this.checkDailyAchievements();
             }
             
-            // Check if this task completion should auto-complete the stage
-            const stageAutoCompleted = this.checkStageCompletion(chapterId);
-            
-            // Check quest completion
+            let stageAutoCompleted = false;
+            if (!level.isDaily) {
+                stageAutoCompleted = this.checkStageCompletion(chapterId);
+            }
+
             const questCompleted = this.currentQuest.stages.every(chapter => chapter.completed);
             if (questCompleted && !this.currentQuest.completed) {
                 this.currentQuest.completed = true;
@@ -161,7 +172,7 @@ class QuestManager {
 
             this.checkAchievements();
             this.checkDayAchievements();
-            this.saveToLocalStorage();
+            this.saveToFirebase(); // CHANGED: Use Firebase
             
             return {
                 xpGained: level.xp,
@@ -177,7 +188,6 @@ class QuestManager {
         return null;
     }
 
-    // Toggle daily status for a task
     toggleDailyTask(chapterId, levelId) {
         if (!this.currentQuest) return false;
 
@@ -187,24 +197,21 @@ class QuestManager {
         if (chapter && level) {
             level.isDaily = !level.isDaily;
             
-            // If marking as not daily and it's completed today, mark as permanently completed
             if (!level.isDaily && level.completedToday) {
                 level.completed = true;
             }
             
-            // If marking as daily, reset completion for today
             if (level.isDaily) {
                 level.completedToday = false;
                 level.completed = false;
             }
             
-            this.saveToLocalStorage();
+            this.saveToFirebase(); // CHANGED: Use Firebase instead of localStorage
             return true;
         }
         return false;
     }
 
-    // Manually complete a stage
     completeStage(chapterId) {
         if (!this.currentQuest) return false;
 
@@ -213,7 +220,6 @@ class QuestManager {
         if (chapter && !chapter.completed) {
             chapter.completed = true;
             
-            // Mark all non-daily tasks as completed
             chapter.steps.forEach(step => {
                 if (!step.isDaily) {
                     step.completed = true;
@@ -221,13 +227,12 @@ class QuestManager {
                 }
             });
             
-            this.saveToLocalStorage();
+            this.saveToFirebase(); // CHANGED: Use Firebase instead of localStorage
             return true;
         }
         return false;
     }
 
-    // Check daily-specific achievements
     checkDailyAchievements() {
         let dailyTasksCompleted = 0;
         
@@ -289,6 +294,7 @@ class QuestManager {
         if (achievement && !achievement.unlocked) {
             achievement.unlocked = true;
             this.addXP(achievement.xp);
+            this.saveToFirebase(); // CHANGED: Save to Firebase when achievement unlocked
             return achievement;
         }
         return null;
@@ -301,7 +307,6 @@ class QuestManager {
             this.unlockAchievement('first_steps');
         }
         
-        // Check for 5 tasks completed today
         let todayTotal = 0;
         Object.values(this.dailyReset.todaysProgress).forEach(completedSteps => {
             if (completedSteps instanceof Set) {
@@ -329,28 +334,69 @@ class QuestManager {
         }, 0);
     }
 
-    hasCompletedFiveToday() {
-        let todayTotal = 0;
-        Object.values(this.dailyReset.todaysProgress).forEach(completedSteps => {
-            if (completedSteps instanceof Set) {
-                todayTotal += completedSteps.size;
-            } else if (Array.isArray(completedSteps)) {
-                todayTotal += completedSteps.length;
+    checkStageCompletion(chapterId) {
+        const chapter = this.currentQuest.stages[chapterId];
+        if (!chapter || chapter.completed) return false;
+
+        const nonDailyTasks = chapter.steps.filter(step => !step.isDaily);
+        
+        if (nonDailyTasks.length === 0) {
+            return false;
+        }
+        
+        const allNonDailyTasksCompleted = nonDailyTasks.every(step => 
+            step.completed || step.completedToday
+        );
+        
+        if (allNonDailyTasksCompleted && !chapter.completed) {
+            chapter.completed = true;
+            
+            chapter.steps.forEach(step => {
+                if (!step.isDaily) {
+                    step.completed = true;
+                    step.completedToday = true;
+                }
+            });
+            
+            const nextChapterIndex = chapterId + 1;
+            if (nextChapterIndex < this.currentQuest.stages.length) {
+                this.currentQuest.stages[nextChapterIndex].unlocked = true;
             }
-        });
-        return todayTotal >= 5;
+            
+            this.saveToFirebase(); // CHANGED: Use Firebase instead of localStorage
+            return true;
+        }
+        
+        return false;
+    }
+
+    getStageProgress(stageId) {
+        if (!this.currentQuest || stageId < 0 || stageId >= this.currentQuest.stages.length) {
+            return 0;
+        }
+        
+        const stage = this.currentQuest.stages[stageId];
+        if (stage.completed) {
+            return 100;
+        }
+        
+        const nonDailyTasks = stage.steps.filter(step => !step.isDaily);
+        if (nonDailyTasks.length === 0) {
+            return 0;
+        }
+        
+        const completedNonDailyTasks = nonDailyTasks.filter(step => step.completed || step.completedToday).length;
+        return (completedNonDailyTasks / nonDailyTasks.length) * 100;
     }
 
     getQuestProgress() {
         if (!this.currentQuest) return { overall: 0, chapters: [] };
         
         const chapterProgress = this.currentQuest.stages.map(chapter => {
-            // Only count non-daily tasks for permanent progress
             const nonDailySteps = chapter.steps.filter(step => !step.isDaily);
             const completedNonDailySteps = nonDailySteps.filter(step => step.completed || step.completedToday).length;
             const totalNonDailySteps = nonDailySteps.length;
             
-            // Progress is based on non-daily task completion
             const progress = chapter.completed ? 100 : 
                 (totalNonDailySteps > 0 ? (completedNonDailySteps / totalNonDailySteps) * 100 : 0);
             
@@ -366,7 +412,6 @@ class QuestManager {
             };
         });
 
-        // Overall progress based only on non-daily task completion
         const completedStages = this.currentQuest.stages.filter(stage => stage.completed).length;
         const totalStages = this.currentQuest.stages.length;
         
@@ -374,21 +419,18 @@ class QuestManager {
         if (completedStages === totalStages) {
             overallProgress = 100;
         } else {
-            // Calculate based on completed stages + current stage progress of non-daily tasks
             let totalWeightedProgress = 0;
             
             this.currentQuest.stages.forEach((stage, index) => {
                 if (stage.completed) {
-                    totalWeightedProgress += 100; // Full weight for completed stages
+                    totalWeightedProgress += 100;
                 } else if (index <= completedStages) {
-                    // Only add progress from current/incomplete stages if they have non-daily tasks
                     const nonDailyTasks = stage.steps.filter(step => !step.isDaily);
                     if (nonDailyTasks.length > 0) {
                         const completedNonDaily = nonDailyTasks.filter(step => step.completed || step.completedToday).length;
                         const stageProgress = (completedNonDaily / nonDailyTasks.length) * 100;
                         totalWeightedProgress += stageProgress;
                     }
-                    // If no non-daily tasks, don't add to progress
                 }
             });
             
@@ -416,13 +458,10 @@ class QuestManager {
             return 100;
         }
         
-        // Calculate progress based only on non-daily tasks
         let totalProgress = 0;
         
-        // Add progress from completed stages
         totalProgress += (completedStages / totalStages) * 100;
         
-        // Add progress from current stage if there is one (only non-daily tasks)
         if (completedStages < totalStages) {
             const currentStage = this.currentQuest.stages[completedStages];
             const nonDailyTasks = currentStage.steps.filter(step => !step.isDaily);
@@ -432,75 +471,12 @@ class QuestManager {
                 const currentStageProgress = (completedNonDailyTasks / nonDailyTasks.length) * 100;
                 totalProgress += (currentStageProgress / 100) * (100 / totalStages);
             }
-            // If no non-daily tasks in current stage, don't add progress
         }
         
         return Math.min(totalProgress, 100);
     }
 
-    // Check if stage should be auto-completed based on task completion
-    checkStageCompletion(chapterId) {
-        const chapter = this.currentQuest.stages[chapterId];
-        if (!chapter || chapter.completed) return false;
-
-        // Only check non-daily tasks for stage completion
-        const nonDailyTasks = chapter.steps.filter(step => !step.isDaily);
-        
-        // If there are no non-daily tasks, the stage cannot be auto-completed
-        if (nonDailyTasks.length === 0) {
-            return false;
-        }
-        
-        // Check if all non-daily tasks are completed
-        const allNonDailyTasksCompleted = nonDailyTasks.every(step => 
-            step.completed || step.completedToday
-        );
-        
-        if (allNonDailyTasksCompleted && !chapter.completed) {
-            chapter.completed = true;
-            
-            // Mark all non-daily tasks as permanently completed
-            chapter.steps.forEach(step => {
-                if (!step.isDaily) {
-                    step.completed = true;
-                    step.completedToday = true;
-                }
-            });
-            
-            // Unlock next stage if exists
-            const nextChapterIndex = chapterId + 1;
-            if (nextChapterIndex < this.currentQuest.stages.length) {
-                this.currentQuest.stages[nextChapterIndex].unlocked = true;
-            }
-            
-            this.saveToLocalStorage();
-            return true;
-        }
-        
-        return false;
-    }
-    // Get progress for a specific stage
-    getStageProgress(stageId) {
-        if (!this.currentQuest || stageId < 0 || stageId >= this.currentQuest.stages.length) {
-            return 0;
-        }
-        
-        const stage = this.currentQuest.stages[stageId];
-        if (stage.completed) {
-            return 100;
-        }
-        
-        // CHANGED: Only count non-daily tasks for stage progress
-        const nonDailyTasks = stage.steps.filter(step => !step.isDaily);
-        if (nonDailyTasks.length === 0) {
-            return 0; // No non-daily tasks means no progress towards stage completion
-        }
-        
-        const completedNonDailyTasks = nonDailyTasks.filter(step => step.completed || step.completedToday).length;
-        return (completedNonDailyTasks / nonDailyTasks.length) * 100;
-    }
-    
-    // New methods for modifying quest
+    // Edit quest methods - all updated to use Firebase
     addStage(stageTitle = "New Stage") {
         if (!this.currentQuest) return null;
 
@@ -509,11 +485,11 @@ class QuestManager {
             title: stageTitle,
             steps: [],
             completed: false,
-            unlocked: false // New stages start locked
+            unlocked: false
         };
 
         this.currentQuest.stages.push(newStage);
-        this.saveToLocalStorage();
+        this.saveToFirebase(); // CHANGED: Use Firebase
         return newStage;
     }
 
@@ -524,12 +500,11 @@ class QuestManager {
         if (stageIndex >= 0 && stageIndex < this.currentQuest.stages.length) {
             this.currentQuest.stages.splice(stageIndex, 1);
             
-            // Re-index stages
             this.currentQuest.stages.forEach((stage, index) => {
                 stage.id = index + 1;
             });
             
-            this.saveToLocalStorage();
+            this.saveToFirebase(); // CHANGED: Use Firebase
             return true;
         }
         return false;
@@ -550,12 +525,11 @@ class QuestManager {
 
             stage.steps.push(newStep);
             
-            // Recalculate XP for all steps in this stage
             stage.steps.forEach(step => {
                 step.xp = this.calculateStepXP(stage.steps.length);
             });
             
-            this.saveToLocalStorage();
+            this.saveToFirebase(); // CHANGED: Use Firebase
             return newStep;
         }
         return null;
@@ -568,13 +542,12 @@ class QuestManager {
         if (stage && stepId >= 1 && stepId <= stage.steps.length) {
             stage.steps.splice(stepId - 1, 1);
             
-            // Re-index steps and recalculate XP
             stage.steps.forEach((step, index) => {
                 step.id = index + 1;
                 step.xp = this.calculateStepXP(stage.steps.length);
             });
             
-            this.saveToLocalStorage();
+            this.saveToFirebase(); // CHANGED: Use Firebase
             return true;
         }
         return false;
@@ -586,7 +559,7 @@ class QuestManager {
         const stage = this.currentQuest.stages[stageId - 1];
         if (stage) {
             stage.title = newTitle;
-            this.saveToLocalStorage();
+            this.saveToFirebase(); // CHANGED: Use Firebase
             return true;
         }
         return false;
@@ -598,35 +571,34 @@ class QuestManager {
         const stage = this.currentQuest.stages[stageId - 1];
         if (stage && stepId >= 1 && stepId <= stage.steps.length) {
             stage.steps[stepId - 1].title = newTitle;
-            this.saveToLocalStorage();
+            this.saveToFirebase(); // CHANGED: Use Firebase
             return true;
         }
         return false;
     }
 
-    saveToLocalStorage() {
-        // Convert Sets to Arrays for localStorage serialization
-        const serializedDailyReset = {
-            lastReset: this.dailyReset.lastReset,
-            todaysProgress: {}
-        };
-        
-        Object.keys(this.dailyReset.todaysProgress).forEach(chapterId => {
-            const completedSteps = this.dailyReset.todaysProgress[chapterId];
-            if (completedSteps instanceof Set) {
-                serializedDailyReset.todaysProgress[chapterId] = Array.from(completedSteps);
-            } else {
-                serializedDailyReset.todaysProgress[chapterId] = completedSteps;
+    // Data persistence methods
+    loadFromFirebaseData(data) {
+        if (data.currentQuest) {
+            this.currentQuest = data.currentQuest;
+            if (this.currentQuest.startedAt) {
+                this.currentQuest.startedAt = new Date(this.currentQuest.startedAt);
             }
-        });
-
-        const saveData = {
-            player: this.player,
-            currentQuest: this.currentQuest,
-            achievements: this.achievements,
-            dailyReset: serializedDailyReset
-        };
-        localStorage.setItem('careerQuest', JSON.stringify(saveData));
+        }
+        
+        if (data.player) {
+            this.player = { ...this.player, ...data.player };
+        }
+        
+        if (data.achievements) {
+            this.achievements = data.achievements;
+        }
+        
+        if (data.dailyReset) {
+            this.dailyReset = data.dailyReset;
+        }
+        
+        console.log('Loaded from Firebase:', this.currentQuest);
     }
 
     loadFromLocalStorage() {
@@ -635,33 +607,22 @@ class QuestManager {
             try {
                 const data = JSON.parse(saved);
                 
-                // Restore player data with defaults
                 this.player = {
                     level: data.player?.level || 1,
                     xp: data.player?.xp || 0,
                     streak: data.player?.streak || 0,
                     lastActivity: data.player?.lastActivity ? new Date(data.player.lastActivity) : null,
-                    totalDays: data.player?.totalDays || 1  // CHANGED: Default to 1
+                    totalDays: data.player?.totalDays || 1
                 };
                 
                 this.currentQuest = data.currentQuest;
                 this.achievements = data.achievements || this.achievements;
                 
-                // if have a quest but totalDays is old, recalculate it
-                if (this.currentQuest && this.currentQuest.startedAt) {
-                    const startDate = new Date(this.currentQuest.startedAt);
-                    const currentDate = new Date();
-                    const timeDiff = currentDate - startDate;
-                    this.player.totalDays = Math.max(1, Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1);
-                }
-                
-                // Initialize dailyReset with proper structure
                 this.dailyReset = {
                     lastReset: data.dailyReset?.lastReset || new Date().toDateString(),
                     todaysProgress: {}
                 };
                 
-                // Safely restore todaysProgress
                 if (data.dailyReset?.todaysProgress && typeof data.dailyReset.todaysProgress === 'object') {
                     Object.keys(data.dailyReset.todaysProgress).forEach(chapterId => {
                         const completedSteps = data.dailyReset.todaysProgress[chapterId];
@@ -669,24 +630,55 @@ class QuestManager {
                     });
                 }
                 
-                // Migrate old data structures if needed
                 this.migrateOldData();
+                
+                if (this.currentQuest && this.currentQuest.startedAt) {
+                    const startDate = new Date(this.currentQuest.startedAt);
+                    const currentDate = new Date();
+                    const timeDiff = currentDate - startDate;
+                    this.player.totalDays = Math.max(1, Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1);
+                }
                 
             } catch (error) {
                 console.error('Error loading saved data:', error);
-                // If loading fails, initialize with defaults
                 this.initializeDefaults();
             }
         }
     }
 
+    saveToFirebase() {
+        // Safety check before saving to Firebase
+        if (!this.isReadyForFirebase()) {
+            console.log('Quest not ready for Firebase, using localStorage');
+            this.saveToLocalStorage();
+            return;
+        }
+        
+        if (this.firebaseManager && typeof this.firebaseManager.saveQuestToFirebase === 'function') {
+            this.firebaseManager.saveQuestToFirebase();
+        } else {
+            console.log('Firebase manager not available, falling back to localStorage');
+            this.saveToLocalStorage();
+        }
+    }
+
+    saveToLocalStorage() {
+        const saveData = {
+            currentQuest: this.currentQuest,
+            player: this.player,
+            achievements: this.achievements,
+            dailyReset: this.dailyReset
+        };
+        localStorage.setItem('careerQuest', JSON.stringify(saveData));
+    }
+
+    // Helper methods
     safeConvertToSet(data) {
         if (data instanceof Set) {
             return data;
         } else if (Array.isArray(data)) {
             return new Set(data);
         } else if (data && typeof data === 'object') {
-            // Handle plain objects - try to extract values
             try {
                 const values = Object.values(data);
                 return new Set(values.filter(val => typeof val === 'number' || typeof val === 'string'));
@@ -699,18 +691,15 @@ class QuestManager {
     }
 
     migrateOldData() {
-        // Migrate from older versions if needed
         if (this.currentQuest) {
-            // Ensure all stages have the required properties
             this.currentQuest.stages.forEach((stage, index) => {
                 if (!stage.hasOwnProperty('unlocked')) {
-                    stage.unlocked = index === 0; // First stage unlocked by default
+                    stage.unlocked = index === 0;
                 }
                 if (!stage.hasOwnProperty('completed')) {
                     stage.completed = false;
                 }
                 
-                // Ensure all steps have required properties
                 stage.steps.forEach(step => {
                     if (!step.hasOwnProperty('completedToday')) {
                         step.completedToday = false;
@@ -721,7 +710,6 @@ class QuestManager {
                 });
             });
             
-            // Ensure quest has currentDay
             if (!this.currentQuest.hasOwnProperty('currentDay')) {
                 this.currentQuest.currentDay = 1;
             }
@@ -743,13 +731,20 @@ class QuestManager {
         };
     }
 
-
     resetQuest() {
         this.currentQuest = null;
         this.dailyReset = {
             lastReset: new Date().toDateString(),
             todaysProgress: {}
         };
+        
+        if (this.firebaseManager && this.firebaseManager.userId) {
+            // Use the database reference from FirebaseManager
+            if (typeof database !== 'undefined') {
+                database.ref(`users/${this.firebaseManager.userId}/quest`).remove();
+            }
+        }
+        
         localStorage.removeItem('careerQuest');
     }
 }

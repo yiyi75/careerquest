@@ -420,11 +420,12 @@ class UIManager {
         
         quest.stages.forEach((stage, index) => {
             const taskTitles = stage.steps.map(task => task.title);
-            this.addEditStage(stage.title, taskTitles);
+            const taskDailyStatus = stage.steps.map(task => task.isDaily); // GET DAILY STATUS
+            this.addEditStage(stage.title, taskTitles, taskDailyStatus);
         });
     }
 
-    addEditStage(title = "New Stage", tasks = []) {
+    addEditStage(title = "New Stage", tasks = [], dailyStatus = []) {
         const editStagesContainer = document.getElementById('editStagesContainer');
         const template = document.getElementById('editStageTemplate');
         const stageElement = template.content.cloneNode(true);
@@ -434,8 +435,9 @@ class UIManager {
         titleInput.value = title;
         
         const tasksContainer = stage.querySelector('.edit-tasks-container');
-        tasks.forEach(taskTitle => {
-            this.addEditTaskToContainer(tasksContainer, taskTitle);
+        tasks.forEach((taskTitle, index) => {
+            const isDaily = dailyStatus[index] || false;
+            this.addEditTaskToContainer(tasksContainer, taskTitle, isDaily);
         });
         
         editStagesContainer.appendChild(stage);
@@ -451,7 +453,7 @@ class UIManager {
         this.addEditTaskToContainer(tasksContainer);
     }
 
-    addEditTaskToContainer(container, title = "New Task") {
+    addEditTaskToContainer(container, title = "New Task", isDaily = false) {
         const template = document.getElementById('editTaskTemplate');
         const taskElement = template.content.cloneNode(true);
         
@@ -459,10 +461,33 @@ class UIManager {
         const titleInput = task.querySelector('.edit-task-title');
         titleInput.value = title;
         
+        // Add daily toggle button
+        const dailyToggle = document.createElement('button');
+        dailyToggle.type = 'button';
+        dailyToggle.className = `btn btn-sm ${isDaily ? 'btn-warning' : 'btn-outline'} edit-daily-toggle`;
+        dailyToggle.textContent = isDaily ? '⭐ Daily' : 'Make Daily';
+        dailyToggle.title = isDaily ? 'Remove daily status' : 'Make this a daily practice task';
+        dailyToggle.style.marginLeft = '8px';
+        
+        // Store daily status as data attribute
+        task.setAttribute('data-daily', isDaily.toString());
+        
+        dailyToggle.addEventListener('click', () => {
+            const currentDaily = task.getAttribute('data-daily') === 'true';
+            const newDaily = !currentDaily;
+            
+            task.setAttribute('data-daily', newDaily.toString());
+            dailyToggle.textContent = newDaily ? '⭐ Daily' : 'Make Daily';
+            dailyToggle.className = `btn btn-sm ${newDaily ? 'btn-warning' : 'btn-outline'} edit-daily-toggle`;
+            dailyToggle.title = newDaily ? 'Remove daily status' : 'Make this a daily practice task';
+        });
+        
+        titleInput.parentNode.insertBefore(dailyToggle, titleInput.nextSibling);
+        
         container.appendChild(task);
         this.animateAdd(container.lastElementChild);
     }
-
+    
     removeEditTask(taskElement) {
         this.animateRemove(taskElement, () => taskElement.remove());
     }
@@ -483,13 +508,20 @@ class UIManager {
 
         const stages = Array.from(stageElements).map(stageElement => {
             const title = stageElement.querySelector('.edit-stage-title').value.trim() || 'Unnamed Stage';
-            const tasks = Array.from(stageElement.querySelectorAll('.edit-task-title'))
-                .map(input => input.value.trim())
-                .filter(task => task !== '');
-            return { title, steps: tasks };
+            const tasks = Array.from(stageElement.querySelectorAll('.edit-task')).map(taskElement => {
+                const taskTitle = taskElement.querySelector('.edit-task-title').value.trim();
+                const isDaily = taskElement.getAttribute('data-daily') === 'true'; // GET DAILY STATUS
+                return { title: taskTitle, isDaily: isDaily };
+            }).filter(task => task.title !== '');
+            
+            return { 
+                title, 
+                steps: tasks.map(t => t.title),
+                dailyStatus: tasks.map(t => t.isDaily) // PASS DAILY STATUS
+            };
         });
 
-        this.updateExistingQuest(newTitle, stages);
+        this.updateExistingQuestWithDailyStatus(newTitle, stages);
         this.hideEditQuestModal();
         this.renderQuestProgress();
         this.showEditSuccessMessage();
@@ -511,6 +543,7 @@ class UIManager {
                         title: newStep,
                         completed: oldStep?.completed || false,
                         completedToday: oldStep?.completedToday || false,
+                        isDaily: oldStep?.isDaily || false, // PRESERVE DAILY STATUS
                         xp: this.questManager.calculateStepXP(newStage.steps.length)
                     };
                 }),
@@ -521,7 +554,39 @@ class UIManager {
 
         oldQuest.stages = updatedStages;
         this.fixStageProgression(oldQuest);
-        this.questManager.saveToLocalStorage();
+        this.questManager.saveToFirebase(); // SAVE TO FIREBASE
+    }
+
+    updateExistingQuestWithDailyStatus(newTitle, newStages) {
+        const oldQuest = this.questManager.currentQuest;
+        oldQuest.title = newTitle;
+        
+        const currentProgress = this.getCurrentProgressState(oldQuest);
+        const updatedStages = newStages.map((newStage, index) => {
+            return {
+                id: index + 1,
+                title: newStage.title,
+                steps: newStage.steps.map((stepTitle, stepIndex) => {
+                    const oldStep = this.findMatchingStep(currentProgress, newStage.title, stepTitle, index, stepIndex);
+                    const isDaily = newStage.dailyStatus ? newStage.dailyStatus[stepIndex] : (oldStep?.isDaily || false);
+                    
+                    return {
+                        id: stepIndex + 1,
+                        title: stepTitle,
+                        completed: oldStep?.completed || false,
+                        completedToday: oldStep?.completedToday || false,
+                        isDaily: isDaily, // USE PRESERVED DAILY STATUS
+                        xp: this.questManager.calculateStepXP(newStage.steps.length)
+                    };
+                }),
+                completed: this.isStageCompleted(currentProgress, newStage.title, index),
+                unlocked: this.isStageUnlocked(currentProgress, newStage.title, index)
+            };
+        });
+
+        oldQuest.stages = updatedStages;
+        this.fixStageProgression(oldQuest);
+        this.questManager.saveToFirebase(); // SAVE TO FIREBASE
     }
 
     getCurrentProgressState(quest) {
@@ -533,22 +598,31 @@ class UIManager {
                 steps: stage.steps.map(step => ({
                     title: step.title,
                     completed: step.completed,
-                    completedToday: step.completedToday
+                    completedToday: step.completedToday,
+                    isDaily: step.isDaily // INCLUDE DAILY STATUS
                 }))
             }))
         };
     }
 
     findMatchingStep(progress, stageTitle, stepTitle, stageIndex, stepIndex) {
+        // First try exact match by stage title and step title
         const exactStage = progress.stages.find(stage => stage.title === stageTitle);
         if (exactStage) {
             const exactStep = exactStage.steps.find(step => step.title === stepTitle);
             if (exactStep) return exactStep;
         }
         
+        // Then try by index if titles don't match
         const indexStage = progress.stages[stageIndex];
         if (indexStage && indexStage.steps[stepIndex]) {
             return indexStage.steps[stepIndex];
+        }
+        
+        // If no match found, try to find by step title anywhere in the quest
+        for (const stage of progress.stages) {
+            const step = stage.steps.find(s => s.title === stepTitle);
+            if (step) return step;
         }
         
         return null;
