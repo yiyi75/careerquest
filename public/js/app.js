@@ -37,6 +37,9 @@ class App {
             // Initialize UI
             this.uiManager = new UIManager(this.questManager);
             
+            // Apply theme after everything is loaded
+            this.applyCurrentTheme();
+            
             // Make available globally for debugging
             window.app = this;
             window.questManager = this.questManager;
@@ -56,7 +59,26 @@ class App {
         this.questManager = new QuestManager(null);
         this.questManager.loadFromLocalStorage();
         this.uiManager = new UIManager(this.questManager);
+        
+        // Apply theme after initialization
+        this.applyCurrentTheme();
+        
         console.log('App initialized without Firebase (local storage only)');
+    }
+
+    applyCurrentTheme() {
+        // Wait a bit for the QuestManager to fully load
+        setTimeout(() => {
+            if (this.questManager && this.questManager.decorations && this.questManager.decorations.currentTheme) {
+                document.body.className = document.body.className.replace(/\btheme-\w+/g, '');
+                document.body.classList.add(`theme-${this.questManager.decorations.currentTheme}`);
+                console.log('Applied theme:', this.questManager.decorations.currentTheme);
+            } else {
+                // Apply original grid style (no theme class)
+                document.body.className = document.body.className.replace(/\btheme-\w+/g, '');
+                console.log('Applied original grid style theme');
+            }
+        }, 200);
     }
 
     showFirebaseSetupWarning() {
@@ -67,6 +89,7 @@ class App {
     }
 }
 
+// Initialize the app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     new App();
 });

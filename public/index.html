@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Career Quest - Gamified Goal Tracker</title>
     <!-- <link rel="stylesheet" href="styles/style.css"> -->
-    <link rel="stylesheet" href="styles/pixelartstyle.css">
+    <link rel="stylesheet" href="styles/calmstyle.css">
 
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
@@ -43,6 +43,11 @@
                         <span class="stat-label">Total Days</span>
                         <span class="stat-value" id="totalDaysProgress">0</span>
                     </div>
+                    <div class="stat">
+                        <span class="stat-label">Progress</span>
+                        <span class="stat-value" id="distanceTraveled">0%</span>
+                    </div>
+                    <button class="btn btn-primary btn-sm" id="themeSelectorBtn">🎨 Themes</button>
                 </div>
 
                 <!-- <div class="quest-days">
@@ -87,20 +92,12 @@
                             <button class="btn btn-danger" id="resetQuestBtn">Reset Quest</button>
                         </div>
                     </div>
-                    <div class="player-journey-stats">
-                        <!-- <div class="stat">
-                            <span class="stat-label">Current Day</span>
-                            <span class="stat-value" id="currentDayProgress">1</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-label">Total Days</span>
-                            <span class="stat-value" id="totalDaysProgress">0</span>
-                        </div> -->
+                    <!-- <div class="player-journey-stats">
                         <div class="stat">
                             <span class="stat-label">Distance Traveled</span>
                             <span class="stat-value" id="distanceTraveled">0%</span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
 
                 <!-- Roadmap Container -->
@@ -159,11 +156,6 @@
                     <div class="stage-tasks" id="stageTasks">
                         <!-- Tasks will be dynamically added here -->
                     </div>
-                </div>
-
-                <div class="achievements-panel">
-                    <h3>🏆 Journey Achievements</h3>
-                    <div class="achievements-grid" id="achievementsGrid"></div>
                 </div>
             </section>
 

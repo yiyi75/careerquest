@@ -1,8 +1,51 @@
+class DecorationsManager {
+    constructor(questManager) {
+        this.questManager = questManager;
+        this.unlockedThemes = new Set(['default']);
+        this.currentTheme = 'default';
+        this.unlockedDecorations = new Set();
+        this.loadProgress();
+    }
+
+    // Save/load progress
+    saveProgress() {
+        const progress = {
+            unlockedThemes: Array.from(this.unlockedThemes),
+            currentTheme: this.currentTheme,
+            unlockedDecorations: Array.from(this.unlockedDecorations)
+        };
+        localStorage.setItem('questDecorations', JSON.stringify(progress));
+    }
+
+    loadProgress() {
+        const saved = localStorage.getItem('questDecorations');
+        if (saved) {
+            const progress = JSON.parse(saved);
+            this.unlockedThemes = new Set(progress.unlockedThemes);
+            this.currentTheme = progress.currentTheme;
+            this.unlockedDecorations = new Set(progress.unlockedDecorations);
+            this.applyTheme(this.currentTheme);
+        }
+    }
+
+    // Get available themes for UI
+    getAvailableThemes() {
+        const conditions = this.getUnlockConditions();
+        return Object.keys(conditions).map(theme => ({
+            name: theme,
+            unlocked: this.unlockedThemes.has(theme),
+            condition: conditions[theme]
+        }));
+    }
+}
+
 class UIManager {
     constructor(questManager) {
         this.questManager = questManager;
         this.isEditMode = false;
         this.initializeEventListeners();
+        // Apply the current theme on initialization
+        this.applyCurrentTheme();
     }
 
     initializeEventListeners() {
@@ -23,6 +66,8 @@ class UIManager {
         document.getElementById('addEditStageBtn').addEventListener('click', () => this.addEditStage());
         document.getElementById('saveQuestBtn').addEventListener('click', () => this.saveQuestEdits());
         document.getElementById('cancelEditBtn').addEventListener('click', () => this.hideEditQuestModal());
+
+        document.getElementById('themeSelectorBtn').addEventListener('click', () => this.showThemeSelector());
 
         // Event delegation for dynamic elements
         document.addEventListener('click', (e) => {
@@ -49,6 +94,458 @@ class UIManager {
         });
     }
 
+    // Apply the current theme
+    applyCurrentTheme() {
+        if (this.questManager.decorations && this.questManager.decorations.currentTheme) {
+            // Remove all theme classes
+            document.body.className = document.body.className.replace(/\btheme-\w+/g, '');
+            // Add new theme class
+            document.body.classList.add(`theme-${this.questManager.decorations.currentTheme}`);
+            
+            // Apply theme-specific styles to the entire app
+            this.applyThemeStyles(this.questManager.decorations.currentTheme);
+            
+            // Force UI refresh
+            setTimeout(() => this.refreshUIAfterThemeChange(), 100);
+        }
+    }
+
+    applyThemeStyles(themeName) {
+        // Remove any existing theme style elements
+        const existingStyle = document.getElementById('dynamic-theme-styles');
+        if (existingStyle) {
+            existingStyle.remove();
+        }
+        
+        // Add theme-specific global styles
+        const style = document.createElement('style');
+        style.id = 'dynamic-theme-styles';
+        
+        // Theme-specific color schemes using CSS variables
+        switch(themeName) {
+            case 'default':
+                style.textContent = `
+                    :root {
+                        --header-bg: #4a7c59;
+                        --header-border: #3a6b47;
+                        --header-shadow: #3a6b47;
+                        --header-text: #e9b872;
+                        
+                        --panel-bg: #5d8c66;
+                        --panel-border: #3a6b47;
+                        
+                        --task-bg: #4a7c59;
+                        --task-border: #3a6b47;
+                        
+                        --button-primary-bg: #e9b872;
+                        --button-primary-border: #d9a862;
+                        --button-primary-text: #2c5530;
+                        --button-primary-shadow: #d9a862;
+                        
+                        --progress-fill: #ebc48dff;
+                        --progress-border: #d9a862;
+                        
+                        --stat-value: #e5c79dff;
+                        
+                        --roadmap-bg: #5d8c66;
+                        --roadmap-border: #e9b872;
+                        --roadmap-shadow: #e9b872;
+                        
+                        --stage-title-color: #f8f5f0;
+                        --stage-progress-color: #f8f5f0;
+                        --stage-label-color: #e9b872;
+                        --task-title-color: #f8f5f0;
+                        --task-completed-color: #b8d4c0;
+                    }
+                `;
+                break;
+                
+            case 'cafe':
+                style.textContent = `
+                    :root {
+                        --header-bg: #8B4513;
+                        --header-border: #5D4037;
+                        --header-shadow: #5D4037;
+                        --header-text: #F4A460;
+                        
+                        --panel-bg: #A0522D;
+                        --panel-border: #8B4513;
+                        
+                        --task-bg: #8B4513;
+                        --task-border: #5D4037;
+                        
+                        --button-primary-bg: #D2691E;
+                        --button-primary-border: #A0522D;
+                        --button-primary-text: #f8f5f0;
+                        --button-primary-shadow: #A0522D;
+                        
+                        --progress-fill: #D2691E;
+                        --progress-border: #A0522D;
+                        
+                        --stat-value: #F4A460;
+                        
+                        --roadmap-bg: #A0522D;
+                        --roadmap-border: #D2691E;
+                        --roadmap-shadow: #D2691E;
+                        
+                        --stage-title-color: #f8f5f0;
+                        --stage-progress-color: #f8f5f0;
+                        --stage-label-color: #F4A460;
+                        --task-title-color: #f8f5f0;
+                        --task-completed-color: #D2B48C;
+
+                        --progress-completed: #D2691E;
+                        --progress-completed-border: #A0522D;
+                    }
+                `;
+                break;
+                
+            case 'pond':
+                style.textContent = `
+                    :root {
+                        --header-bg: #1e3a5f;
+                        --header-border: #0d1b2a;
+                        --header-shadow: #0d1b2a;
+                        --header-text: #4facfe;
+                        
+                        --panel-bg: #2a4b8d;
+                        --panel-border: #1e3a5f;
+                        
+                        --task-bg: #1e3a5f;
+                        --task-border: #0d1b2a;
+                        
+                        --button-primary-bg: #4facfe;
+                        --button-primary-border: #2a4b8d;
+                        --button-primary-text: #f8f5f0;
+                        --button-primary-shadow: #2a4b8d;
+                        
+                        --progress-fill: #4facfe;
+                        --progress-border: #2a4b8d;
+                        
+                        --stat-value: #00f2fe;
+                        
+                        --roadmap-bg: #2a4b8d;
+                        --roadmap-border: #4facfe;
+                        --roadmap-shadow: #4facfe;
+                        
+                        --stage-title-color: #f8f5f0;
+                        --stage-progress-color: #f8f5f0;
+                        --stage-label-color: #4facfe;
+                        --task-title-color: #f8f5f0;
+                        --task-completed-color: #87CEEB;
+
+                        --progress-completed: #4facfe;
+                        --progress-completed-border: #2a4b8d;
+                    }
+                `;
+                break;
+                
+            case 'forest':
+                style.textContent = `
+                    :root {
+                        --header-bg: #1b4332;
+                        --header-border: #0d1f14;
+                        --header-shadow: #0d1f14;
+                        --header-text: #43e97b;
+                        
+                        --panel-bg: #2d6a4f;
+                        --panel-border: #1b4332;
+                        
+                        --task-bg: #1b4332;
+                        --task-border: #0d1f14;
+                        
+                        --button-primary-bg: #7bdd9ce6;
+                        --button-primary-border: #2d6a4f;
+                        --button-primary-text: #1b4332;
+                        --button-primary-shadow: #2d6a4f;
+                        
+                        --progress-fill: #89d4a2ff;
+                        --progress-border: #2d6a4f;
+                        
+                        --stat-value: #38f9d7;
+                        
+                        --roadmap-bg: #2d6a4f;
+                        --roadmap-border: #6fdf94ff;
+                        --roadmap-shadow: #50c878ff;
+                        
+                        --stage-title-color: #f8f5f0;
+                        --stage-progress-color: #f8f5f0;
+                        --stage-label-color: #43e97b;
+                        --task-title-color: #f8f5f0;
+                        --task-completed-color: #90EE90;
+
+                        --progress-completed: #89d4a2ff;
+                        --progress-completed-border: #2d6a4f;
+                    }
+                `;
+                break;
+                
+            case 'sunset':
+                style.textContent = `
+                    :root {
+                        --header-bg: #6a0572;
+                        --header-border: #4a034f;
+                        --header-shadow: #4a034f;
+                        --header-text: #fa709a;
+                        
+                        --panel-bg: #8a2be2;
+                        --panel-border: #6a0572;
+                        
+                        --task-bg: #6a0572;
+                        --task-border: #4a034f;
+                        
+                        --button-primary-bg: #fa83a7ff;
+                        --button-primary-border: #8a2be2;
+                        --button-primary-text: #f8f5f0;
+                        --button-primary-shadow: #8a2be2;
+                        
+                        --progress-fill: #f391aeff;
+                        --progress-border: #8a2be2;
+                        
+                        --stat-value: #fee140;
+                        
+                        --roadmap-bg: #8a2be2;
+                        --roadmap-border: #e984a2ff;
+                        --roadmap-shadow: #d77b97ff;
+                        
+                        --stage-title-color: #f8f5f0;
+                        --stage-progress-color: #f8f5f0;
+                        --stage-label-color: #fa709a;
+                        --task-title-color: #f8f5f0;
+                        --task-completed-color: #FFB6C1;
+
+                        --progress-completed: #f391aeff;
+                        --progress-completed-border: #8a2be2;
+                    }
+                `;
+                break;
+                
+            case 'space':
+                style.textContent = `
+                    :root {
+                        --header-bg: #0d1b2a;
+                        --header-border: #050a14;
+                        --header-shadow: #050a14;
+                        --header-text: #415a77;
+                        
+                        --panel-bg: #1b263b;
+                        --panel-border: #0d1b2a;
+                        
+                        --task-bg: #0d1b2a;
+                        --task-border: #050a14;
+                        
+                        --button-primary-bg: #415a77;
+                        --button-primary-border: #1b263b;
+                        --button-primary-text: #f8f5f0;
+                        --button-primary-shadow: #1b263b;
+                        
+                        --progress-fill: #415a77;
+                        --progress-border: #1b263b;
+                        
+                        --stat-value: #778da9;
+                        
+                        --roadmap-bg: #1b263b;
+                        --roadmap-border: #415a77;
+                        --roadmap-shadow: #415a77;
+                        
+                        --stage-title-color: #f8f5f0;
+                        --stage-progress-color: #f8f5f0;
+                        --stage-label-color: #415a77;
+                        --task-title-color: #f8f5f0;
+                        --task-completed-color: #A9A9A9;
+
+                        --progress-completed: #415a77;
+                        --progress-completed-border: #1b263b;
+                    }
+                `;
+                break;
+                
+            case 'mountain':
+                style.textContent = `
+                    :root {
+                        --header-bg: #2E7D32;
+                        --header-border: #1b5e20;
+                        --header-shadow: #1b5e20;
+                        --header-text: #78909C;
+                        
+                        --panel-bg: #5D4037;
+                        --panel-border: #2E7D32;
+                        
+                        --task-bg: #2E7D32;
+                        --task-border: #1b5e20;
+                        
+                        --button-primary-bg: #78909C;
+                        --button-primary-border: #5D4037;
+                        --button-primary-text: #f8f5f0;
+                        --button-primary-shadow: #5D4037;
+                        
+                        --progress-fill: #78909C;
+                        --progress-border: #5D4037;
+                        
+                        --stat-value: #BCAAA4;
+                        
+                        --roadmap-bg: #5D4037;
+                        --roadmap-border: #78909C;
+                        --roadmap-shadow: #78909C;
+                        
+                        --stage-title-color: #f8f5f0;
+                        --stage-progress-color: #f8f5f0;
+                        --stage-label-color: #78909C;
+                        --task-title-color: #f8f5f0;
+                        --task-completed-color: #C0C0C0;
+
+                        --progress-completed: #78909C;
+                        --progress-completed-border: #5D4037;
+                    }
+                `;
+                break;
+                
+            case 'beach':
+                style.textContent = `
+                    :root {
+                        --header-bg: #4FC3F7;
+                        --header-border: #29b6f6;
+                        --header-shadow: #29b6f6;
+                        --header-text: #FFF176;
+                        
+                        --panel-bg: #81D4FA;
+                        --panel-border: #4FC3F7;
+                        
+                        --task-bg: #4FC3F7;
+                        --task-border: #29b6f6;
+                        
+                        --button-primary-bg: #FFF176;
+                        --button-primary-border: #81D4FA;
+                        --button-primary-text: #1e3a5f;
+                        --button-primary-shadow: #81D4FA;
+                        
+                        --progress-fill: #f9ee93ff;
+                        --progress-border: #81D4FA;
+                        
+                        --stat-value: #FFD54F;
+                        
+                        --roadmap-bg: #81D4FA;
+                        --roadmap-border: #efe692ff;
+                        --roadmap-shadow: #dfd68aff;
+                        
+                        --stage-title-color: #1e3a5f;
+                        --stage-progress-color: #1e3a5f;
+                        --stage-label-color: #FFF176;
+                        --task-title-color: #1e3a5f;
+                        --task-completed-color: #87CEEB;
+
+                        --progress-completed: #f9ee93ff;
+                        --progress-completed-border: #81D4FA;
+                    }
+                `;
+                break;
+                
+            case 'library':
+                style.textContent = `
+                    :root {
+                        --header-bg: #5D4037;
+                        --header-border: #3E2723;
+                        --header-shadow: #3E2723;
+                        --header-text: #BCAAA4;
+                        
+                        --panel-bg: #795548;
+                        --panel-border: #5D4037;
+                        
+                        --task-bg: #5D4037;
+                        --task-border: #3E2723;
+                        
+                        --button-primary-bg: #BCAAA4;
+                        --button-primary-border: #795548;
+                        --button-primary-text: #3E2723;
+                        --button-primary-shadow: #795548;
+                        
+                        --progress-fill: #BCAAA4;
+                        --progress-border: #795548;
+                        
+                        --stat-value: #D7CCC8;
+                        
+                        --roadmap-bg: #795548;
+                        --roadmap-border: #BCAAA4;
+                        --roadmap-shadow: #BCAAA4;
+                        
+                        --stage-title-color: #f8f5f0;
+                        --stage-progress-color: #f8f5f0;
+                        --stage-label-color: #BCAAA4;
+                        --task-title-color: #f8f5f0;
+                        --task-completed-color: #D7CCC8;
+
+                        --progress-completed: #BCAAA4;
+                        --progress-completed-border: #795548;
+                    }
+                `;
+                break;
+        }
+        
+        document.head.appendChild(style);
+        
+        // Force a re-render of all UI elements
+        this.refreshUIAfterThemeChange();
+    }
+
+    // Add this method to refresh UI after theme changes
+    refreshUIAfterThemeChange() {
+        // Re-render the quest progress to update all UI elements
+        if (this.questManager.currentQuest) {
+            this.renderQuestProgress();
+        }
+        
+        // Force browser to repaint
+        document.body.offsetHeight;
+    }
+
+    // Helper method to update CSS variables
+    updateThemeCSSVariables(themeName) {
+        const root = document.documentElement;
+        
+        // Set CSS variables based on theme
+        switch(themeName) {
+            case 'cafe':
+                root.style.setProperty('--theme-primary', '#8B4513');
+                root.style.setProperty('--theme-secondary', '#5D4037');
+                root.style.setProperty('--theme-accent', '#D2691E');
+                break;
+            case 'pond':
+                root.style.setProperty('--theme-primary', '#1e3a5f');
+                root.style.setProperty('--theme-secondary', '#0d1b2a');
+                root.style.setProperty('--theme-accent', '#4facfe');
+                break;
+            case 'forest':
+                root.style.setProperty('--theme-primary', '#1b4332');
+                root.style.setProperty('--theme-secondary', '#0d1f14');
+                root.style.setProperty('--theme-accent', '#43e97b');
+                break;
+            case 'sunset':
+                root.style.setProperty('--theme-primary', '#6a0572');
+                root.style.setProperty('--theme-secondary', '#4a034f');
+                root.style.setProperty('--theme-accent', '#fa709a');
+                break;
+            case 'space':
+                root.style.setProperty('--theme-primary', '#0d1b2a');
+                root.style.setProperty('--theme-secondary', '#050a14');
+                root.style.setProperty('--theme-accent', '#415a77');
+                break;
+            case 'mountain':
+                root.style.setProperty('--theme-primary', '#2E7D32');
+                root.style.setProperty('--theme-secondary', '#1b5e20');
+                root.style.setProperty('--theme-accent', '#78909C');
+                break;
+            case 'beach':
+                root.style.setProperty('--theme-primary', '#4FC3F7');
+                root.style.setProperty('--theme-secondary', '#29b6f6');
+                root.style.setProperty('--theme-accent', '#FFF176');
+                break;
+            case 'library':
+                root.style.setProperty('--theme-primary', '#5D4037');
+                root.style.setProperty('--theme-secondary', '#3E2723');
+                root.style.setProperty('--theme-accent', '#BCAAA4');
+                break;
+        }
+    }
     // ===== QUEST CREATION METHODS =====
     addStage() {
         const stagesContainer = document.getElementById('stagesContainer');
@@ -118,7 +615,6 @@ class UIManager {
         this.updatePlayerStats();
         this.renderRoadmap();
         this.renderAllStageDetails();
-        this.renderAchievements();
     }
 
     renderRoadmap() {
@@ -315,6 +811,87 @@ class UIManager {
         return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
     }
 
+    // Method to show theme selector
+    showThemeSelector() {
+        const modal = document.createElement('div');
+        modal.className = 'modal theme-selector-modal';
+        modal.innerHTML = `
+            <div class="modal-content large">
+                <h3>🎨 Customize Your Workspace</h3>
+                <p>Unlock new themes by making progress!</p>
+                <div class="theme-selector-grid" id="themeSelector"></div>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" id="closeThemeSelector">Close</button>
+                </div>
+            </div>
+        `;
+
+        const themeSelector = modal.querySelector('#themeSelector');
+        const themes = this.questManager.getAvailableThemes();
+
+        themes.forEach(theme => {
+            const themeOption = document.createElement('div');
+            themeOption.className = `theme-option ${theme.unlocked ? '' : 'locked'} ${theme.name === this.questManager.decorations.currentTheme ? 'active' : ''}`;
+            
+            themeOption.innerHTML = `
+                <div class="theme-preview-container">
+                    <div class="theme-preview theme-${theme.name}">
+                        <div class="preview-content">
+                            <div class="preview-icon">${theme.icon}</div>
+                            <div class="preview-title">Preview</div>
+                        </div>
+                    </div>
+                    ${!theme.unlocked ? '<div class="lock-overlay">🔒</div>' : ''}
+                    ${theme.name === this.questManager.decorations.currentTheme ? '<div class="active-badge">Active</div>' : ''}
+                </div>
+                <div class="theme-info">
+                    <div class="theme-name">${theme.displayName}</div>
+                    ${theme.unlocked ? 
+                        `<div class="theme-status unlocked">Unlocked! 🎉</div>` : 
+                        `<div class="theme-condition">${theme.condition.description}</div>`
+                    }
+                </div>
+            `;
+
+            if (theme.unlocked) {
+                themeOption.addEventListener('click', () => {
+                    const success = this.questManager.applyTheme(theme.name);
+                    if (success) {
+                        this.applyCurrentTheme();
+                        this.showToast(`Applied ${theme.displayName} theme!`, 'success');
+                        
+                        // Update active state
+                        document.querySelectorAll('.theme-option').forEach(opt => {
+                            opt.classList.remove('active');
+                            const existingBadge = opt.querySelector('.active-badge');
+                            if (existingBadge) existingBadge.remove();
+                        });
+                        
+                        themeOption.classList.add('active');
+                        if (!themeOption.querySelector('.active-badge')) {
+                            const activeBadge = document.createElement('div');
+                            activeBadge.className = 'active-badge';
+                            activeBadge.textContent = 'Active';
+                            themeOption.querySelector('.theme-preview-container').appendChild(activeBadge);
+                        }
+                    }
+                });
+            }
+
+            themeSelector.appendChild(themeOption);
+        });
+
+        document.body.appendChild(modal);
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+        
+        modal.querySelector('#closeThemeSelector').addEventListener('click', () => {
+            modal.remove();
+        });
+    }
+
     handleTaskCompletion(checkbox) {
         const taskId = parseInt(checkbox.getAttribute('data-task-id'));
         const stageId = parseInt(checkbox.getAttribute('data-stage-id'));
@@ -332,15 +909,24 @@ class UIManager {
             
             if (result.leveledUp) {
                 this.showLevelUpAnimation(result.newLevel);
+                // Check for theme unlocks after level up
+                const themeUnlocks = this.questManager.checkThemeUnlocks();
+                // if (themeUnlocks.length > 0) {
+                //     this.showThemeUnlockMessage(themeUnlocks);
+                // }
             }
             
-            // CHANGED: Only show stage completion if it actually happened
-            // and only for non-daily tasks or when explicitly completed
             if (result.chapterCompleted) {
                 this.showStageCompleteAnimation(this.questManager.currentQuest.stages[stageId].title, result.autoCompleted);
             }
             
-            this.renderAchievements();
+            // Show theme unlocks from task completion
+            // if (result.themeUnlocks && result.themeUnlocks.length > 0) {
+            //     this.showThemeUnlockMessage(result.themeUnlocks);
+            // }
+            
+            // Update themes display
+            this.renderThemes();
         }
     }
 
@@ -394,7 +980,6 @@ class UIManager {
             this.renderAllStageDetails();
             this.updatePlayerStats();
             this.showStageCompleteAnimation(this.questManager.currentQuest.stages[stageId].title);
-            this.renderAchievements();
         }
     }
 
@@ -709,38 +1294,6 @@ class UIManager {
             `;
         }
         
-        message.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2002;
-        `;
-        
-        const content = message.querySelector('.message-content');
-        content.style.cssText = `
-            background: #16213e;
-            border: 4px solid #f95959;
-            padding: 30px;
-            border-radius: 0;
-            text-align: center;
-            max-width: 400px;
-            animation: pixelPopIn 0.5s ease;
-            box-shadow: 8px 8px 0px #0f3460;
-            position: relative;
-        `;
-        
-        // Add the dark blue background layer
-        content.innerHTML = `
-            <div style="position: absolute; top: -8px; left: -8px; right: 8px; bottom: 8px; background: #0f3460; z-index: -1;"></div>
-            ${content.innerHTML}
-        `;
-        
         document.body.appendChild(message);
         message.querySelector('.close-message').addEventListener('click', () => {
             message.remove();
@@ -789,39 +1342,57 @@ class UIManager {
         
         // Quest progress panel stats (use the new IDs with 'Progress' suffix)
         // document.getElementById('currentDayProgress').textContent = this.questManager.currentQuest.currentDay;
-        // document.getElementById('totalDaysProgress').textContent = this.questManager.player.totalDays;
-        
+        document.getElementById('totalDaysProgress').textContent = this.questManager.player.totalDays;
+
         // Update distance traveled
-        // const progress = this.questManager.getQuestProgress();
-        // document.getElementById('distanceTraveled').textContent = `${Math.round(progress.distanceTraveled)}%`;
+        const progress = this.questManager.getQuestProgress();
+        document.getElementById('distanceTraveled').textContent = `${Math.round(progress.distanceTraveled)}%`;
+    }
+    renderThemes() {
+        const container = document.getElementById('achievementsGrid'); // Reuse the same container
+        if (!container) return;
+        
+        container.innerHTML = '<h3>🎨 Unlocked Themes</h3>';
+        
+        const themes = this.questManager.getAvailableThemes();
+        const themesGrid = document.createElement('div');
+        themesGrid.className = 'themes-grid';
+        themesGrid.style.cssText = `
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        `;
+
+        themes.forEach(theme => {
+            const themeElement = document.createElement('div');
+            themeElement.className = `theme-display ${theme.unlocked ? 'unlocked' : 'locked'}`;
+            themeElement.innerHTML = `
+                <div class="theme-icon">${theme.icon}</div>
+                <div class="theme-info">
+                    <div class="theme-name">${theme.displayName}</div>
+                    ${theme.unlocked ? 
+                        `<div class="theme-status">Unlocked! 🎉</div>` : 
+                        `<div class="theme-condition">${theme.condition}</div>`
+                    }
+                </div>
+            `;
+
+            if (theme.unlocked) {
+                themeElement.style.cursor = 'pointer';
+                themeElement.addEventListener('click', () => {
+                    this.questManager.applyTheme(theme.name);
+                    this.applyCurrentTheme();
+                    this.showToast(`Applied ${theme.displayName} theme!`, 'success');
+                });
+            }
+
+            themesGrid.appendChild(themeElement);
+        });
+
+        container.appendChild(themesGrid);
     }
 
-    renderAchievements() {
-        const grid = document.getElementById('achievementsGrid');
-        grid.innerHTML = '';
-        
-        this.questManager.achievements.forEach(achievement => {
-            const template = document.getElementById('achievementTemplate');
-            const achievementElement = template.content.cloneNode(true);
-            const achievementDiv = achievementElement.querySelector('.achievement');
-            const icon = achievementDiv.querySelector('.achievement-icon');
-            const title = achievementDiv.querySelector('.achievement-title');
-            const description = achievementDiv.querySelector('.achievement-description');
-            
-            if (achievement.unlocked) {
-                achievementDiv.classList.remove('locked');
-                achievementDiv.classList.add('unlocked');
-                icon.textContent = '🏆';
-                title.textContent = achievement.title;
-                description.textContent = achievement.description + ` (+${achievement.xp} XP)`;
-            } else {
-                title.textContent = '???';
-                description.textContent = 'Keep progressing to unlock';
-            }
-            
-            grid.appendChild(achievementElement);
-        });
-    }
 
     showLevelUpAnimation(newLevel) {
         const celebration = document.getElementById('celebration');
@@ -891,42 +1462,16 @@ class UIManager {
             </div>
         `;
         
-        message.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #0f3460;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 2001;
-        `;
-        
-        const content = message.querySelector('.reset-message-content');
-        content.style.cssText = `
-            background: #16213e;
-            border: 4px solid #f95959;
-            padding: 30px;
-            border-radius: 0;
-            text-align: center;
-            max-width: 400px;
-            animation: pixelPopIn 0.5s ease;
-            box-shadow: 8px 8px 0px #0f3460;
-            position: relative;
-        `;
-        
-        // Add the dark blue background layer
-        content.innerHTML = `
-            <div style="position: absolute; top: -8px; left: -8px; right: 8px; bottom: 8px; background: #0f3460; z-index: -1;"></div>
-            ${content.innerHTML}
-        `;
-        
         document.body.appendChild(message);
         message.querySelector('.close-reset-message').addEventListener('click', () => {
             message.remove();
         });
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (document.body.contains(message)) {
+                message.remove();
+            }
+        }, 5000);
     }
 
     showQuestCreation() {
@@ -955,46 +1500,3 @@ class UIManager {
         setTimeout(callback, 300);
     }
 }
-
-// Add CSS animations
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes floatUp {
-        0% { transform: translateY(0); opacity: 1; }
-        100% { transform: translateY(-50px); opacity: 0; }
-    }
-    
-    @keyframes confettiFall {
-        0% { transform: translateY(0) rotate(0deg); }
-        100% { transform: translateY(100vh) rotate(360deg); }
-    }
-    
-    @keyframes slideIn {
-        0% { transform: translateX(-100%); opacity: 0; }
-        100% { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes slideInRight {
-        0% { transform: translateX(100%); opacity: 0; }
-        100% { transform: translateX(0); opacity: 1; }
-    }
-    
-    @keyframes slideOutRight {
-        0% { transform: translateX(0); opacity: 1; }
-        100% { transform: translateX(100%); opacity: 0; }
-    }
-    
-    @keyframes popIn {
-        0% { transform: scale(0.5); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
-    }
-    
-    .edit-success-message {
-        box-shadow: 0 4px 15px rgba(76, 175, 80, 0.3);
-    }
-    
-    .stage-complete-message {
-        z-index: 2002;
-    }
-`;
-document.head.appendChild(style);

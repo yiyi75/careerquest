@@ -7,24 +7,127 @@ class QuestManager {
             xp: 0,
             streak: 0,
             lastActivity: null,
-            totalDays: 1
+            totalDays: 1,
+            totalXP: 0,
+            questsCompleted: 0
         };
         this.dailyReset = {
             lastReset: new Date().toDateString(),
             todaysProgress: {}
         };
-        this.achievements = [
-            { id: 'first_steps', title: 'First Steps', description: 'Complete your first task', unlocked: false, xp: 50 },
-            { id: 'quick_learner', title: 'Quick Learner', description: 'Complete 5 tasks in one day', unlocked: false, xp: 100 },
-            { id: 'dedicated', title: 'Dedicated Learner', description: 'Maintain a 7-day streak', unlocked: false, xp: 200 },
-            { id: 'preparation_master', title: 'Preparation Master', description: 'Complete a preparation stage', unlocked: false, xp: 150 },
-            { id: 'interview_ready', title: 'Interview Ready', description: 'Complete all preparation tasks', unlocked: false, xp: 300 },
-            { id: 'job_hunter', title: 'Job Hunter', description: 'Reach the application stage', unlocked: false, xp: 250 },
-            { id: 'offer_seeker', title: 'Offer Seeker', description: 'Complete an interview stage', unlocked: false, xp: 400 },
-            { id: 'career_champion', title: 'Career Champion', description: 'Complete an entire career quest', unlocked: false, xp: 1000 },
-            { id: 'consistent', title: 'Consistent', description: 'Spend 30 days on your quest', unlocked: false, xp: 500 },
-            { id: 'daily_warrior', title: 'Daily Warrior', description: 'Complete 20 daily tasks', unlocked: false, xp: 300 }
-        ];
+        
+        // Theme system - this is what UIManager uses
+        this.decorations = {
+            unlockedThemes: new Set(['default']),
+            currentTheme: 'default',
+            unlockedDecorations: new Set()
+        };
+    }
+
+    // Theme unlock conditions - based on level progression
+    getThemeUnlockConditions() {
+        return {
+            'default': { type: 'level', value: 1, description: 'Starting theme' },
+            'cafe': { type: 'streak', value: 1, description: '1-day streak' },
+            'pond': { type: 'level', value: 1, description: 'Reach Level 2' },
+            'forest': { type: 'level', value: 1, description: 'Reach Level 4' },
+            'sunset': { type: 'level', value: 1, description: 'Reach Level 5' },
+            'space': { type: 'level', value: 1, description: 'Reach Level 6' },
+            'mountain': { type: 'streak', value: 1, description: '10-day streak' },
+            'beach': { type: 'quests_completed', value: 1, description: 'Complete 2 quests' },
+            'library': { type: 'total_xp', value: 10, description: 'Earn 5000 XP' }
+        };
+    }
+
+    // Check for theme unlocks when progress is made
+    checkThemeUnlocks() {
+        const conditions = this.getThemeUnlockConditions();
+        let newUnlocks = [];
+
+        Object.entries(conditions).forEach(([theme, condition]) => {
+            if (!this.decorations.unlockedThemes.has(theme)) {
+                let conditionMet = false;
+                
+                switch (condition.type) {
+                    case 'level':
+                        conditionMet = this.player.level >= condition.value;
+                        break;
+                    case 'streak':
+                        conditionMet = this.player.streak >= condition.value;
+                        break;
+                    case 'quests_completed':
+                        conditionMet = this.player.questsCompleted >= condition.value;
+                        break;
+                    case 'total_xp':
+                        conditionMet = this.player.totalXP >= condition.value;
+                        break;
+                }
+
+                if (conditionMet) {
+                    this.decorations.unlockedThemes.add(theme);
+                    newUnlocks.push({
+                        name: theme,
+                        displayName: this.getThemeDisplayName(theme),
+                        condition: condition.description
+                    });
+                }
+            }
+        });
+
+        return newUnlocks;
+    }
+
+    // Apply a theme - updates both QuestManager and UI
+    applyTheme(themeName) {
+        if (!this.decorations.unlockedThemes.has(themeName)) return false;
+        
+        this.decorations.currentTheme = themeName;
+        this.saveToFirebase();
+        return true;
+    }
+
+    // Get available themes for UI - this is what UIManager calls
+    getAvailableThemes() {
+        const conditions = this.getThemeUnlockConditions();
+        return Object.keys(conditions).map(theme => ({
+            name: theme,
+            displayName: this.getThemeDisplayName(theme),
+            unlocked: this.decorations.unlockedThemes.has(theme),
+            condition: conditions[theme],
+            icon: this.getThemeIcon(theme)
+        }));
+    }
+
+    // Get display name for themes
+    getThemeDisplayName(themeName) {
+        const names = {
+            'default': 'Original Grid',
+            'cafe': 'Cafe',
+            'pond': 'Pond', 
+            'forest': 'Forest',
+            'sunset': 'Sunset',
+            'space': 'Space',
+            'mountain': 'Mountain',
+            'beach': 'Beach',
+            'library': 'Library'
+        };
+        return names[themeName] || themeName;
+    }
+
+    // Get icons for themes
+    getThemeIcon(themeName) {
+        const icons = {
+            'default': '🔳',
+            'cafe': '☕',
+            'pond': '💧',
+            'forest': '🌲',
+            'sunset': '🌅',
+            'space': '🚀',
+            'mountain': '⛰️',
+            'beach': '🏖️',
+            'library': '📚'
+        };
+        return icons[themeName] || '🎨';
     }
 
     // Safety check for Firebase
@@ -112,7 +215,7 @@ class QuestManager {
                 });
             }
             
-            this.saveToFirebase(); // CHANGED: Use Firebase instead of localStorage
+            this.saveToFirebase();
             return true;
         }
         return false;
@@ -155,10 +258,6 @@ class QuestManager {
             const xpResult = this.addXP(level.xp);
             this.updateStreak();
             
-            if (level.isDaily) {
-                this.checkDailyAchievements();
-            }
-            
             let stageAutoCompleted = false;
             if (!level.isDaily) {
                 stageAutoCompleted = this.checkStageCompletion(chapterId);
@@ -167,12 +266,13 @@ class QuestManager {
             const questCompleted = this.currentQuest.stages.every(chapter => chapter.completed);
             if (questCompleted && !this.currentQuest.completed) {
                 this.currentQuest.completed = true;
-                this.unlockAchievement('career_champion');
+                this.player.questsCompleted++;
             }
 
-            this.checkAchievements();
-            this.checkDayAchievements();
-            this.saveToFirebase(); // CHANGED: Use Firebase
+            // Check for theme unlocks
+            const newThemeUnlocks = this.checkThemeUnlocks();
+            
+            this.saveToFirebase();
             
             return {
                 xpGained: level.xp,
@@ -181,7 +281,8 @@ class QuestManager {
                 chapterCompleted: stageAutoCompleted,
                 questCompleted: questCompleted,
                 isDailyTask: level.isDaily,
-                autoCompleted: stageAutoCompleted
+                autoCompleted: stageAutoCompleted,
+                themeUnlocks: newThemeUnlocks // Return new theme unlocks
             };
         }
         
@@ -206,7 +307,7 @@ class QuestManager {
                 level.completed = false;
             }
             
-            this.saveToFirebase(); // CHANGED: Use Firebase instead of localStorage
+            this.saveToFirebase();
             return true;
         }
         return false;
@@ -227,34 +328,17 @@ class QuestManager {
                 }
             });
             
-            this.saveToFirebase(); // CHANGED: Use Firebase instead of localStorage
+            this.saveToFirebase();
             return true;
         }
         return false;
     }
 
-    checkDailyAchievements() {
-        let dailyTasksCompleted = 0;
-        
-        if (this.currentQuest) {
-            this.currentQuest.stages.forEach(chapter => {
-                chapter.steps.forEach(step => {
-                    if (step.isDaily && step.completedToday) {
-                        dailyTasksCompleted++;
-                    }
-                });
-            });
-        }
-        
-        if (dailyTasksCompleted >= 20) {
-            this.unlockAchievement('daily_warrior');
-        }
-    }
-
     addXP(amount) {
         this.player.xp += amount;
+        this.player.totalXP += amount;
         
-        const newLevel = Math.floor(this.player.xp / 1000) + 1;
+        const newLevel = Math.floor(this.player.xp / 200) + 1;
         if (newLevel > this.player.level) {
             const oldLevel = this.player.level;
             this.player.level = newLevel;
@@ -283,91 +367,6 @@ class QuestManager {
         }
         
         this.player.lastActivity = new Date();
-        
-        if (this.player.streak >= 7) {
-            this.unlockAchievement('dedicated');
-        }
-    }
-
-    unlockAchievement(achievementId) {
-        const achievement = this.achievements.find(a => a.id === achievementId);
-        if (achievement && !achievement.unlocked) {
-            achievement.unlocked = true;
-            this.addXP(achievement.xp);
-            this.saveToFirebase(); // CHANGED: Save to Firebase when achievement unlocked
-            return achievement;
-        }
-        return null;
-    }
-
-    checkAchievements() {
-        const completedTasks = this.getTotalCompletedTasks();
-        
-        if (completedTasks >= 1) {
-            this.unlockAchievement('first_steps');
-        }
-        
-        let todayTotal = 0;
-        Object.values(this.dailyReset.todaysProgress).forEach(completedSteps => {
-            if (completedSteps instanceof Set) {
-                todayTotal += completedSteps.size;
-            } else if (Array.isArray(completedSteps)) {
-                todayTotal += completedSteps.length;
-            }
-        });
-        
-        if (todayTotal >= 5) {
-            this.unlockAchievement('quick_learner');
-        }
-    }
-
-    checkDayAchievements() {
-        if (this.player.totalDays >= 30) {
-            this.unlockAchievement('consistent');
-        }
-    }
-
-    getTotalCompletedTasks() {
-        if (!this.currentQuest) return 0;
-        return this.currentQuest.stages.reduce((total, chapter) => {
-            return total + chapter.steps.filter(step => step.completed).length;
-        }, 0);
-    }
-
-    checkStageCompletion(chapterId) {
-        const chapter = this.currentQuest.stages[chapterId];
-        if (!chapter || chapter.completed) return false;
-
-        const nonDailyTasks = chapter.steps.filter(step => !step.isDaily);
-        
-        if (nonDailyTasks.length === 0) {
-            return false;
-        }
-        
-        const allNonDailyTasksCompleted = nonDailyTasks.every(step => 
-            step.completed || step.completedToday
-        );
-        
-        if (allNonDailyTasksCompleted && !chapter.completed) {
-            chapter.completed = true;
-            
-            chapter.steps.forEach(step => {
-                if (!step.isDaily) {
-                    step.completed = true;
-                    step.completedToday = true;
-                }
-            });
-            
-            const nextChapterIndex = chapterId + 1;
-            if (nextChapterIndex < this.currentQuest.stages.length) {
-                this.currentQuest.stages[nextChapterIndex].unlocked = true;
-            }
-            
-            this.saveToFirebase(); // CHANGED: Use Firebase instead of localStorage
-            return true;
-        }
-        
-        return false;
     }
 
     getStageProgress(stageId) {
@@ -476,104 +475,39 @@ class QuestManager {
         return Math.min(totalProgress, 100);
     }
 
-    // Edit quest methods - all updated to use Firebase
-    addStage(stageTitle = "New Stage") {
-        if (!this.currentQuest) return null;
+    checkStageCompletion(chapterId) {
+        const chapter = this.currentQuest.stages[chapterId];
+        if (!chapter || chapter.completed) return false;
 
-        const newStage = {
-            id: this.currentQuest.stages.length + 1,
-            title: stageTitle,
-            steps: [],
-            completed: false,
-            unlocked: false
-        };
-
-        this.currentQuest.stages.push(newStage);
-        this.saveToFirebase(); // CHANGED: Use Firebase
-        return newStage;
-    }
-
-    removeStage(stageId) {
-        if (!this.currentQuest) return false;
-
-        const stageIndex = stageId - 1;
-        if (stageIndex >= 0 && stageIndex < this.currentQuest.stages.length) {
-            this.currentQuest.stages.splice(stageIndex, 1);
+        const nonDailyTasks = chapter.steps.filter(step => !step.isDaily);
+        
+        if (nonDailyTasks.length === 0) {
+            return false;
+        }
+        
+        const allNonDailyTasksCompleted = nonDailyTasks.every(step => 
+            step.completed || step.completedToday
+        );
+        
+        if (allNonDailyTasksCompleted && !chapter.completed) {
+            chapter.completed = true;
             
-            this.currentQuest.stages.forEach((stage, index) => {
-                stage.id = index + 1;
+            chapter.steps.forEach(step => {
+                if (!step.isDaily) {
+                    step.completed = true;
+                    step.completedToday = true;
+                }
             });
             
-            this.saveToFirebase(); // CHANGED: Use Firebase
+            const nextChapterIndex = chapterId + 1;
+            if (nextChapterIndex < this.currentQuest.stages.length) {
+                this.currentQuest.stages[nextChapterIndex].unlocked = true;
+            }
+            
+            this.saveToFirebase();
             return true;
         }
-        return false;
-    }
-
-    addStep(stageId, stepTitle = "New Step") {
-        if (!this.currentQuest) return null;
-
-        const stage = this.currentQuest.stages[stageId - 1];
-        if (stage) {
-            const newStep = {
-                id: stage.steps.length + 1,
-                title: stepTitle,
-                completed: false,
-                completedToday: false,
-                xp: this.calculateStepXP(stage.steps.length + 1)
-            };
-
-            stage.steps.push(newStep);
-            
-            stage.steps.forEach(step => {
-                step.xp = this.calculateStepXP(stage.steps.length);
-            });
-            
-            this.saveToFirebase(); // CHANGED: Use Firebase
-            return newStep;
-        }
-        return null;
-    }
-
-    removeStep(stageId, stepId) {
-        if (!this.currentQuest) return false;
-
-        const stage = this.currentQuest.stages[stageId - 1];
-        if (stage && stepId >= 1 && stepId <= stage.steps.length) {
-            stage.steps.splice(stepId - 1, 1);
-            
-            stage.steps.forEach((step, index) => {
-                step.id = index + 1;
-                step.xp = this.calculateStepXP(stage.steps.length);
-            });
-            
-            this.saveToFirebase(); // CHANGED: Use Firebase
-            return true;
-        }
-        return false;
-    }
-
-    updateStageTitle(stageId, newTitle) {
-        if (!this.currentQuest) return false;
-
-        const stage = this.currentQuest.stages[stageId - 1];
-        if (stage) {
-            stage.title = newTitle;
-            this.saveToFirebase(); // CHANGED: Use Firebase
-            return true;
-        }
-        return false;
-    }
-
-    updateStepTitle(stageId, stepId, newTitle) {
-        if (!this.currentQuest) return false;
-
-        const stage = this.currentQuest.stages[stageId - 1];
-        if (stage && stepId >= 1 && stepId <= stage.steps.length) {
-            stage.steps[stepId - 1].title = newTitle;
-            this.saveToFirebase(); // CHANGED: Use Firebase
-            return true;
-        }
+        
         return false;
     }
 
@@ -588,14 +522,34 @@ class QuestManager {
         
         if (data.player) {
             this.player = { ...this.player, ...data.player };
-        }
-        
-        if (data.achievements) {
-            this.achievements = data.achievements;
+            // Ensure totalXP and questsCompleted exist
+            if (this.player.totalXP === undefined) this.player.totalXP = this.player.xp || 0;
+            if (this.player.questsCompleted === undefined) this.player.questsCompleted = 0;
         }
         
         if (data.dailyReset) {
             this.dailyReset = data.dailyReset;
+            // Convert arrays back to Sets for todaysProgress
+            if (this.dailyReset.todaysProgress && typeof this.dailyReset.todaysProgress === 'object') {
+                Object.keys(this.dailyReset.todaysProgress).forEach(chapterId => {
+                    const completedSteps = this.dailyReset.todaysProgress[chapterId];
+                    this.dailyReset.todaysProgress[chapterId] = this.safeConvertToSet(completedSteps);
+                });
+            }
+        }
+        
+        // Load decorations - this is crucial for theme sync
+        if (data.decorations) {
+            this.decorations.unlockedThemes = new Set(data.decorations.unlockedThemes || ['default']);
+            this.decorations.currentTheme = data.decorations.currentTheme || 'default';
+            this.decorations.unlockedDecorations = new Set(data.decorations.unlockedDecorations || []);
+        } else {
+            // Initialize decorations if they don't exist
+            this.decorations = {
+                unlockedThemes: new Set(['default']),
+                currentTheme: 'default',
+                unlockedDecorations: new Set()
+            };
         }
         
         console.log('Loaded from Firebase:', this.currentQuest);
@@ -612,11 +566,12 @@ class QuestManager {
                     xp: data.player?.xp || 0,
                     streak: data.player?.streak || 0,
                     lastActivity: data.player?.lastActivity ? new Date(data.player.lastActivity) : null,
-                    totalDays: data.player?.totalDays || 1
+                    totalDays: data.player?.totalDays || 1,
+                    totalXP: data.player?.totalXP || data.player?.xp || 0,
+                    questsCompleted: data.player?.questsCompleted || 0
                 };
                 
                 this.currentQuest = data.currentQuest;
-                this.achievements = data.achievements || this.achievements;
                 
                 this.dailyReset = {
                     lastReset: data.dailyReset?.lastReset || new Date().toDateString(),
@@ -628,6 +583,13 @@ class QuestManager {
                         const completedSteps = data.dailyReset.todaysProgress[chapterId];
                         this.dailyReset.todaysProgress[chapterId] = this.safeConvertToSet(completedSteps);
                     });
+                }
+                
+                // Load decorations from localStorage
+                if (data.decorations) {
+                    this.decorations.unlockedThemes = new Set(data.decorations.unlockedThemes || ['default']);
+                    this.decorations.currentTheme = data.decorations.currentTheme || 'default';
+                    this.decorations.unlockedDecorations = new Set(data.decorations.unlockedDecorations || []);
                 }
                 
                 this.migrateOldData();
@@ -646,6 +608,42 @@ class QuestManager {
         }
     }
 
+    saveToLocalStorage() {
+        const saveData = {
+            currentQuest: this.currentQuest,
+            player: this.player,
+            dailyReset: this.dailyReset,
+            decorations: {
+                unlockedThemes: Array.from(this.decorations.unlockedThemes),
+                currentTheme: this.decorations.currentTheme,
+                unlockedDecorations: Array.from(this.decorations.unlockedDecorations)
+            }
+        };
+        localStorage.setItem('careerQuest', JSON.stringify(saveData));
+    }
+
+    initializeDefaults() {
+        this.player = {
+            level: 1,
+            xp: 0,
+            streak: 0,
+            lastActivity: null,
+            totalDays: 1,
+            totalXP: 0,
+            questsCompleted: 0
+        };
+        this.currentQuest = null;
+        this.dailyReset = {
+            lastReset: new Date().toDateString(),
+            todaysProgress: {}
+        };
+        this.decorations = {
+            unlockedThemes: new Set(['default']),
+            currentTheme: 'default',
+            unlockedDecorations: new Set()
+        };
+    }
+
     saveToFirebase() {
         // Safety check before saving to Firebase
         if (!this.isReadyForFirebase()) {
@@ -660,16 +658,6 @@ class QuestManager {
             console.log('Firebase manager not available, falling back to localStorage');
             this.saveToLocalStorage();
         }
-    }
-
-    saveToLocalStorage() {
-        const saveData = {
-            currentQuest: this.currentQuest,
-            player: this.player,
-            achievements: this.achievements,
-            dailyReset: this.dailyReset
-        };
-        localStorage.setItem('careerQuest', JSON.stringify(saveData));
     }
 
     // Helper methods
@@ -714,21 +702,6 @@ class QuestManager {
                 this.currentQuest.currentDay = 1;
             }
         }
-    }
-
-    initializeDefaults() {
-        this.player = {
-            level: 1,
-            xp: 0,
-            streak: 0,
-            lastActivity: null,
-            totalDays: 1
-        };
-        this.currentQuest = null;
-        this.dailyReset = {
-            lastReset: new Date().toDateString(),
-            todaysProgress: {}
-        };
     }
 
     resetQuest() {
