@@ -369,23 +369,25 @@ class QuestManager {
         this.player.lastActivity = new Date();
     }
 
-    getStageProgress(stageId) {
-        if (!this.currentQuest || stageId < 0 || stageId >= this.currentQuest.stages.length) {
+    // In QuestManager class
+    getStageProgress(stageIndex) {
+        const stage = this.currentQuest.stages[stageIndex];
+        if (!stage) {
             return 0;
         }
         
-        const stage = this.currentQuest.stages[stageId];
         if (stage.completed) {
             return 100;
         }
         
-        const nonDailyTasks = stage.steps.filter(step => !step.isDaily);
-        if (nonDailyTasks.length === 0) {
-            return 0;
-        }
+        const completedTasks = stage.steps.filter(task => task.completed || task.completedToday).length;
+        const totalTasks = stage.steps.length;
         
-        const completedNonDailyTasks = nonDailyTasks.filter(step => step.completed || step.completedToday).length;
-        return (completedNonDailyTasks / nonDailyTasks.length) * 100;
+        if (totalTasks === 0) return 0;
+        
+        const progress = (completedTasks / totalTasks) * 100;
+        const roundedProgress = Math.round(progress);
+        return roundedProgress;
     }
 
     getQuestProgress() {
@@ -551,8 +553,6 @@ class QuestManager {
                 unlockedDecorations: new Set()
             };
         }
-        
-        console.log('Loaded from Firebase:', this.currentQuest);
     }
 
     loadFromLocalStorage() {

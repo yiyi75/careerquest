@@ -142,8 +142,8 @@ class UIManager {
                         --button-primary-text: #2c5530;
                         --button-primary-shadow: #d9a862;
                         
-                        --progress-fill: #ebc48dff;
-                        --progress-border: #d9a862;
+                        --progress-fill: #d1a465ff;
+                        --progress-border: #b38b53ff;
                         
                         --stat-value: #e5c79dff;
                         
@@ -156,6 +156,9 @@ class UIManager {
                         --stage-label-color: #e9b872;
                         --task-title-color: #f8f5f0;
                         --task-completed-color: #b8d4c0;
+
+                        --progress-completed: #d1a465ff;
+                        --progress-completed-border: #b38b53ff;
                     }
                 `;
                 break;
@@ -603,6 +606,12 @@ class UIManager {
     showQuestProgress() {
         document.getElementById('questCreationPanel').classList.add('hidden');
         document.getElementById('questProgressPanel').classList.remove('hidden');
+
+        // Scroll to the top of the page
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     }
 
     // ===== QUEST PROGRESS RENDERING =====
@@ -610,41 +619,183 @@ class UIManager {
         const quest = this.questManager.currentQuest;
         if (!quest) return;
 
-        document.getElementById('currentQuestTitle').textContent = quest.title;
-        document.getElementById('destinationTitle').textContent = quest.title;
+        // Add null checks for these elements
+        const currentQuestTitle = document.getElementById('currentQuestTitle');
+        const destinationTitle = document.getElementById('destinationTitle');
+        
+        if (currentQuestTitle) currentQuestTitle.textContent = quest.title;
+        if (destinationTitle) destinationTitle.textContent = quest.title;
+        
         this.updatePlayerStats();
-        this.renderRoadmap();
-        this.renderAllStageDetails();
+        
+        // Only render roadmap and stage details if we're in the progress view
+        const questProgressPanel = document.getElementById('questProgressPanel');
+        if (questProgressPanel && !questProgressPanel.classList.contains('hidden')) {
+            this.renderRoadmap();
+            this.renderCurrentStage();
+            this.renderAllStageDetails();
+        }
+    }
+
+    renderCurrentStage() {
+        const quest = this.questManager.currentQuest;
+        if (!quest) return;
+
+        // Find the current (first incomplete) stage
+        const currentStage = quest.stages.find(stage => !stage.completed) || quest.stages[0];
+        if (!currentStage) return;
+
+        const stageIndex = quest.stages.indexOf(currentStage);
+        const stageProgress = this.questManager.getStageProgress(stageIndex);
+
+        // Update the current stage panel with null checks
+        const currentStageTitle = document.getElementById('currentStageTitle');
+        const stageProgressText = document.getElementById('stageProgressText');
+        const stageProgressFill = document.getElementById('stageProgressFill');
+        
+        if (currentStageTitle) currentStageTitle.textContent = currentStage.title;
+        if (stageProgressText) stageProgressText.textContent = `${Math.round(stageProgress)}%`;
+        if (stageProgressFill) stageProgressFill.style.width = `${stageProgress}%`;
+
+        // Only render tasks if the container exists (quest progress panel is visible)
+        const tasksContainer = document.getElementById('stageTasks');
+        if (tasksContainer) {
+            this.renderStageTasksInPanel(stageIndex, currentStage);
+        }
+    }
+
+    renderStageTasksInPanel(stageIndex, stage) {
+        const tasksContainer = document.getElementById('stageTasks');
+        
+        // Add null check to prevent errors when element doesn't exist
+        if (!tasksContainer) {
+            console.log('stageTasks container not found - quest progress panel may be hidden');
+            return;
+        }
+        
+        tasksContainer.innerHTML = '';
+
+        stage.steps.forEach((task, taskIndex) => {
+            const taskElement = document.createElement('div');
+            taskElement.className = `stage-task ${task.completedToday ? 'completed' : ''} ${task.isDaily ? 'daily' : ''}`;
+            
+            const dailyTooltip = task.isDaily ? 'title="This task resets daily. Completing it counts toward stage progress for today."' : '';
+            
+            taskElement.innerHTML = `
+                <div class="task-content">
+                    <input type="checkbox" class="task-checkbox" 
+                        data-stage-id="${stageIndex}" 
+                        data-task-id="${taskIndex}"
+                        ${task.completedToday ? 'checked' : ''}
+                        ${stage.completed ? 'disabled' : ''}
+                        ${dailyTooltip}>
+                    <span class="task-title">${task.title}</span>
+                    <button class="btn btn-sm daily-toggle-btn ${task.isDaily ? 'btn-warning' : 'btn-outline'}" 
+                            data-stage-id="${stageIndex}" 
+                            data-task-id="${taskIndex}"
+                            title="${task.isDaily ? 'Remove daily status' : 'Make this a daily practice task'}">
+                        ${task.isDaily ? '⭐ Daily' : 'Make Daily'}
+                    </button>
+                </div>
+                <div class="task-info">
+                    <span class="task-xp">+${task.xp} XP</span>
+                    ${task.isDaily ? '<span class="daily-badge" title="Resets daily">Daily</span>' : ''}
+                </div>
+            `;
+            tasksContainer.appendChild(taskElement);
+        });
     }
 
     renderRoadmap() {
         const quest = this.questManager.currentQuest;
         const roadmapStops = document.getElementById('roadmapStops');
+        if (!roadmapStops) {
+            console.log('Roadmap stops container not found');
+            return;
+        }
+        
         roadmapStops.innerHTML = '';
-
+        
+        // Calculate responsive sizing based on number of stops
+        const totalStops = quest.stages.length;
+        let stopWidth = '140px'; // Default from your CSS
+        let markerSize = '60px';
+        let fontSize = '0.9em';
+        let smallFontSize = '0.75em';
+        
+        if (totalStops > 6) {
+            stopWidth = '100px';
+            markerSize = '50px';
+            fontSize = '0.8em';
+            smallFontSize = '0.7em';
+        } else if (totalStops > 4) {
+            stopWidth = '120px';
+            markerSize = '55px';
+            fontSize = '0.85em';
+            smallFontSize = '0.72em';
+        }
+        
         quest.stages.forEach((stage, index) => {
             const template = document.getElementById('roadmapStopTemplate');
             const stopElement = template.content.cloneNode(true);
             const stop = stopElement.querySelector('.roadmap-stop');
             stop.setAttribute('data-stage-id', index);
 
-            if (stage.completed) {
-                stop.classList.add('completed');
-                stop.querySelector('.completion-badge').classList.remove('hidden');
-            } else {
-                stop.classList.add('active');
+            // Apply responsive sizing
+            stop.style.maxWidth = stopWidth;
+            stop.style.minWidth = stopWidth;
+            
+            const stopMarker = stop.querySelector('.stop-marker');
+            if (stopMarker) {
+                stopMarker.style.width = markerSize;
+                stopMarker.style.height = markerSize;
+            }
+            
+            const stageName = stop.querySelector('.stop-label h4');
+            if (stageName) {
+                stageName.style.fontSize = fontSize;
+            }
+            
+            const stageDesc = stop.querySelector('.stop-label p');
+            if (stageDesc) {
+                stageDesc.style.fontSize = smallFontSize;
             }
 
-            const progressPercent = this.questManager.getStageProgress(index);
-            stop.querySelector('.stage-name').textContent = stage.title;
+            // Calculate stage progress properly
+            const stageProgress = this.questManager.getStageProgress(index);
+
+            // Remove any existing state classes
+            stop.classList.remove('active', 'completed', 'inactive');
             
-            // Show different text based on completion state
             if (stage.completed) {
-                stop.querySelector('.stage-progress-text').textContent = 'Completed!';
-            } else if (progressPercent === 100) {
-                stop.querySelector('.stage-progress-text').textContent = 'Ready to Complete!';
+                stop.classList.add('completed');
+                const completionBadge = stop.querySelector('.completion-badge');
+                if (completionBadge) completionBadge.classList.remove('hidden');
             } else {
-                stop.querySelector('.stage-progress-text').textContent = `${Math.round(progressPercent)}% Complete`;
+                // Find first incomplete stage and mark it as active
+                const firstIncompleteIndex = quest.stages.findIndex(s => !s.completed);
+                if (index === firstIncompleteIndex) {
+                    stop.classList.add('active');
+                } else if (index > firstIncompleteIndex) {
+                    stop.classList.add('inactive');
+                }
+            }
+
+            // Update stage title and progress
+            const titleElement = stop.querySelector('.stage-name');
+            if (titleElement) titleElement.textContent = stage.title;
+            
+            // Update progress text display
+            const progressText = stop.querySelector('.stage-progress-text');
+            if (progressText) {
+                if (stage.completed) {
+                    progressText.textContent = 'Completed!';
+                } else if (stageProgress === 100) {
+                    progressText.textContent = 'Ready!';
+                } else {
+                    progressText.textContent = `${Math.round(stageProgress)}%`;
+                }
+                progressText.style.fontSize = '0.7em';
             }
             
             roadmapStops.appendChild(stopElement);
@@ -653,56 +804,92 @@ class UIManager {
         this.updateRoadProgress();
     }
 
-
-     updateRoadProgress() {
-        const progress = this.questManager.getQuestProgress();
+    updateRoadProgress() {
+        const quest = this.questManager.currentQuest;
         const roadProgress = document.getElementById('roadProgress');
         const progressTraveler = document.getElementById('progressTraveler');
         const travelerTooltip = document.getElementById('travelerTooltip');
         
-        // Road progress shows overall completion including partial stages
+        if (!quest || !quest.stages || quest.stages.length === 0) return;
+        
+        const progress = this.questManager.getQuestProgress();
         const progressPercent = progress.overall;
-        roadProgress.style.width = `${progressPercent}%`;
         
-        // Traveler position is based on completed stages + current stage progress
-        const completedStages = progress.completedStages;
-        const totalStages = progress.totalStages;
-        
-        let travelerPosition;
-        if (completedStages === totalStages) {
-            // At destination
-            travelerPosition = 100;
-        } else if (completedStages === 0) {
-            // At start, show progress of first stage
-            const firstStageProgress = this.questManager.getStageProgress(0);
-            travelerPosition = (firstStageProgress / 100) * (100 / totalStages);
-        } else {
-            // Completed stages + current stage progress
-            const completedPercentage = (completedStages / totalStages) * 100;
-            const currentStageIndex = completedStages;
-            const currentStageProgress = this.questManager.getStageProgress(currentStageIndex);
-            const currentStageContribution = (currentStageProgress / 100) * (100 / totalStages);
-            travelerPosition = completedPercentage + currentStageContribution;
+        // Update road progress bar
+        if (roadProgress) {
+            roadProgress.style.width = `${progressPercent}%`;
         }
         
-        progressTraveler.style.left = `${travelerPosition}%`;
+        // Calculate positions based on actual progress, not just stage completion
+        const totalSteps = quest.stages.reduce((sum, stage) => sum + (stage.steps?.length || 1), 0);
+        const segmentWidth = quest.stages.map(stage => {
+            const stepCount = stage.steps?.length || 1;
+            return (stepCount / totalSteps) * 100; // each segment width in percentage
+        });
+        
+        let travelerPosition = 0;
+        let tooltipText = 'Starting journey...';
+        
+        // Find the current stage and calculate precise position
+        const currentStageIndex = quest.stages.findIndex(stage => !stage.completed);
+        
+        if (currentStageIndex === -1) {
+            // All stages completed - traveler at destination
+            travelerPosition = 100;
+            tooltipText = 'Destination reached! 🎉';
+        } else {
+            const currentStage = quest.stages[currentStageIndex];
+            const currentStageProgress = this.questManager.getStageProgress(currentStageIndex);
+            
+            if (currentStageIndex === 0 && currentStageProgress === 0) {
+                // At the very beginning
+                travelerPosition = 0;
+                tooltipText = 'Starting journey...';
+            } else {
+                // Calculate position based on completed stages + current stage progress
+                
+                // Position from completed stages
+                const completedStagesProgress = currentStageIndex * segmentWidth;
+                
+                // Position from current stage progress
+                const currentStageSegmentProgress = (currentStageProgress / 100) * segmentWidth;
+                
+                // Total position = completed stages position + current stage progress within its segment
+                travelerPosition = completedStagesProgress + currentStageSegmentProgress;
+                
+                // Add the start segment (0% to first dynamic stop)
+                travelerPosition += segmentWidth;
+                
+                // Ensure we don't exceed 100%
+                travelerPosition = Math.min(travelerPosition, 100);
+                
+                // Update tooltip
+                if (currentStageProgress === 100 && !currentStage.completed) {
+                    tooltipText = `Ready to complete: ${currentStage.title}`;
+                } else if (currentStage.completed) {
+                    tooltipText = `Completed: ${currentStage.title}`;
+                } else {
+                    tooltipText = `Working on: ${currentStage.title} (${Math.round(currentStageProgress)}%)`;
+                }
+            }
+        }
+        
+        // Update traveler position with smooth transition
+        if (progressTraveler) {
+            progressTraveler.style.transition = 'left 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            progressTraveler.style.left = `${travelerPosition}%`;
+        }
         
         // Update traveler tooltip
-        const currentStage = this.questManager.currentQuest.stages.find(stage => !stage.completed);
-        if (currentStage) {
-            const currentStageProgress = this.questManager.getStageProgress(currentStage.id - 1);
-            if (currentStageProgress === 100) {
-                travelerTooltip.textContent = `Ready to complete: ${currentStage.title}`;
-            } else {
-                travelerTooltip.textContent = `Working on: ${currentStage.title} (${Math.round(currentStageProgress)}%)`;
-            }
-        } else if (progress.overall === 100) {
-            travelerTooltip.textContent = 'Destination reached! 🎉';
-        } else {
-            travelerTooltip.textContent = 'Starting journey...';
+        if (travelerTooltip) {
+            travelerTooltip.textContent = tooltipText;
         }
         
-        document.getElementById('distanceTraveled').textContent = `${Math.round(progressPercent)}%`;
+        // Update distance traveled display
+        const distanceTraveled = document.getElementById('distanceTraveled');
+        if (distanceTraveled) {
+            distanceTraveled.textContent = `${Math.round(progressPercent)}%`;
+        }
     }
 
     renderAllStageDetails() {
@@ -903,30 +1090,20 @@ class UIManager {
             taskElement.classList.add('completed');
             
             this.animateXP(result.xpGained);
+            
+            // Refresh ALL UI components after task completion
             this.updateRoadProgress();
+            this.renderRoadmap(); // Add this line to refresh roadmap stops
             this.renderAllStageDetails();
             this.updatePlayerStats();
             
             if (result.leveledUp) {
                 this.showLevelUpAnimation(result.newLevel);
-                // Check for theme unlocks after level up
-                const themeUnlocks = this.questManager.checkThemeUnlocks();
-                // if (themeUnlocks.length > 0) {
-                //     this.showThemeUnlockMessage(themeUnlocks);
-                // }
             }
             
             if (result.chapterCompleted) {
                 this.showStageCompleteAnimation(this.questManager.currentQuest.stages[stageId].title, result.autoCompleted);
             }
-            
-            // Show theme unlocks from task completion
-            // if (result.themeUnlocks && result.themeUnlocks.length > 0) {
-            //     this.showThemeUnlockMessage(result.themeUnlocks);
-            // }
-            
-            // Update themes display
-            this.renderThemes();
         }
     }
 
@@ -977,6 +1154,7 @@ class UIManager {
         const success = this.questManager.completeStage(stageId);
         if (success) {
             this.updateRoadProgress();
+            this.renderRoadmap(); // Add this line
             this.renderAllStageDetails();
             this.updatePlayerStats();
             this.showStageCompleteAnimation(this.questManager.currentQuest.stages[stageId].title);
@@ -1095,20 +1273,26 @@ class UIManager {
             const title = stageElement.querySelector('.edit-stage-title').value.trim() || 'Unnamed Stage';
             const tasks = Array.from(stageElement.querySelectorAll('.edit-task')).map(taskElement => {
                 const taskTitle = taskElement.querySelector('.edit-task-title').value.trim();
-                const isDaily = taskElement.getAttribute('data-daily') === 'true'; // GET DAILY STATUS
+                const isDaily = taskElement.getAttribute('data-daily') === 'true';
                 return { title: taskTitle, isDaily: isDaily };
             }).filter(task => task.title !== '');
             
             return { 
                 title, 
                 steps: tasks.map(t => t.title),
-                dailyStatus: tasks.map(t => t.isDaily) // PASS DAILY STATUS
+                dailyStatus: tasks.map(t => t.isDaily)
             };
         });
 
         this.updateExistingQuestWithDailyStatus(newTitle, stages);
         this.hideEditQuestModal();
-        this.renderQuestProgress();
+        
+        // Only refresh the UI if we're currently viewing the quest progress
+        const questProgressPanel = document.getElementById('questProgressPanel');
+        if (questProgressPanel && !questProgressPanel.classList.contains('hidden')) {
+            this.renderQuestProgress();
+        }
+        
         this.showEditSuccessMessage();
     }
 
@@ -1335,19 +1519,23 @@ class UIManager {
     }
 
     updatePlayerStats() {
-        // Header stats (these use the original IDs)
-        document.getElementById('playerLevel').textContent = this.questManager.player.level;
-        document.getElementById('playerXP').textContent = this.questManager.player.xp;
-        document.getElementById('playerStreak').textContent = this.questManager.player.streak;
+        // Header stats with null checks
+        const playerLevel = document.getElementById('playerLevel');
+        const playerXP = document.getElementById('playerXP');
+        const playerStreak = document.getElementById('playerStreak');
+        const totalDaysProgress = document.getElementById('totalDaysProgress');
+        const distanceTraveled = document.getElementById('distanceTraveled');
         
-        // Quest progress panel stats (use the new IDs with 'Progress' suffix)
-        // document.getElementById('currentDayProgress').textContent = this.questManager.currentQuest.currentDay;
-        document.getElementById('totalDaysProgress').textContent = this.questManager.player.totalDays;
+        if (playerLevel) playerLevel.textContent = this.questManager.player.level;
+        if (playerXP) playerXP.textContent = this.questManager.player.xp;
+        if (playerStreak) playerStreak.textContent = this.questManager.player.streak;
+        if (totalDaysProgress) totalDaysProgress.textContent = this.questManager.player.totalDays;
 
         // Update distance traveled
         const progress = this.questManager.getQuestProgress();
-        document.getElementById('distanceTraveled').textContent = `${Math.round(progress.distanceTraveled)}%`;
+        if (distanceTraveled) distanceTraveled.textContent = `${Math.round(progress.distanceTraveled)}%`;
     }
+
     renderThemes() {
         const container = document.getElementById('achievementsGrid'); // Reuse the same container
         if (!container) return;

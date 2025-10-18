@@ -74,6 +74,185 @@ body {
     display: none !important;
 }
 
+/* =========================Character Selection Styles======================== */
+.character-option .pixel-character {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 0.5rem;
+    /* Remove background color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.character-option:hover .pixel-character {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.character-option.selected .pixel-character {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Character in background (bottom right) */
+.quest-character {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 5; /* Behind main content but above background */
+    pointer-events: none; /* So it doesn't interfere with clicks */
+}
+
+.quest-character .pixel-character {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* Floating animation for background character */
+.character-float {
+    animation: floatGentle 4s ease-in-out infinite;
+}
+
+@keyframes floatGentle {
+    0%, 100% { 
+        transform: translateY(0px) scale(1); 
+    }
+    50% { 
+        transform: translateY(-10px) scale(1.05); 
+    }
+}
+
+/* Character preview in selection */
+#selectedCharacterPreview {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--panel-border);
+}
+
+/* Character grid improvements */
+.character-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.character-option {
+    background: var(--task-bg);
+    border: 2px solid var(--task-border);
+    border-radius: 12px;
+    padding: 1rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.character-option:hover {
+    transform: translateY(-5px);
+    border-color: var(--button-primary-bg);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.character-option.selected {
+    border-color: var(--button-primary-bg);
+    background: var(--button-primary-bg);
+    transform: translateY(-5px);
+}
+
+.character-option.selected .character-name {
+    color: var(--button-primary-text);
+}
+
+.character-name {
+    font-weight: 600;
+    color: var(--task-title-color);
+    margin-bottom: 0.25rem;
+    font-size: 0.9em;
+}
+
+.character-type {
+    font-size: 0.8em;
+    color: var(--stage-label-color);
+}
+
+/* Character preview section */
+.character-preview {
+    background: var(--panel-bg);
+    border: 2px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.preview-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.character-info {
+    text-align: center;
+    flex: 1;
+    min-width: 200px;
+}
+
+#selectedCharacterName {
+    color: var(--stage-title-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.3em;
+}
+
+#selectedCharacterDescription {
+    color: var(--stage-label-color);
+    line-height: 1.5;
+    font-size: 0.95em;
+}
+
+/* Responsive design for character */
+@media (max-width: 768px) {
+    .quest-character {
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    .quest-character .pixel-character {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .quest-character .pixel-character span {
+        font-size: 2em !important;
+    }
+    
+    .character-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .character-option .pixel-character {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .character-option .pixel-character span {
+        font-size: 1.5em !important;
+    }
+}
+
 /* ===== THEME-SPECIFIC BACKGROUNDS & COLORS ===== */
 
 /* Default Theme */
@@ -296,7 +475,8 @@ body.theme-library {
     font-size: 1.5em;
     margin-bottom: 15px;
     color: var(--header-text);
-    text-shadow: 2px 2px 0px var(--header-border);
+    text-shadow: 2px 2px 0px 0px;
+    font-weight: bold;
 }
 
 .quest-title-section {
@@ -713,8 +893,8 @@ body.theme-library {
     -webkit-appearance: none;
     width: 20px;
     height: 20px;
-    background: #5d8c66;
-    border: 2px solid #e9b872;
+    background: var(--roadmap-bg);
+    border: 2px solid var(--panel-border);
     border-radius: 0;
     cursor: pointer;
     position: relative;
@@ -783,11 +963,11 @@ body.theme-library {
 .roadmap-container {
     position: relative;
     margin: 30px 0;
-    padding: 0 20px;
+    padding: 20px;
     background: var(--roadmap-bg);
     border: 4px solid var(--roadmap-border);
-    padding: 20px;
     box-shadow: 6px 6px 0px var(--roadmap-shadow);
+    border-radius: 8px;
 }
 
 .roadmap {
@@ -795,7 +975,7 @@ body.theme-library {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-height: 120px;
+    min-height: 140px;
 }
 
 .roadmap-stops {
@@ -805,6 +985,7 @@ body.theme-library {
     flex: 1;
     position: relative;
     z-index: 2;
+    margin: 0 40px; /* Add margin for start/end points */
 }
 
 .roadmap-stop {
@@ -815,113 +996,152 @@ body.theme-library {
     position: relative;
     z-index: 3;
     flex: 1;
-    max-width: 120px;
+    max-width: 140px;
+    min-width: 100px;
 }
 
 /* Stop Marker */
 .stop-marker {
     position: relative;
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border: 3px solid var(--button-primary-border);
     background: var(--button-primary-bg);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     transition: all 0.3s ease;
+    border-radius: 8px;
+    box-shadow: 3px 3px 0px var(--button-primary-shadow);
+}
+
+.stop-label {
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 .stop-marker .marker-icon {
-    font-size: 1.2em;
+    font-size: 1.4em;
+    filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
 }
 
 .stop-label h4 {
-    margin: 0 0 5px 0;
-    font-size: 1em;
-    font-weight: normal;
+    margin: 0 0 4px 0;
+    font-size: 0.9em;
+    font-weight: 600;
     color: var(--stage-title-color);
+    line-height: 1.2;
 }
 
 .stop-label p {
     margin: 0;
-    font-size: 0.8em;
+    font-size: 0.75em;
     color: var(--stage-progress-color);
+    font-weight: 500;
+    line-height: 1.3;
+    min-height: 1.5em;
 }
 
 /* Stop States */
 .roadmap-stop.active .stop-marker {
     border-color: var(--button-primary-border);
     background: var(--button-primary-bg);
-    transform: scale(1.1);
+    transform: scale(1);
+    box-shadow: 4px 4px 0px var(--button-primary-shadow);
+    animation: pulse 2s infinite;
 }
 
 .roadmap-stop.completed .stop-marker {
-    border-color: var(--button-primary-border);
-    /* color to be slightly ligher than button primary bg */
-    background: var(--button-primary-bg) 70%;
-    color: #f8f5f0;
+    border-color: var(--progress-completed-border);
+    background: var(--progress-completed);
+    transform: scale(1);
+    box-shadow: 3px 3px 0px var(--progress-completed-border);
+}
+
+.roadmap-stop.inactive .stop-marker {
+    /* border-color: var(--header-border); */
+    background: var(--header-bg);
+    opacity: 1;
+    transform: scale(1);
 }
 
 .completion-badge {
     position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--button-primary-bg);
-    color: #f8f5f0;
-    width: 18px;
-    height: 18px;
+    top: -8px;
+    right: -8px;
+    background: var(--progress-completed);
+    color: var(--button-primary-text);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
     display: none;
-    font-size: 0.8em;
+    font-size: 0.7em;
     font-weight: bold;
-    border: 2px solid var(--button-primary-border);
+    border: 2px solid var(--progress-completed-border);
+    align-items: center;
+    justify-content: center;
+    box-shadow: 2px 2px 0px var(--progress-completed-border);
 }
+
 
 .roadmap-stop.completed .completion-badge {
     display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 /* Road Path */
 .road-path {
     position: absolute;
-    top: 25px;
-    left: 0;
-    right: 0;
-    height: 10px;
+    top: 30px;
+    left: 40px;  /* Start after start point */
+    right: 40px; /* End before destination */
+    height: 12px;
     background: var(--panel-bg);
-    border: 2px solid var(--progress-border);
+    border: 3px solid var(--progress-border);
+    border-radius: 6px;
     z-index: 1;
+    box-shadow: inset 2px 2px 4px rgba(0,0,0,0.1);
 }
 
 .road-progress {
     height: 100%;
-    background: var(--progress-fill);
+    background: linear-gradient(90deg, var(--progress-fill), var(--button-primary-bg));
     width: 0%;
-    transition: width 0.5s ease;
+    transition: width 0.8s ease;
     position: relative;
+    border-radius: 3px;
+}
+
+.road-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    animation: shimmer 2s infinite;
 }
 
 /* Progress Traveler */
 .progress-traveler {
     position: absolute;
-    top: 12px;
-    left: 0;
+    top: 18px;
+    /* left: 0%; */
     transform: translateX(-50%);
     z-index: 4;
-    transition: left 1s ease-in-out;
+    transition: left 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    filter: drop-shadow(3px 3px 0px rgba(0,0,0,0.2));
+    pointer-events: auto; /* Ensure tooltip works */
 }
 
 .traveler-icon {
-    font-size: 1.5em;
+    font-size: 2em;
     animation: pixelBounce 2s infinite;
-    filter: drop-shadow(2px 2px 0px #2c5530);
-}
-
-@keyframes pixelBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+    filter: drop-shadow(2px 2px 0px var(--button-primary-shadow));
+    display: block; /* Ensure proper positioning */
 }
 
 .traveler-tooltip {
@@ -929,15 +1149,20 @@ body.theme-library {
     bottom: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: #5d8c66;
-    color: #f8f5f0;
-    padding: 8px 12px;
-    border: 2px solid #e9b872;
+    background: var(--button-primary-bg);
+    color: var(--button-primary-text);
+    padding: 6px 10px;
+    border-radius: 4px;
     font-size: 0.8em;
+    font-weight: 600;
     white-space: nowrap;
     margin-bottom: 8px;
+    border: 2px solid var(--button-primary-border);
+    box-shadow: 2px 2px 0px var(--button-primary-shadow);
     opacity: 0;
     transition: opacity 0.3s ease;
+    z-index: 5;
+    pointer-events: none; /* Don't interfere with hover */
 }
 
 .traveler-tooltip::after {
@@ -947,20 +1172,131 @@ body.theme-library {
     left: 50%;
     transform: translateX(-50%);
     border: 5px solid transparent;
-    border-top-color: #5d8c66;
+    border-top-color: var(--button-primary-border);
 }
 
 .progress-traveler:hover .traveler-tooltip {
     opacity: 1;
 }
 
+/* Start and Destination Points */
+/* .start-point .stop-marker,
+.destination-point .stop-marker {
+    width: 70px;
+    height: 70px;
+    border-width: 4px;
+}
+
+.start-point .marker-icon,
+.destination-point .marker-icon {
+    font-size: 1.6em;
+} */
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% { transform: scale(1.1); }
+    50% { transform: scale(1.15); }
+}
+
+@keyframes pixelBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+/* @keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+} */
+
+/* Progress percentage styling */
+.stage-progress-text {
+    font-weight: 700;
+    font-size: 0.8em;
+    background: var(--button-primary-bg);
+    color: var(--button-primary-text);
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-top: 2px;
+    border: 1px solid var(--button-primary-border);
+    box-shadow: 1px 1px 0px var(--button-primary-shadow);
+}
+
+.roadmap-stop.completed .stage-progress-text {
+    background: var(--progress-completed);
+    border-color: var(--progress-completed-border);
+}
+
+/* Ensure proper spacing for multiple stages */
+.roadmap-stop:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 30px;
+    right: -50%;
+    width: 100%;
+    height: 2px;
+    z-index: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .roadmap-container {
+        margin: 20px 0;
+        padding: 15px;
+    }
+    
+    .roadmap-stops {
+        margin: 0 20px;
+    }
+    
+    .roadmap-stop {
+        max-width: 80px;
+        min-width: 60px;
+    }
+    
+    .stop-marker {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .stop-label h4 {
+        font-size: 0.8em;
+    }
+    
+    .stop-label p {
+        font-size: 0.7em;
+    }
+    
+    .road-path {
+        left: 20px;
+        right: 20px;
+        top: 22px;
+    }
+    
+    .progress-traveler {
+        top: 15px;
+    }
+    
+    .traveler-icon {
+        font-size: 1.6em;
+    }
+}
+
 /* ===== PROGRESS INDICATORS ===== */
+.stage-details-panel h3 {
+    color: var(--stage-label-color);
+    font-size: 1.4em;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--panel-border);
+}
+
 .stage-progress-overview {
-    background: var(--panel-bg);
-    border: 2px solid var(--panel-border);
-    border-radius: 0;
-    padding: 15px;
-    margin-bottom: 20px;
+    background: var(--task-bg);
+    border: 2px solid var(--task-border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .stage-progress-overview .progress-info {
@@ -1111,7 +1447,7 @@ body.theme-library {
     font-size: 1.8em;
     margin-bottom: 20px;
     color: var(--progress-completed-border);
-    text-shadow: 3px 3px 0px var(--roadmap-border);
+    text-shadow: 3px 3px 0px 0px;
     letter-spacing: 1px;
 }
 
@@ -1126,7 +1462,7 @@ body.theme-library {
     color: var(--progress-completed);
     font-weight: bold;
     font-size: 1.2em;
-    text-shadow: 2px 2px 0px var(--roadmap-border);
+    text-shadow: 2px 2px 0px 0px;
 }
 
 /* Stage Complete Message */
@@ -1134,7 +1470,7 @@ body.theme-library {
     font-size: 1.5em;
     margin-bottom: 15px;
     color: var(--progress-completed-border);
-    text-shadow: 2px 2px 0px var(--roadmap-border);
+    text-shadow: 2px 2px 0px 0px;
 }
 
 .stage-complete-message .message-content p {

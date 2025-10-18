@@ -65,8 +65,33 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Character Selection Panel -->
+            <section class="panel character-selection-panel hidden" id="characterSelectionPanel">
+                <h2>👤 Choose Your Adventurer</h2>
+                <p class="selection-subtitle">Select a character to represent you on your career journey!</p>
+                
+                <div class="character-grid" id="characterGrid">
+                    <!-- Characters will be dynamically added here -->
+                </div>
+                
+                <div class="character-preview">
+                    <div class="preview-container">
+                        <div class="pixel-character" id="selectedCharacterPreview">
+                            <!-- Selected character will appear here -->
+                        </div>
+                        <div class="character-info">
+                            <h3 id="selectedCharacterName">Select a Character</h3>
+                            <p id="selectedCharacterDescription">Choose an adventurer to begin your quest</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="selection-actions">
+                    <button class="btn btn-primary" id="confirmCharacterBtn" disabled>Confirm Character</button>
+                </div>
+            </section>
             <!-- Quest Creation Panel -->
-            <section class="panel quest-creation-panel" id="questCreationPanel">
+            <section class="panel quest-creation-panel hidden" id="questCreationPanel">
                 <h2>🎯 Create Your Career Quest</h2>
                 <div class="form-group">
                     <label for="questTitle">Ultimate Career Goal:</label>
@@ -129,15 +154,15 @@
                         </div>
 
                         <!-- Progress Traveler -->
-                        <div class="progress-traveler" id="progressTraveler">
+                        <!-- <div class="progress-traveler" id="progressTraveler">
                             <div class="traveler-icon">🧭</div>
                             <div class="traveler-tooltip" id="travelerTooltip">Starting journey...</div>
-                        </div>
+                        </div> -->
 
                         <!-- Road Path -->
-                        <div class="road-path">
+                        <!-- <div class="road-path">
                             <div class="road-progress" id="roadProgress"></div>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
 
@@ -146,7 +171,6 @@
                     <h3 id="currentStageTitle">Current Stage</h3>
                     <div class="stage-progress">
                         <div class="progress-info">
-                            <!-- <span>Progress</span> -->
                             <span id="stageProgressText">0%</span>
                         </div>
                         <div class="progress-bar">
@@ -315,7 +339,7 @@
         </div>
     </template>
 
-    <template id="achievementTemplate">
+    <!-- <template id="achievementTemplate">
         <div class="achievement locked">
             <div class="achievement-icon">🔒</div>
             <div class="achievement-info">
@@ -323,11 +347,12 @@
                 <p class="achievement-description">Complete tasks to unlock</p>
             </div>
         </div>
-    </template>
+    </template> -->
 
     <script src="js/firebaseConfig.js"></script>
     <script src="js/questManager.js"></script>
     <script src="js/uiManager.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/characterManager.js"></script>
 </body>
 </html>
