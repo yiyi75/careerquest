@@ -29,12 +29,12 @@ class QuestManager {
         return {
             'default': { type: 'level', value: 1, description: 'Starting theme' },
             'cafe': { type: 'streak', value: 1, description: '1-day streak' },
-            'pond': { type: 'level', value: 1, description: 'Reach Level 2' },
-            'forest': { type: 'level', value: 1, description: 'Reach Level 4' },
-            'sunset': { type: 'level', value: 1, description: 'Reach Level 5' },
-            'space': { type: 'level', value: 1, description: 'Reach Level 6' },
-            'beach': { type: 'level', value: 1, description: 'Reach Level 3' },
-            'library': { type: 'total_xp', value: 10, description: 'Earn 5000 XP' }
+            'pond': { type: 'level', value: 2, description: 'Reach Level 2' },
+            'forest': { type: 'level', value: 3, description: 'Reach Level 4' },
+            'sunset': { type: 'streak', value: 2, description: '2-day streak' },
+            'space': { type: 'level', value: 6, description: 'Reach Level 6' },
+            'beach': { type: 'level', value: 7, description: 'Reach Level 7' },
+            'library': { type: 'total_xp', value: 1000, description: 'Earn 1000 XP' }
         };
     }
 
