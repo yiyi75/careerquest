@@ -1,17 +1,17 @@
 // app.js
 class App {
     constructor() {
-        this.characterManager = new CharacterManager();
+        //this.characterManager = new CharacterManager();
         this.init();
     }
 
     async init() {
         try {
             // Check if user has selected a character first
-            if (!this.characterManager.hasSelectedCharacter()) {
-                this.showCharacterSelection();
-                return; // Stop here until character is selected
-            }
+            // if (!this.characterManager.hasSelectedCharacter()) {
+            //     this.showCharacterSelection();
+            //     return;
+            // }
 
             // Continue with normal app initialization
             await this.initializeApp();
@@ -56,7 +56,7 @@ class App {
             this.initializeUI();
             
             // Add character to UI if we have one
-            this.characterManager.addCharacterToProgressPanel();
+            // this.characterManager.addCharacterToProgressPanel();
             
             // Apply theme after everything is loaded
             this.applyCurrentTheme();
@@ -66,7 +66,7 @@ class App {
             window.questManager = this.questManager;
             window.uiManager = this.uiManager;
             window.firebaseManager = this.firebaseManager;
-            window.characterManager = this.characterManager;
+            // window.characterManager = this.characterManager;
             
         } catch (error) {
             console.error('Firebase initialization failed:', error);
@@ -83,7 +83,7 @@ class App {
         this.initializeUI();
         
         // Add character to UI if we have one
-        this.characterManager.addCharacterToProgressPanel();
+        // this.characterManager.addCharacterToProgressPanel();
         
         // Apply theme after initialization
         this.applyCurrentTheme();
@@ -106,7 +106,7 @@ class App {
 
     showMainContent() {
         // Hide character selection
-        document.getElementById('characterSelectionPanel')?.classList.add('hidden');
+        // document.getElementById('characterSelectionPanel')?.classList.add('hidden');
         
         // Show the appropriate panel based on whether a quest exists
         if (this.questManager.currentQuest) {
@@ -118,49 +118,39 @@ class App {
         }
     }
 
-    showCharacterSelection() {
-        // Hide all other panels
-        document.getElementById('questCreationPanel')?.classList.add('hidden');
-        document.getElementById('questProgressPanel')?.classList.add('hidden');
-        document.getElementById('firebaseLoading')?.classList.add('hidden');
-        
-        // Show character selection
-        const characterPanel = document.getElementById('characterSelectionPanel');
-        if (characterPanel) {
-            characterPanel.classList.remove('hidden');
-            this.characterManager.renderCharacterSelection();
-            
-            // Add event listener for confirm button
-            const confirmBtn = document.getElementById('confirmCharacterBtn');
-            if (confirmBtn) {
-                // Remove any existing listeners to prevent duplicates
-                confirmBtn.replaceWith(confirmBtn.cloneNode(true));
-                document.getElementById('confirmCharacterBtn').addEventListener('click', () => {
-                    if (this.characterManager.confirmSelection()) {
-                        this.onCharacterSelected();
-                    }
-                });
-            }
-        } else {
-            console.error('Character selection panel not found!');
-            // Fallback: continue without character selection
-            this.initializeApp();
-        }
-    }
+    // showCharacterSelection() {
+    //     document.getElementById('questCreationPanel')?.classList.add('hidden');
+    //     document.getElementById('questProgressPanel')?.classList.add('hidden');
+    //     document.getElementById('firebaseLoading')?.classList.add('hidden');
 
-    onCharacterSelected() {
-        // Hide character selection
-        document.getElementById('characterSelectionPanel').classList.add('hidden');
-        
-        // Show quest creation panel immediately
-        document.getElementById('questCreationPanel').classList.remove('hidden');
-        
-        // Now initialize the UI manager since we know which panel is visible
-        this.uiManager = new UIManager(this.questManager);
-        
-        // Continue with normal app initialization in background
-        this.initializeApp();
-    }
+    //     const characterPanel = document.getElementById('characterSelectionPanel');
+    //     if (characterPanel) {
+    //         characterPanel.classList.remove('hidden');
+    //         this.characterManager.renderCharacterSelection();
+            
+
+    //         const confirmBtn = document.getElementById('confirmCharacterBtn');
+    //         if (confirmBtn) {
+    //             confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+    //             document.getElementById('confirmCharacterBtn').addEventListener('click', () => {
+    //                 if (this.characterManager.confirmSelection()) {
+    //                     this.onCharacterSelected();
+    //                 }
+    //             });
+    //         }
+    //     } else {
+    //         console.error('Character selection panel not found!');
+    //         this.initializeApp();
+    //     }
+    // }
+
+    // onCharacterSelected() {
+    //     document.getElementById('characterSelectionPanel').classList.add('hidden');
+
+    //     document.getElementById('questCreationPanel').classList.remove('hidden');
+    //     this.uiManager = new UIManager(this.questManager);
+    //     this.initializeApp();
+    // }
 
     applyCurrentTheme() {
         // Wait a bit for the QuestManager to fully load
@@ -183,10 +173,10 @@ class App {
     }
 
     // Method to allow changing character later (could be added to settings)
-    changeCharacter() {
-        this.characterManager.resetCharacter();
-        this.showCharacterSelection();
-    }
+    // changeCharacter() {
+    //     this.characterManager.resetCharacter();
+    //     this.showCharacterSelection();
+    // }
 }
 
 // Initialize the app when DOM is ready

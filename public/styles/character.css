@@ -1,0 +1,177 @@
+.character-option .pixel-character {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 0.5rem;
+    /* Remove background color */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+}
+
+.character-option:hover .pixel-character {
+    transform: scale(1.1);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.character-option.selected .pixel-character {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.1);
+}
+
+/* Character in background (bottom right) */
+.quest-character {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 5; /* Behind main content but above background */
+    pointer-events: none; /* So it doesn't interfere with clicks */
+}
+
+.quest-character .pixel-character {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+/* Floating animation for background character */
+.character-float {
+    animation: floatGentle 4s ease-in-out infinite;
+}
+
+@keyframes floatGentle {
+    0%, 100% { 
+        transform: translateY(0px) scale(1); 
+    }
+    50% { 
+        transform: translateY(-10px) scale(1.05); 
+    }
+}
+
+/* Character preview in selection */
+#selectedCharacterPreview {
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid var(--panel-border);
+}
+
+/* Character grid improvements */
+.character-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.character-option {
+    background: var(--task-bg);
+    border: 2px solid var(--task-border);
+    border-radius: 12px;
+    padding: 1rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-align: center;
+}
+
+.character-option:hover {
+    transform: translateY(-5px);
+    border-color: var(--button-primary-bg);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.character-option.selected {
+    border-color: var(--button-primary-bg);
+    background: var(--button-primary-bg);
+    transform: translateY(-5px);
+}
+
+.character-option.selected .character-name {
+    color: var(--button-primary-text);
+}
+
+.character-name {
+    font-weight: 600;
+    color: var(--task-title-color);
+    margin-bottom: 0.25rem;
+    font-size: 0.9em;
+}
+
+.character-type {
+    font-size: 0.8em;
+    color: var(--stage-label-color);
+}
+
+/* Character preview section */
+.character-preview {
+    background: var(--panel-bg);
+    border: 2px solid var(--panel-border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.preview-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.character-info {
+    text-align: center;
+    flex: 1;
+    min-width: 200px;
+}
+
+#selectedCharacterName {
+    color: var(--stage-title-color);
+    margin-bottom: 0.5rem;
+    font-size: 1.3em;
+}
+
+#selectedCharacterDescription {
+    color: var(--stage-label-color);
+    line-height: 1.5;
+    font-size: 0.95em;
+}
+
+/* Responsive design for character */
+@media (max-width: 768px) {
+    .quest-character {
+        bottom: 10px;
+        right: 10px;
+    }
+    
+    .quest-character .pixel-character {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .quest-character .pixel-character span {
+        font-size: 2em !important;
+    }
+    
+    .character-grid {
+        grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .character-option .pixel-character {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .character-option .pixel-character span {
+        font-size: 1.5em !important;
+    }
+}
