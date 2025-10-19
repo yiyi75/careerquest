@@ -654,7 +654,6 @@ class UIManager {
         stage.steps.forEach((task, taskIndex) => {
             const taskElement = document.createElement('div');
             
-            // FIXED: Determine completion status for display
             // For daily tasks: show completedToday status
             // For regular tasks: show completed status
             const isCompleted = task.isDaily ? task.completedToday : task.completed;

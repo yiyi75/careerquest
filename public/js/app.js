@@ -62,7 +62,6 @@ class App {
                 this.questManager.loadFromLocalStorage();
             }
             
-            // Initialize UI only after we know which panel to show
             this.initializeUI();
 
             // this.characterManager.addCharacterToProgressPanel();
@@ -88,10 +87,10 @@ class App {
         this.questManager = new QuestManager(null);
         this.questManager.loadFromLocalStorage();
         
-        // Initialize UI only after we know which panel to show
+        // Initialize UI
         this.initializeUI();
         
-        // Add character to UI if we have one
+        // Add character to UI
         // this.characterManager.addCharacterToProgressPanel();
         
         // Apply theme after initialization
@@ -107,7 +106,7 @@ class App {
         // Now initialize UI manager with the current state
         this.uiManager = new UIManager(this.questManager);
         
-        // If we're in progress panel, render the quest progress
+        // If in progress panel, render the quest progress
         if (this.questManager.currentQuest && document.getElementById('questProgressPanel')?.classList.contains('hidden') === false) {
             this.uiManager.renderQuestProgress();
         }

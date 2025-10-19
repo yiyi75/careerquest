@@ -19,7 +19,10 @@ js/firebaseConfig.js
 public/js/firebaseConfig.js
 firebaseConfig.js
 
-
+# style
+style.css
+pixelartstyle.css
+character.css
 
 # Uncomment this if you'd like others to create their own Firebase project.
 # For a team working on the same Firebase project(s), it is recommended to leave

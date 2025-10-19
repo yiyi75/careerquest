@@ -980,10 +980,14 @@ body.theme-library {
 }
 
 .stop-label {
-    min-height: 50px;
     display: flex;
     flex-direction: column;
+    align-items: center;
     justify-content: center;
+    text-align: center;
+    width: 100%;
+    min-height: 50px;
+    gap: 4px;
 }
 
 .stop-marker .marker-icon {
@@ -997,6 +1001,10 @@ body.theme-library {
     font-weight: 600;
     color: var(--stage-title-color);
     line-height: 1.2;
+    text-align: center;
+    width: 100%;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .stop-label p {
@@ -1193,6 +1201,7 @@ body.theme-library {
 .stage-progress-text {
     font-weight: 700;
     font-size: 0.8em;
+    text-align: center;
     background: var(--button-primary-bg);
     color: var(--button-primary-text);
     padding: 2px 6px;
@@ -1200,6 +1209,17 @@ body.theme-library {
     margin-top: 2px;
     border: 1px solid var(--button-primary-border);
     box-shadow: 1px 1px 0px var(--button-primary-shadow);
+    /* Responsive width based on number of stops */
+    width: 80%;
+    max-width: 60px;
+    min-width: 30px;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    /* Ensure text fits within the container */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .roadmap-stop.completed .stage-progress-text {
