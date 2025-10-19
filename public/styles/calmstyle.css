@@ -9,16 +9,16 @@
 
 :root {
     /* Default theme colors - will be overridden by theme system */
-    --header-bg: #4a7c59;
-    --header-border: #3a6b47;
+    --header-bg: #6e9d78;
+    --header-border: #669270;
     --header-shadow: #3a6b47;
     --header-text: #e9b872;
     
     --panel-bg: #5d8c66;
     --panel-border: #3a6b47;
     
-    --task-bg: #4a7c59;
-    --task-border: #3a6b47;
+    --task-bg: #6e9d78;
+    --task-border: #669270;
     
     --button-primary-bg: #ebc084;
     --button-primary-border: #d9a862;
@@ -52,16 +52,148 @@
     --progress-completed-border: #5a8542;
 }
 
+
+/* ===== Loader STYLES ===== */
+/* From Uiverse.io by esraaabdel-kareem */ 
+/* coffee cup loader */
+.loader {
+  width: 100px;
+  height: 80px;
+  position: relative;
+  display: flex;
+  justify-items: center;
+  align-items: center;
+}
+.loader .cup {
+  position: absolute;
+  width: 25px;
+  height: 18px;
+  background-color: #fff;
+  border: 1px solid #2e2e2e;
+  z-index: 1;
+  border-radius: 2px 2px 10px 10px;
+  animation: expansion 6s infinite ease-in-out;
+  transform-origin: center;
+}
+
+.cup::after {
+  content: "";
+  position: absolute;
+  top: -2px;
+  width: calc(100% - 2px);
+  height: 2px;
+  background: #fed59fca;
+  border: 1px solid #2e2e2ebe;
+  border-radius: 50%;
+}
+.cup::before {
+  content: "";
+  position: absolute;
+  top: 15px;
+  width: calc(100% - 2px);
+  height: 4px;
+  background: #ffffff00;
+  border: 1px solid #2e2e2e;
+  border-top: none;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+.loader .cup .cup-handle {
+  position: absolute;
+  width: 5px;
+  height: 10px;
+  background-color: #fff;
+  border: 1px solid #2e2e2e;
+  right: -5px;
+  top: 2px;
+  border-radius: 2px 10px 20px 2px;
+}
+
+.loader .cup .smoke {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  width: 15px;
+  height: 25px;
+  background: rgba(107, 102, 102, 0.433);
+  border-radius: 50%;
+  transform: translateX(-50%);
+  animation: rise 6s infinite ease-in-out;
+  filter: blur(8px);
+}
+
+.loader .cup .smoke.one {
+  animation-delay: 0s;
+}
+.loader .cup .smoke.two {
+  animation-delay: 1s;
+}
+.loader .cup .smoke.three {
+  animation-delay: 2s;
+}
+
+.loader .load {
+  position: absolute;
+  font-size: 10px;
+  opacity: 0.7;
+  top: 45%;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: -1;
+}
+
+@keyframes expansion {
+  0% {
+    width: 25px;
+    transform: translateX(0);
+  }
+  40% {
+    width: 100%;
+    transform: translateX(0);
+  }
+  80% {
+    width: 25px;
+    transform: translateX(64px);
+  }
+  90% {
+    width: 100%;
+    transform: translateX(0);
+  }
+  100% {
+    width: 25px;
+    transform: translateX(0);
+  }
+}
+
+@keyframes rise {
+  0% {
+    transform: translate(-50%, 0) scale(0.4);
+    opacity: 0;
+  }
+  30% {
+    opacity: 0.7;
+  }
+  60% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: translate(-50%, -120px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* ///////////////////////theme style started//////////////////////////////// */
 body {
     font-family: 'Press Start 2P', 'Courier New', monospace;
-    background: #2c5530;
+    background: #FFF0DD;
     color: var(--text-color);
     min-height: 100vh;
     line-height: 1.6;
-    background-image: 
-        linear-gradient(#3a7d44 1px, transparent 1px),
-        linear-gradient(90deg, #3a7d44 1px, transparent 1px);
-    background-size: 20px 20px;
+    /* background-image: 
+        linear-gradient(#83b488 1px, transparent 1px),
+        linear-gradient(90deg, #83b488 1px, transparent 1px);
+    background-size: 20px 20px; */
 }
 
 .app-container {
@@ -253,15 +385,94 @@ body {
     }
 }
 
+/* cat loader character style */
+/* From Uiverse.io by vinodjangid07 */ 
+.loader {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wrapper {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.catContainer {
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.catbody {
+  width: 80px;
+}
+.tail {
+  position: absolute;
+  width: 17px;
+  top: 50%;
+  animation: tail 0.5s ease-in infinite alternate-reverse;
+  transform-origin: top;
+}
+@keyframes tail {
+  0% {
+    transform: rotateZ(60deg);
+  }
+  50% {
+    transform: rotateZ(0deg);
+  }
+  100% {
+    transform: rotateZ(-20deg);
+  }
+}
+.wall {
+  width: 300px;
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  width: 50px;
+  position: absolute;
+  margin: 0px 0px 100px 120px;
+}
+.zzz {
+  color: black;
+  font-weight: 700;
+  font-size: 15px;
+  animation: zzz 2s linear infinite;
+}
+.bigzzz {
+  color: black;
+  font-weight: 700;
+  font-size: 25px;
+  margin-left: 10px;
+  animation: zzz 2.3s linear infinite;
+}
+@keyframes zzz {
+  0% {
+    color: transparent;
+  }
+  50% {
+    color: black;
+  }
+  100% {
+    color: transparent;
+  }
+}
+
+
 /* ===== THEME-SPECIFIC BACKGROUNDS & COLORS ===== */
 
 /* Default Theme */
 body.theme-default {
-    background: #2c5530;
-    background-image: 
-        linear-gradient(#3a7d44 1px, transparent 1px),
-        linear-gradient(90deg, #3a7d44 1px, transparent 1px);
-    background-size: 20px 20px;
+    background: #FFF0DD;
+    /* animation: waterFlow 15s infinite ease-in-out; */
 }
 
 /* Cafe Theme */
@@ -380,10 +591,37 @@ body.theme-library {
     100% { background-position: 150px 0; }
 }
 
+@keyframes waterFlow {
+    0%, 100% {
+        background-position: 
+            0% 0%,
+            100% 100%,
+            50% 50%;
+    }
+    25% {
+        background-position: 
+            25% 10%,
+            75% 90%,
+            60% 40%;
+    }
+    50% {
+        background-position: 
+            50% 0%,
+            50% 100%,
+            40% 60%;
+    }
+    75% {
+        background-position: 
+            75% 10%,
+            25% 90%,
+            60% 40%;
+    }
+}
+
 /* ===== THEME PREVIEW STYLES ===== */
 .theme-preview {
     position: relative;
-    background: var(--preview-gradient);
+    background: #FFF0DD;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -459,9 +697,9 @@ body.theme-library {
 
 .header h1 {
     font-size: 1.8em;
-    font-weight: normal;
+    font-weight: bold;
     color: var(--header-text);
-    text-shadow: 3px 3px 0px var(--header-border);
+    text-shadow: 3px 3px 0px 0px;
     letter-spacing: 1px;
 }
 
@@ -473,6 +711,15 @@ body.theme-library {
 
 .quest-header h2 {
     font-size: 1.5em;
+    margin-bottom: 15px;
+    color: var(--header-text);
+    text-shadow: 2px 2px 0px 0px;
+    font-weight: bold;
+}
+
+.quest-creation-panel h2 
+{
+    font-size: 1.2em;
     margin-bottom: 15px;
     color: var(--header-text);
     text-shadow: 2px 2px 0px 0px;
@@ -492,6 +739,7 @@ body.theme-library {
     margin: 0;
     flex: 1;
     font-size: 1.3em;
+    color: var(--header-text);
 }
 
 .quest-controls {
@@ -524,8 +772,9 @@ body.theme-library {
 
 .stat-label {
     display: block;
-    font-size: 0.7em;
-    color: #f8f5f0;
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #EEEFE0;
     margin-bottom: 8px;
 }
 
@@ -609,24 +858,23 @@ body.theme-library {
 }
 
 .btn-success {
-    background: #6a994e;
-    border-color: #5a8542;
+    background: var(--header-bg);
+    border-color: var(--header-border);
     color: #f8f5f0;
-    box-shadow: 4px 4px 0px #5a8542;
+    box-shadow: 4px 4px 0px var(--header-shadow);
 }
 
 .btn-outline {
-    background: transparent;
-    border-color: #e9b872;
-    color: #e9b872;
-    box-shadow: 4px 4px 0px #3a6b47;
+    background: var(--button-primary-bg);
+    border-color: color-mix(in srgb, var(--button-primary-border) 70%, rgb(118, 118, 118));
+    color: var(--button-primary-text);
 }
 
 .btn-danger {
-    background: #bc4749;
-    border-color: #a63d3f;
+    background: #F08787;
+    border-color: #d67979;
     color: #f8f5f0;
-    box-shadow: 4px 4px 0px #a63d3f;
+    box-shadow: 4px 4px 0px #d67979;
 }
 
 .btn-warning {
@@ -656,9 +904,9 @@ body.theme-library {
 .form-group label {
     display: block;
     margin-bottom: 10px;
-    font-weight: normal;
+    font-weight: bold;
     color: var(--stage-label-color);
-    font-size: 0.8em;
+    font-size: 1em;
 }
 
 .form-group input {
@@ -666,7 +914,7 @@ body.theme-library {
     padding: 12px 15px;
     border: 3px solid var(--header-text);
     border-radius: 0;
-    font-size: 0.8em;
+    font-size: 0.9em;
     font-family: 'Press Start 2P', monospace;
     background: var(--panel-bg);
     color: var(--text-color);
@@ -1043,6 +1291,37 @@ body.theme-library {
     font-weight: 500;
     line-height: 1.3;
     min-height: 1.5em;
+}
+
+/* Start Journey Icon States */
+.roadmap-stop.start-point.active .stop-marker {
+    border-color: var(--button-primary-border);
+    background: var(--button-primary-bg);
+    transform: scale(1);
+    box-shadow: 4px 4px 0px var(--button-primary-shadow);
+    animation: pulse 2s infinite;
+}
+
+.roadmap-stop.start-point.completed .stop-marker {
+    border-color: var(--progress-completed-border);
+    background: var(--progress-completed);
+    transform: scale(1);
+    box-shadow: 3px 3px 0px var(--progress-completed-border);
+}
+
+.roadmap-stop.destination-point.active .stop-marker {
+    border-color: var(--button-primary-border);
+    background: var(--button-primary-bg);
+    transform: scale(1);
+    box-shadow: 4px 4px 0px var(--button-primary-shadow);
+    animation: pulse 2s infinite;
+}
+
+.roadmap-stop.destination-point.completed .stop-marker {
+    border-color: var(--progress-completed-border);
+    background: var(--progress-completed);
+    transform: scale(1);
+    box-shadow: 3px 3px 0px var(--progress-completed-border);
 }
 
 /* Stop States */

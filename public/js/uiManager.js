@@ -126,20 +126,20 @@ class UIManager {
             case 'default':
                 style.textContent = `
                     :root {
-                        --header-bg: #4a7c59;
-                        --header-border: #3a6b47;
-                        --header-shadow: #3a6b47;
-                        --header-text: #e9b872;
+                        --header-bg: #7ba0abff;
+                        --header-border: #D1D3D4;
+                        --header-shadow: #80A1BA;
+                        --header-text: #F0BB78;
                         
-                        --panel-bg: #5d8c66;
-                        --panel-border: #3a6b47;
+                        --panel-bg: #86B0BD;
+                        --panel-border: #7ba0abff;
+
+                        --task-bg: #7ba0abff;
+                        --task-border: #D1D3D4;
                         
-                        --task-bg: #4a7c59;
-                        --task-border: #3a6b47;
-                        
-                        --button-primary-bg: #e9b872;
-                        --button-primary-border: #d9a862;
-                        --button-primary-text: #2c5530;
+                        --button-primary-bg: #F0BB78;
+                        --button-primary-border: #E2A16F;
+                        --button-primary-text: #1B3C53;
                         --button-primary-shadow: #d9a862;
                         
                         --progress-fill: #d1a465ff;
@@ -147,18 +147,23 @@ class UIManager {
                         
                         --stat-value: #e5c79dff;
                         
-                        --roadmap-bg: #5d8c66;
-                        --roadmap-border: #e9b872;
-                        --roadmap-shadow: #e9b872;
+                        --roadmap-bg: #86B0BD;
+                        --roadmap-border: #D1D3D4;
+                        --roadmap-shadow: #80A1BA;
                         
                         --stage-title-color: #f8f5f0;
                         --stage-progress-color: #f8f5f0;
-                        --stage-label-color: #e9b872;
-                        --task-title-color: #f8f5f0;
+                        --stage-label-color: #F0BB78;
+                        --task-title-color: #EEEFE0;
                         --task-completed-color: #b8d4c0;
 
                         --progress-completed: #d1a465ff;
                         --progress-completed-border: #b38b53ff;
+
+                        --task-completed-bg: #5686a1ff;
+                        --task-completed-border: #93BFCF;
+                        --task-daily-bg: #93BFCF;
+                        --task-daily-border: #5686a1ff;
                     }
                 `;
                 break;
@@ -166,30 +171,30 @@ class UIManager {
             case 'cafe':
                 style.textContent = `
                     :root {
-                        --header-bg: #8B4513;
+                        --header-bg: #6F4E37;
                         --header-border: #5D4037;
                         --header-shadow: #5D4037;
                         --header-text: #F4A460;
                         
-                        --panel-bg: #A0522D;
-                        --panel-border: #8B4513;
+                        --panel-bg: #A67B5B;
+                        --panel-border: #6F4E37;
                         
-                        --task-bg: #8B4513;
+                        --task-bg: #6F4E37;
                         --task-border: #5D4037;
                         
-                        --button-primary-bg: #D2691E;
-                        --button-primary-border: #A0522D;
+                        --button-primary-bg: #ECB176;
+                        --button-primary-border: #A67B5B;
                         --button-primary-text: #f8f5f0;
-                        --button-primary-shadow: #A0522D;
+                        --button-primary-shadow: #A67B5B;
                         
-                        --progress-fill: #D2691E;
-                        --progress-border: #A0522D;
+                        --progress-fill: #ECB176;
+                        --progress-border: #A67B5B;
                         
                         --stat-value: #F4A460;
                         
-                        --roadmap-bg: #A0522D;
-                        --roadmap-border: #D2691E;
-                        --roadmap-shadow: #D2691E;
+                        --roadmap-bg: #A67B5B;
+                        --roadmap-border: #ECB176;
+                        --roadmap-shadow: #ECB176;
                         
                         --stage-title-color: #f8f5f0;
                         --stage-progress-color: #f8f5f0;
@@ -197,8 +202,8 @@ class UIManager {
                         --task-title-color: #f8f5f0;
                         --task-completed-color: #D2B48C;
 
-                        --progress-completed: #D2691E;
-                        --progress-completed-border: #A0522D;
+                        --progress-completed: #ECB176;
+                        --progress-completed-border: #A67B5B;
                     }
                 `;
                 break;
@@ -718,7 +723,7 @@ class UIManager {
         
         // Calculate responsive sizing based on number of stops
         const totalStops = quest.stages.length;
-        let stopWidth = '140px'; // Default from your CSS
+        let stopWidth = '140px';
         let markerSize = '60px';
         let fontSize = '0.9em';
         let smallFontSize = '0.75em';
@@ -761,7 +766,7 @@ class UIManager {
                 stageDesc.style.fontSize = smallFontSize;
             }
 
-            // Calculate stage progress properly
+            // Calculate stage progress
             const stageProgress = this.questManager.getStageProgress(index);
 
             // Remove any existing state classes
@@ -801,7 +806,50 @@ class UIManager {
             roadmapStops.appendChild(stopElement);
         });
 
+        this.updateStartJourneyIcon();
+        
         this.updateRoadProgress();
+    }
+
+    updateStartJourneyIcon() {
+        const quest = this.questManager.currentQuest;
+        if (!quest || !quest.stages.length) return;
+
+        const startPoint = document.querySelector('.roadmap-stop.start-point');
+        const destinationPoint = document.querySelector('.roadmap-stop.destination-point');
+        
+        if (!startPoint || !destinationPoint) return;
+
+        // Check if there's any progress in the first stage
+        const firstStageProgress = this.questManager.getStageProgress(0);
+        const hasAnyProgress = firstStageProgress > 0;
+
+        // Update the start point
+        startPoint.classList.remove('active', 'completed');
+        const startBadge = startPoint.querySelector('.completion-badge');
+        
+        if (hasAnyProgress) {
+            startPoint.classList.add('completed');
+            if (startBadge) startBadge.classList.remove('hidden');
+        } else {
+            startPoint.classList.add('active');
+            if (startBadge) startBadge.classList.add('hidden');
+        }
+
+        // Update the destination point
+        const questProgress = this.questManager.getQuestProgress();
+        const isQuestComplete = questProgress.overall === 100;
+        
+        destinationPoint.classList.remove('active', 'completed', 'inactive');
+        const destinationBadge = destinationPoint.querySelector('.completion-badge');
+        
+        if (isQuestComplete) {
+            destinationPoint.classList.add('completed');
+            if (destinationBadge) destinationBadge.classList.remove('hidden');
+        } else {
+            destinationPoint.classList.add('inactive');
+            if (destinationBadge) destinationBadge.classList.add('hidden');
+        }
     }
 
     updateRoadProgress() {

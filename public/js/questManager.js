@@ -34,7 +34,7 @@ class QuestManager {
             'sunset': { type: 'level', value: 1, description: 'Reach Level 5' },
             'space': { type: 'level', value: 1, description: 'Reach Level 6' },
             'mountain': { type: 'streak', value: 1, description: '10-day streak' },
-            'beach': { type: 'quests_completed', value: 1, description: 'Complete 2 quests' },
+            'beach': { type: 'level', value: 1, description: 'Reach Level 3' },
             'library': { type: 'total_xp', value: 10, description: 'Earn 5000 XP' }
         };
     }
@@ -101,7 +101,7 @@ class QuestManager {
     // Get display name for themes
     getThemeDisplayName(themeName) {
         const names = {
-            'default': 'Original Grid',
+            'default': 'Default',
             'cafe': 'Cafe',
             'pond': 'Pond', 
             'forest': 'Forest',
@@ -117,7 +117,7 @@ class QuestManager {
     // Get icons for themes
     getThemeIcon(themeName) {
         const icons = {
-            'default': '🔳',
+            'default': '🟨',
             'cafe': '☕',
             'pond': '💧',
             'forest': '🌲',
