@@ -49,27 +49,41 @@ class UIManager {
     }
 
     initializeEventListeners() {
-        // Quest creation
-        document.getElementById('addStageBtn').addEventListener('click', () => this.addStage());
-        document.getElementById('startQuestBtn').addEventListener('click', () => this.startQuest());
+        const addStageBtn = document.getElementById('addStageBtn');
+        const startQuestBtn = document.getElementById('startQuestBtn');
         
-        // Celebration
-        document.getElementById('closeCelebration').addEventListener('click', () => this.hideCelebration());
+        if (addStageBtn) addStageBtn.addEventListener('click', () => this.addStage());
+        if (startQuestBtn) startQuestBtn.addEventListener('click', () => this.startQuest());
         
-        // Reset functionality
-        document.getElementById('resetQuestBtn').addEventListener('click', () => this.showResetConfirmation());
-        document.getElementById('confirmResetBtn').addEventListener('click', () => this.confirmReset());
-        document.getElementById('cancelResetBtn').addEventListener('click', () => this.hideResetConfirmation());
+        // Celebration element (might not exist if we removed it)
+        const closeCelebration = document.getElementById('closeCelebration');
+        if (closeCelebration) closeCelebration.addEventListener('click', () => this.hideCelebration());
+        
+        // Reset functionality elements (only exist in quest progress panel)
+        const resetQuestBtn = document.getElementById('resetQuestBtn');
+        const confirmResetBtn = document.getElementById('confirmResetBtn');
+        const cancelResetBtn = document.getElementById('cancelResetBtn');
+        
+        if (resetQuestBtn) resetQuestBtn.addEventListener('click', () => this.showResetConfirmation());
+        if (confirmResetBtn) confirmResetBtn.addEventListener('click', () => this.confirmReset());
+        if (cancelResetBtn) cancelResetBtn.addEventListener('click', () => this.hideResetConfirmation());
 
-        // Edit quest functionality
-        document.getElementById('toggleEditBtn').addEventListener('click', () => this.showEditQuestModal());
-        document.getElementById('addEditStageBtn').addEventListener('click', () => this.addEditStage());
-        document.getElementById('saveQuestBtn').addEventListener('click', () => this.saveQuestEdits());
-        document.getElementById('cancelEditBtn').addEventListener('click', () => this.hideEditQuestModal());
+        // Edit quest functionality elements (only exist when edit modal is open)
+        const toggleEditBtn = document.getElementById('toggleEditBtn');
+        const addEditStageBtn = document.getElementById('addEditStageBtn');
+        const saveQuestBtn = document.getElementById('saveQuestBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        
+        if (toggleEditBtn) toggleEditBtn.addEventListener('click', () => this.showEditQuestModal());
+        if (addEditStageBtn) addEditStageBtn.addEventListener('click', () => this.addEditStage());
+        if (saveQuestBtn) saveQuestBtn.addEventListener('click', () => this.saveQuestEdits());
+        if (cancelEditBtn) cancelEditBtn.addEventListener('click', () => this.hideEditQuestModal());
 
-        document.getElementById('themeSelectorBtn').addEventListener('click', () => this.showThemeSelector());
+        // Theme selector button (exists in header)
+        const themeSelectorBtn = document.getElementById('themeSelectorBtn');
+        if (themeSelectorBtn) themeSelectorBtn.addEventListener('click', () => this.showThemeSelector());
 
-        // Event delegation for dynamic elements
+        // Event delegation for dynamic elements (this should always work)
         document.addEventListener('click', (e) => {
             if (e.target.classList.contains('remove-stage')) {
                 this.removeStage(e.target.closest('.stage'));
@@ -1027,7 +1041,6 @@ class UIManager {
         stage.steps.forEach((task, taskIndex) => {
             const taskElement = document.createElement('div');
             
-            // FIXED: Use the same logic here
             const isCompleted = task.isDaily ? task.completedToday : task.completed;
             
             taskElement.className = `stage-task ${isCompleted ? 'completed' : ''} ${task.isDaily ? 'daily' : ''}`;
@@ -1064,13 +1077,6 @@ class UIManager {
             tasksContainer.appendChild(taskElement);
         });
     }
-
-    // getStageProgress(stage) {
-    //     if (stage.completed) return 100;
-    //     const completedTasks = stage.steps.filter(task => task.completed || task.completedToday).length;
-    //     const totalTasks = stage.steps.length;
-    //     return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-    // }
 
     // Method to show theme selector
     showThemeSelector() {
@@ -1156,14 +1162,13 @@ class UIManager {
     handleTaskCompletion(checkbox) {
         const taskId = parseInt(checkbox.getAttribute('data-task-id'));
         const stageId = parseInt(checkbox.getAttribute('data-stage-id'));
-        
         const result = this.questManager.completeStep(stageId, taskId);
         
         if (result) {
             const taskElement = checkbox.closest('.stage-task');
             const task = this.questManager.currentQuest.stages[stageId].steps[taskId];
             
-            // FIXED: Update the visual state based on task type
+            // Update the visual state based on task type
             if (task.isDaily) {
                 // For daily tasks, toggle completedToday visual state
                 if (task.completedToday) {
@@ -1178,6 +1183,12 @@ class UIManager {
             
             this.animateXP(result.xpGained);
             
+            if (result.questCompleted) {
+                this.showQuestCompleteAnimation();
+            } else if (result.chapterCompleted) {
+                this.showSimpleStageComplete(this.questManager.currentQuest.stages[stageId].title);
+            }
+            
             // Refresh ALL UI components after task completion
             this.updateRoadProgress();
             this.renderRoadmap();
@@ -1188,10 +1199,48 @@ class UIManager {
                 this.showLevelUpAnimation(result.newLevel);
             }
             
-            if (result.chapterCompleted) {
-                this.showStageCompleteAnimation(this.questManager.currentQuest.stages[stageId].title, result.autoCompleted);
+            // Show theme unlocks if any
+            if (result.themeUnlocks && result.themeUnlocks.length > 0) {
+                result.themeUnlocks.forEach(theme => {
+                    this.showToast(`🎨 Unlocked ${theme.displayName} theme!`, 'success');
+                });
             }
         }
+    }
+
+    showSimpleStageComplete(stageTitle) {
+        this.showToast(`🎉 Stage Complete: ${stageTitle}`, 'success');
+    }
+
+    showQuestCompleteAnimation() {
+        const message = document.createElement('div');
+        message.className = 'quest-complete-message';
+        message.innerHTML = `
+            <div class="message-content">
+                <h3>🎊 Quest Completed! 🎊</h3>
+                <p>You've successfully completed your entire career quest!</p>
+                <p class="completion-note">All stages are finished. Great work!</p>
+                <button class="btn btn-primary close-message">Celebrate!</button>
+            </div>
+        `;
+        
+        document.body.appendChild(message);
+        
+        // Remove the inline CSS styles that were overriding your theme variables
+        // Let CSS classes handle the styling instead
+        
+        message.querySelector('.close-message').addEventListener('click', () => {
+            message.remove();
+            this.createConfetti();
+        });
+        
+        // Auto-remove after 8 seconds
+        setTimeout(() => {
+            if (document.body.contains(message)) {
+                message.remove();
+                this.createConfetti();
+            }
+        }, 8000);
     }
 
     handleDailyToggle(button) {
@@ -1226,16 +1275,6 @@ class UIManager {
         const toast = document.createElement('div');
         toast.className = `toast-message toast-${type}`;
         toast.textContent = message;
-        toast.style.cssText = `
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 12px 20px;
-            border-radius: 8px;
-            z-index: 2004;
-            animation: slideDown 0.3s ease;
-        `;
         
         document.body.appendChild(toast);
         setTimeout(() => {
@@ -1248,7 +1287,7 @@ class UIManager {
         const success = this.questManager.completeStage(stageId);
         if (success) {
             this.updateRoadProgress();
-            this.renderRoadmap(); // Add this line
+            this.renderRoadmap();
             this.renderAllStageDetails();
             this.updatePlayerStats();
             this.showStageCompleteAnimation(this.questManager.currentQuest.stages[stageId].title);
@@ -1528,17 +1567,6 @@ class UIManager {
         const message = document.createElement('div');
         message.className = 'edit-success-message';
         message.textContent = '✓ Quest updated successfully!';
-        message.style.cssText = `
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #4CAF50;
-            color: white;
-            padding: 12px 20px;
-            border-radius: 8px;
-            z-index: 2003;
-            animation: slideInRight 0.5s ease;
-        `;
         
         document.body.appendChild(message);
         setTimeout(() => {
@@ -1549,35 +1577,35 @@ class UIManager {
         }, 3000);
     }
 
-    showStageCompleteAnimation(stageTitle, autoCompleted = false) {
-        const message = document.createElement('div');
-        message.className = 'stage-complete-message';
+    // showStageCompleteAnimation(stageTitle, autoCompleted = false) {
+    //     const message = document.createElement('div');
+    //     message.className = 'stage-complete-message';
         
-        if (autoCompleted) {
-            message.innerHTML = `
-                <div class="message-content">
-                    <h3>🎉 Stage Auto-Completed!</h3>
-                    <p>You finished all tasks in "${stageTitle}"!</p>
-                    <p class="auto-complete-note">The stage was automatically marked as complete.</p>
-                    <button class="btn btn-primary close-message">Continue Journey</button>
-                </div>
-            `;
-        } else {
-            message.innerHTML = `
-                <div class="message-content">
-                    <h3>🎉 Stage Complete!</h3>
-                    <p>You've completed "${stageTitle}"!</p>
-                    <button class="btn btn-primary close-message">Continue Journey</button>
-                </div>
-            `;
-        }
+    //     if (autoCompleted) {
+    //         message.innerHTML = `
+    //             <div class="message-content">
+    //                 <h3>🎉 Stage Auto-Completed!</h3>
+    //                 <p>You finished all tasks in "${stageTitle}"!</p>
+    //                 <p class="auto-complete-note">The stage was automatically marked as complete.</p>
+    //                 <button class="btn btn-primary close-message">Continue Journey</button>
+    //             </div>
+    //         `;
+    //     } else {
+    //         message.innerHTML = `
+    //             <div class="message-content">
+    //                 <h3>🎉 Stage Complete!</h3>
+    //                 <p>You've completed "${stageTitle}"!</p>
+    //                 <button class="btn btn-primary close-message">Continue Journey</button>
+    //             </div>
+    //         `;
+    //     }
         
-        document.body.appendChild(message);
-        message.querySelector('.close-message').addEventListener('click', () => {
-            message.remove();
-            this.renderQuestProgress();
-        });
-    }
+    //     document.body.appendChild(message);
+    //     message.querySelector('.close-message').addEventListener('click', () => {
+    //         message.remove();
+    //         this.renderQuestProgress();
+    //     });
+    // }
 
     animateXP(xpGained) {
         const xpElement = document.getElementById('playerXP');
@@ -1675,17 +1703,38 @@ class UIManager {
         container.appendChild(themesGrid);
     }
 
-
     showLevelUpAnimation(newLevel) {
-        const celebration = document.getElementById('celebration');
-        const newLevelElement = document.getElementById('newLevel');
-        newLevelElement.textContent = newLevel;
-        celebration.classList.remove('hidden');
+        const message = document.createElement('div');
+        message.className = 'level-up-popup';
+        message.innerHTML = `
+            <div class="level-up-content">
+                <h3>🎉 Level Up! 🎉</h3>
+                <p>You've reached level <span class="level-number">${newLevel}</span>!</p>
+                <button class="btn btn-primary close-level-up">Awesome!</button>
+            </div>
+        `;
+        
+        document.body.appendChild(message);
+        
+        message.querySelector('.close-level-up').addEventListener('click', () => {
+            message.remove();
+        });
+        
+        // Auto-remove after 5 seconds
+        setTimeout(() => {
+            if (document.body.contains(message)) {
+                message.remove();
+            }
+        }, 5000);
+        
         this.createConfetti();
     }
 
     hideCelebration() {
-        document.getElementById('celebration').classList.add('hidden');
+        const celebration = document.getElementById('celebration');
+        if (celebration) {
+            celebration.classList.add('hidden');
+        }
     }
 
     createConfetti() {

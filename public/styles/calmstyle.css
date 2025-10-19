@@ -178,6 +178,88 @@
   }
 }
 
+/* cat loader character style */
+/* From Uiverse.io by vinodjangid07 */ 
+.loader {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.wrapper {
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.catContainer {
+  width: 100%;
+  height: fit-content;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.catbody {
+  width: 80px;
+}
+.tail {
+  position: absolute;
+  width: 17px;
+  top: 50%;
+  animation: tail 0.5s ease-in infinite alternate-reverse;
+  transform-origin: top;
+}
+@keyframes tail {
+  0% {
+    transform: rotateZ(60deg);
+  }
+  50% {
+    transform: rotateZ(0deg);
+  }
+  100% {
+    transform: rotateZ(-20deg);
+  }
+}
+.wall {
+  width: 300px;
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  width: 50px;
+  position: absolute;
+  margin: 0px 0px 100px 120px;
+}
+.zzz {
+  color: black;
+  font-weight: 700;
+  font-size: 15px;
+  animation: zzz 2s linear infinite;
+}
+.bigzzz {
+  color: black;
+  font-weight: 700;
+  font-size: 25px;
+  margin-left: 10px;
+  animation: zzz 2.3s linear infinite;
+}
+@keyframes zzz {
+  0% {
+    color: transparent;
+  }
+  50% {
+    color: black;
+  }
+  100% {
+    color: transparent;
+  }
+}
+
+
 /* ///////////////////////theme style started//////////////////////////////// */
 body {
     font-family: 'Press Start 2P', 'Courier New', monospace;
@@ -379,88 +461,6 @@ body {
         font-size: 1.5em !important;
     }
 }
-
-/* cat loader character style */
-/* From Uiverse.io by vinodjangid07 */ 
-.loader {
-  width: fit-content;
-  height: fit-content;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.wrapper {
-  width: fit-content;
-  height: fit-content;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.catContainer {
-  width: 100%;
-  height: fit-content;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-.catbody {
-  width: 80px;
-}
-.tail {
-  position: absolute;
-  width: 17px;
-  top: 50%;
-  animation: tail 0.5s ease-in infinite alternate-reverse;
-  transform-origin: top;
-}
-@keyframes tail {
-  0% {
-    transform: rotateZ(60deg);
-  }
-  50% {
-    transform: rotateZ(0deg);
-  }
-  100% {
-    transform: rotateZ(-20deg);
-  }
-}
-.wall {
-  width: 300px;
-}
-.text {
-  display: flex;
-  flex-direction: column;
-  width: 50px;
-  position: absolute;
-  margin: 0px 0px 100px 120px;
-}
-.zzz {
-  color: black;
-  font-weight: 700;
-  font-size: 15px;
-  animation: zzz 2s linear infinite;
-}
-.bigzzz {
-  color: black;
-  font-weight: 700;
-  font-size: 25px;
-  margin-left: 10px;
-  animation: zzz 2.3s linear infinite;
-}
-@keyframes zzz {
-  0% {
-    color: transparent;
-  }
-  50% {
-    color: black;
-  }
-  100% {
-    color: transparent;
-  }
-}
-
 
 /* ===== THEME-SPECIFIC BACKGROUNDS & COLORS ===== */
 
@@ -1192,6 +1192,55 @@ body.theme-library {
     padding: 4px 8px;
 }
 
+/* Level Up Popup Styles */
+.level-up-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    background: var(--panel-bg);
+    border: 4px solid var(--panel-border);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 350px;
+    width: 90%;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    animation: pixelPopInLevel 0.5s ease;
+}
+
+.level-up-content h3 {
+    color: var(--header-text);
+    margin-bottom: 1rem;
+    font-size: 1.2em;
+}
+
+.level-up-content p {
+    color: var(--task-title-color);
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+}
+
+.level-number {
+    color: var(--progress-fill);
+    font-weight: bold;
+    font-size: 1.3em;
+    text-shadow: 2px 2px 0px 0px;
+}
+
+
+@keyframes pixelPopInLevel {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
 .daily-badge {
     background: #e9b872;
     color: #2c5530;
@@ -1695,7 +1744,7 @@ body.theme-library {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background: var(--panel-bg);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -1714,7 +1763,7 @@ body.theme-library {
     position: relative;
 }
 
-.celebration-content::before, 
+/* .celebration-content::before, 
 .stage-complete-message .message-content::before,
 .reset-message-content::before {
     content: '';
@@ -1725,7 +1774,7 @@ body.theme-library {
     bottom: 8px;
     background: var(--roadmap-border);
     z-index: -1;
-}
+} */
 
 /* Celebration Specific Styles */
 .celebration h1 {
@@ -1770,28 +1819,51 @@ body.theme-library {
     color: #e9b872;
     font-style: italic;
     margin: 15px 0;
-    background: rgba(233, 184, 114, 0.1);
+    /* background: rgba(233, 184, 114, 0.1); */
     padding: 10px;
     border: 2px solid #e9b872;
 }
 
 /* Quest Complete Celebration */
+.quest-complete-message {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+    background: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+}
+
 .quest-complete-message .message-content {
-    border-color: #6a994e;
-    background: #4a7c59;
+    background: var(--panel-bg);
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    max-width: 400px;
+    border: 4px solid var(--panel-border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
 }
 
-.quest-complete-message .message-content::before {
-    background: #3a6b47;
+.quest-complete-message h3 {
+    color: var(--header-text);
+    margin-bottom: 1rem;
+    font-size: 1.3em;
 }
 
-.quest-complete-message .message-content h3 {
-    color: #6a994e;
-    text-shadow: 2px 2px 0px #3a6b47;
+.quest-complete-message p {
+    color: var(--task-title-color);
+    margin-bottom: 1rem;
+    line-height: 1.5;
 }
 
-.quest-complete-message .message-content p {
-    color: #f8f5f0;
+.completion-note {
+    color: var(--stage-label-color);
+    font-style: italic;
+    font-size: 0.9em;
 }
 
 /* Special celebration for quest completion */
@@ -2006,61 +2078,46 @@ body.theme-library {
 
 /* Edit Success Message */
 .edit-success-message {
-    background: #4a7c59;
-    border: 4px solid #6a994e;
-    color: #f8f5f0;
-    padding: 15px 25px;
-    border-radius: 0;
-    box-shadow: 6px 6px 0px #3a6b47;
+    position: fixed;
     font-size: 0.8em;
-}
-
-.edit-success-message::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    left: -8px;
-    right: 8px;
-    bottom: 8px;
-    background: #3a6b47;
-    z-index: -1;
+    top: 20px;
+    right: 20px;
+    background: #6ccc61ff;
+    border: 4px solid #5A9E7C;
+    color: var(--button-primary-text);
+    padding: 12px 20px;
+    border-radius: 8px;
+    z-index: 2003;
+    animation: slideInRight 0.5s ease;
 }
 
 /* Toast Messages */
 .toast-message {
-    background: var(--button-primary-bg);
-    border: 3px solid;
-    padding: 15px 20px;
-    border-radius: 0;
-    font-size: 0.7em;
-    box-shadow: 4px 4px 0px var(--button-primary-shadow);
-    font-weight: normal;
-    position: relative;
-}
-
-.toast-message::before {
-    content: '';
-    position: absolute;
-    top: -6px;
-    left: -6px;
-    right: 6px;
-    bottom: 6px;
-    background: var(--button-primary-shadow);
-    z-index: -1;
+    position: fixed;
+    font-size: 0.8em;
+    top: 20px;
+    right: 20px;
+    background: #6ccc61ff;
+    border: 4px solid #5A9E7C;
+    color: var(--button-primary-text);
+    padding: 12px 20px;
+    border-radius: 8px;
+    z-index: 2003;
+    animation: slideInRight 0.5s ease;
 }
 
 .toast-info {
-    border-color: var(--button-primary-border);
+    border-color: #5A9E7C;
     color: var(--button-primary-text);
 }
 
 .toast-success {
-    border-color: var(--button-primary-border);
+    border-color:  #5A9E7C;
     color: var(--button-primary-text);
 }
 
 .toast-warning {
-    border-color: var(--button-primary-border);
+    border-color: var(--button-primary-bg);
     color: var(--button-primary-text);
 }
 

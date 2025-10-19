@@ -248,7 +248,7 @@ class QuestManager {
         let xpGained = 0;
         let leveledUp = false;
         let chapterCompleted = false;
-        let autoCompleted = false;
+        let questCompleted = false;
 
         // For daily tasks: only track daily completion, not overall completion
         if (level.isDaily) {
@@ -259,6 +259,12 @@ class QuestManager {
                 // Add XP and check for level up
                 const levelUpResult = this.addXP(xpGained);
                 leveledUp = levelUpResult.leveledUp;
+                
+                // mark daily task as completed (overall completion) when done for the first time
+                // This ensures daily tasks count toward stage completion after being completed at least once
+                if (!level.completed) {
+                    level.completed = true;
+                }
             }
         } else {
             // For regular tasks: track overall completion
@@ -270,26 +276,33 @@ class QuestManager {
                 // Add XP and check for level up
                 const levelUpResult = this.addXP(xpGained);
                 leveledUp = levelUpResult.leveledUp;
-                
-                // Check if stage is now complete
-                const wasReadyBefore = this.getStageProgress(chapterId) === 100;
-                const isReadyNow = this.getStageProgress(chapterId) === 100;
-                
-                // Auto-complete stage if it just became ready
-                if (isReadyNow && !wasReadyBefore && !chapter.completed) {
-                    this.completeStage(chapterId);
-                    chapterCompleted = true;
-                    autoCompleted = true;
-                }
+            }
+        }
+
+        // Check if stage is now complete (AFTER potentially updating completion status)
+        // This check applies to both daily and regular tasks
+        if (!chapter.completed) {
+            const allTasksCompleted = chapter.steps.every(step => {
+                // For a stage to be complete, ALL tasks must have been completed at least once
+                // This means daily tasks must have completed: true (completed at least once)
+                // and regular tasks must have completed: true
+                return step.completed === true;
+            });
+            
+            if (allTasksCompleted) {
+                this.completeStage(chapterId);
+                chapterCompleted = true;
             }
         }
 
         this.updateStreak();
         
-        const questCompleted = this.currentQuest.stages.every(chapter => chapter.completed);
-        if (questCompleted && !this.currentQuest.completed) {
+        // Check if entire quest is completed (all stages completed)
+        const allStagesCompleted = this.currentQuest.stages.every(stage => stage.completed);
+        if (allStagesCompleted && !this.currentQuest.completed) {
             this.currentQuest.completed = true;
             this.player.questsCompleted++;
+            questCompleted = true;
         }
 
         // Check for theme unlocks
@@ -304,7 +317,6 @@ class QuestManager {
             chapterCompleted: chapterCompleted,
             questCompleted: questCompleted,
             isDailyTask: level.isDaily,
-            autoCompleted: autoCompleted,
             themeUnlocks: newThemeUnlocks
         };
     }
@@ -431,19 +443,6 @@ class QuestManager {
         
         const progress = (completedCount / totalTasks) * 100;
         const roundedProgress = Math.round(progress);
-        
-        console.log(`Stage ${stageIndex} progress:`, {
-            title: stage.title,
-            totalTasks: totalTasks,
-            completedCount: completedCount,
-            progress: roundedProgress + '%',
-            tasks: stage.steps.map(t => ({
-                title: t.title,
-                isDaily: t.isDaily,
-                completed: t.completed,
-                completedToday: t.completedToday
-            }))
-        });
         
         return roundedProgress;
     }
@@ -574,28 +573,16 @@ class QuestManager {
             return false;
         }
         
-        let allTasksCompleted = true;
-        
-        chapter.steps.forEach(step => {
-            if (step.isDaily) {
-                // Daily tasks must have been completed at least once
-                if (!step.completed) {
-                    allTasksCompleted = false;
-                }
-            } else {
-                // Regular tasks must be completed
-                if (!step.completed) {
-                    allTasksCompleted = false;
-                }
-            }
-        });
+        // For a stage to be complete, ALL tasks must have been completed at least once
+        // This means both daily and regular tasks must have completed: true
+        const allTasksCompleted = chapter.steps.every(step => step.completed === true);
         
         if (allTasksCompleted && !chapter.completed) {
             chapter.completed = true;
             
+            // Mark all non-daily tasks as completedToday for display
             chapter.steps.forEach(step => {
                 if (!step.isDaily) {
-                    step.completed = true;
                     step.completedToday = true;
                 }
             });

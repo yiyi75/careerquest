@@ -52,8 +52,8 @@ class App {
                 this.questManager.loadFromLocalStorage();
             }
             
-            // Initialize UI
-            this.uiManager = new UIManager(this.questManager);
+            // Initialize UI only after we know which panel to show
+            this.initializeUI();
             
             // Add character to UI if we have one
             this.characterManager.addCharacterToProgressPanel();
@@ -61,17 +61,12 @@ class App {
             // Apply theme after everything is loaded
             this.applyCurrentTheme();
             
-            // Show the appropriate main content based on quest state
-            this.showMainContent();
-            
             // Make available globally for debugging
             window.app = this;
             window.questManager = this.questManager;
             window.uiManager = this.uiManager;
             window.firebaseManager = this.firebaseManager;
             window.characterManager = this.characterManager;
-            
-            console.log('App initialized successfully with Firebase');
             
         } catch (error) {
             console.error('Firebase initialization failed:', error);
@@ -83,7 +78,9 @@ class App {
     initializeWithoutFirebase() {
         this.questManager = new QuestManager(null);
         this.questManager.loadFromLocalStorage();
-        this.uiManager = new UIManager(this.questManager);
+        
+        // Initialize UI only after we know which panel to show
+        this.initializeUI();
         
         // Add character to UI if we have one
         this.characterManager.addCharacterToProgressPanel();
@@ -91,10 +88,20 @@ class App {
         // Apply theme after initialization
         this.applyCurrentTheme();
         
-        // Show the appropriate main content
+        console.log('App initialized without Firebase (local storage only)');
+    }
+
+    initializeUI() {
+        // Show the appropriate panel first, THEN initialize UI manager
         this.showMainContent();
         
-        console.log('App initialized without Firebase (local storage only)');
+        // Now initialize UI manager with the current state
+        this.uiManager = new UIManager(this.questManager);
+        
+        // If we're in progress panel, render the quest progress
+        if (this.questManager.currentQuest && document.getElementById('questProgressPanel')?.classList.contains('hidden') === false) {
+            this.uiManager.renderQuestProgress();
+        }
     }
 
     showMainContent() {
@@ -105,8 +112,6 @@ class App {
         if (this.questManager.currentQuest) {
             document.getElementById('questProgressPanel')?.classList.remove('hidden');
             document.getElementById('questCreationPanel')?.classList.add('hidden');
-            // Refresh the UI to show current progress
-            this.uiManager.renderQuestProgress();
         } else {
             document.getElementById('questCreationPanel')?.classList.remove('hidden');
             document.getElementById('questProgressPanel')?.classList.add('hidden');
@@ -126,11 +131,16 @@ class App {
             this.characterManager.renderCharacterSelection();
             
             // Add event listener for confirm button
-            document.getElementById('confirmCharacterBtn').addEventListener('click', () => {
-                if (this.characterManager.confirmSelection()) {
-                    this.onCharacterSelected();
-                }
-            });
+            const confirmBtn = document.getElementById('confirmCharacterBtn');
+            if (confirmBtn) {
+                // Remove any existing listeners to prevent duplicates
+                confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+                document.getElementById('confirmCharacterBtn').addEventListener('click', () => {
+                    if (this.characterManager.confirmSelection()) {
+                        this.onCharacterSelected();
+                    }
+                });
+            }
         } else {
             console.error('Character selection panel not found!');
             // Fallback: continue without character selection
@@ -145,6 +155,9 @@ class App {
         // Show quest creation panel immediately
         document.getElementById('questCreationPanel').classList.remove('hidden');
         
+        // Now initialize the UI manager since we know which panel is visible
+        this.uiManager = new UIManager(this.questManager);
+        
         // Continue with normal app initialization in background
         this.initializeApp();
     }
@@ -155,11 +168,9 @@ class App {
             if (this.questManager && this.questManager.decorations && this.questManager.decorations.currentTheme) {
                 document.body.className = document.body.className.replace(/\btheme-\w+/g, '');
                 document.body.classList.add(`theme-${this.questManager.decorations.currentTheme}`);
-                console.log('Applied theme:', this.questManager.decorations.currentTheme);
             } else {
                 // Apply original grid style (no theme class)
                 document.body.className = document.body.className.replace(/\btheme-\w+/g, '');
-                console.log('Applied original grid style theme');
             }
         }, 200);
     }
