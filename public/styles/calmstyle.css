@@ -48,218 +48,6 @@
                         --task-daily-border: #5686a1ff;
 }
 
-/* ===== Loader STYLES ===== */
-/* From Uiverse.io by esraaabdel-kareem */ 
-/* coffee cup loader */
-.loader {
-  width: 100px;
-  height: 80px;
-  position: relative;
-  display: flex;
-  justify-items: center;
-  align-items: center;
-}
-.loader .cup {
-  position: absolute;
-  width: 25px;
-  height: 18px;
-  background-color: #fff;
-  border: 1px solid #2e2e2e;
-  z-index: 1;
-  border-radius: 2px 2px 10px 10px;
-  animation: expansion 6s infinite ease-in-out;
-  transform-origin: center;
-}
-
-.cup::after {
-  content: "";
-  position: absolute;
-  top: -2px;
-  width: calc(100% - 2px);
-  height: 2px;
-  background: #fed59fca;
-  border: 1px solid #2e2e2ebe;
-  border-radius: 50%;
-}
-.cup::before {
-  content: "";
-  position: absolute;
-  top: 15px;
-  width: calc(100% - 2px);
-  height: 4px;
-  background: #ffffff00;
-  border: 1px solid #2e2e2e;
-  border-top: none;
-  border-radius: 50%;
-  z-index: -1;
-}
-
-.loader .cup .cup-handle {
-  position: absolute;
-  width: 5px;
-  height: 10px;
-  background-color: #fff;
-  border: 1px solid #2e2e2e;
-  right: -5px;
-  top: 2px;
-  border-radius: 2px 10px 20px 2px;
-}
-
-.loader .cup .smoke {
-  position: absolute;
-  bottom: 100%;
-  left: 50%;
-  width: 15px;
-  height: 25px;
-  background: rgba(107, 102, 102, 0.433);
-  border-radius: 50%;
-  transform: translateX(-50%);
-  animation: rise 6s infinite ease-in-out;
-  filter: blur(8px);
-}
-
-.loader .cup .smoke.one {
-  animation-delay: 0s;
-}
-.loader .cup .smoke.two {
-  animation-delay: 1s;
-}
-.loader .cup .smoke.three {
-  animation-delay: 2s;
-}
-
-.loader .load {
-  position: absolute;
-  font-size: 10px;
-  opacity: 0.7;
-  top: 45%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: -1;
-}
-
-@keyframes expansion {
-  0% {
-    width: 25px;
-    transform: translateX(0);
-  }
-  40% {
-    width: 100%;
-    transform: translateX(0);
-  }
-  80% {
-    width: 25px;
-    transform: translateX(64px);
-  }
-  90% {
-    width: 100%;
-    transform: translateX(0);
-  }
-  100% {
-    width: 25px;
-    transform: translateX(0);
-  }
-}
-
-@keyframes rise {
-  0% {
-    transform: translate(-50%, 0) scale(0.4);
-    opacity: 0;
-  }
-  30% {
-    opacity: 0.7;
-  }
-  60% {
-    opacity: 0.4;
-  }
-  100% {
-    transform: translate(-50%, -120px) scale(1);
-    opacity: 0;
-  }
-}
-
-/* cat loader character style */
-/* From Uiverse.io by vinodjangid07 */ 
-.loader {
-  width: fit-content;
-  height: fit-content;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.wrapper {
-  width: fit-content;
-  height: fit-content;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-.catContainer {
-  width: 100%;
-  height: fit-content;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-.catbody {
-  width: 80px;
-}
-.tail {
-  position: absolute;
-  width: 17px;
-  top: 50%;
-  animation: tail 0.5s ease-in infinite alternate-reverse;
-  transform-origin: top;
-}
-@keyframes tail {
-  0% {
-    transform: rotateZ(60deg);
-  }
-  50% {
-    transform: rotateZ(0deg);
-  }
-  100% {
-    transform: rotateZ(-20deg);
-  }
-}
-.wall {
-  width: 300px;
-}
-.text {
-  display: flex;
-  flex-direction: column;
-  width: 50px;
-  position: absolute;
-  margin: 0px 0px 100px 120px;
-}
-.zzz {
-  color: black;
-  font-weight: 700;
-  font-size: 15px;
-  animation: zzz 2s linear infinite;
-}
-.bigzzz {
-  color: black;
-  font-weight: 700;
-  font-size: 25px;
-  margin-left: 10px;
-  animation: zzz 2.3s linear infinite;
-}
-@keyframes zzz {
-  0% {
-    color: transparent;
-  }
-  50% {
-    color: black;
-  }
-  100% {
-    color: transparent;
-  }
-}
-
-
 /* ///////////////////////theme style started//////////////////////////////// */
 body {
     font-family: 'Press Start 2P', 'Courier New', monospace;
@@ -295,33 +83,27 @@ body.theme-default {
 body.theme-cafe {
     background: linear-gradient(135deg, #8B4513 0%, #A0522D 50%, #D2691E 100%);
     background-image: 
-        url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20,20 C22,18 26,18 28,20 C30,22 30,26 28,28 C26,30 22,30 20,28 C18,26 18,22 20,20 Z' fill='%235D4037' opacity='0.1'/%3E%3C/svg%3E");
-    background-size: 60px 60px;
-    animation: coffeeFloat 30s infinite linear;
+        radial-gradient(circle at 50% 50%, rgba(210, 105, 30, 0.4) 0%, transparent 70%);
+    background-size: 400px 400px;
+    animation: cafePulse 15s infinite ease-in-out;
 }
 
-body.theme-cafe .header {
-    background: var(--header-bg, #8B4513);
-    border-color: var(--header-border, #5D4037);
+/* Forest Theme */
+body.theme-forest {
+    background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 50%, #71d492 100%);
+    background-image:
+        radial-gradient(circle at 50% 50%, rgba(45, 106, 79, 0.3) 0%, transparent 70%);
+    background-size: 400px 400px;
+    animation: forestPulse 15s infinite ease-in-out;
 }
 
 /* Pond Theme */
 body.theme-pond {
     background: linear-gradient(135deg, #1e3a5f 0%, #2a4b8d 50%, #4facfe 100%);
     background-image: 
-        radial-gradient(circle at 30% 30%, rgba(79, 172, 254, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 70% 70%, rgba(0, 242, 254, 0.2) 0%, transparent 50%);
-    background-size: 300px 300px, 300px 300px;
-    animation: waterFlow 20s infinite linear;
-}
-
-/* Forest Theme */
-body.theme-forest {
-    background: linear-gradient(135deg, #1b4332 0%, #2d6a4f 50%, #71d492 100%);
-    background-image: 
-        url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M20,40 C25,35 35,35 40,40 C45,45 45,55 40,60 C35,65 25,65 20,60 C15,55 15,45 20,40 Z' fill='%232d6a4f' opacity='0.1' transform='rotate(45 40 40)'/%3E%3C/svg%3E");
-    background-size: 80px 80px;
-    animation: forestBreeze 25s infinite linear;
+        radial-gradient(circle at 50% 50%, rgba(79, 172, 254, 0.4) 0%, transparent 70%);
+    background-size: 400px 400px;
+    animation: pondPulse 15s infinite ease-in-out;
 }
 
 /* Sunset Theme */
@@ -337,21 +119,9 @@ body.theme-sunset {
 body.theme-space {
     background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 50%, #415a77 100%);
     background-image: 
-        radial-gradient(2px 2px at 20px 30px, #eee, transparent),
-        radial-gradient(2px 2px at 40px 70px, #fff, transparent),
-        radial-gradient(1px 1px at 90px 40px, #eee, transparent),
-        radial-gradient(1px 1px at 130px 80px, #fff, transparent);
-    background-size: 350px 350px;
-    animation: starTwinkle 8s infinite ease-in-out;
-}
-
-/* Mountain Theme */
-body.theme-mountain {
-    background: linear-gradient(135deg, #2E7D32 0%, #5D4037 50%, #78909C 100%);
-    background-image: 
-        url("data:image/svg+xml,%3Csvg width='120' height='80' viewBox='0 0 120 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0,80 L30,40 L60,60 L90,20 L120,80 Z' fill='%235D4037' opacity='0.1'/%3E%3C/svg%3E");
-    background-size: 120px 80px;
-    animation: mountainShift 40s infinite linear;
+        radial-gradient(circle at 50% 50%, rgba(138, 137, 137, 0.3) 0%, transparent 70%);
+    background-size: 400px 400px;
+    animation: starTwinkle 15s infinite ease-in-out;
 }
 
 /* Beach Theme */
@@ -372,19 +142,19 @@ body.theme-library {
 }
 
 /* ===== BACKGROUND ANIMATIONS ===== */
-@keyframes coffeeFloat {
-    0% { background-position: 0 0; }
-    100% { background-position: 60px 60px; }
+@keyframes cafePulse {
+    0%, 100% { background-size: 400px 400px; opacity: 0.8; }
+    50% { background-size: 450px 450px; opacity: 1; }
 }
 
-@keyframes waterFlow {
-    0% { background-position: 0% 0%, 0% 0%; }
-    100% { background-position: 300px 0, -300px 150px; }
+@keyframes forestPulse {
+    0%, 100% { background-size: 400px 400px; opacity: 0.8; }
+    50% { background-size: 450px 450px; opacity: 1; }
 }
 
-@keyframes forestBreeze {
-    0% { background-position: 0 0; }
-    100% { background-position: 80px 80px; }
+@keyframes pondPulse {
+    0%, 100% { background-size: 400px 400px; opacity: 0.8; }
+    50% { background-size: 450px 450px; opacity: 1; }
 }
 
 @keyframes sunsetPulse {
@@ -393,13 +163,8 @@ body.theme-library {
 }
 
 @keyframes starTwinkle {
-    0%, 100% { opacity: 0.8; }
-    50% { opacity: 1; }
-}
-
-@keyframes mountainShift {
-    0% { background-position: 0 0; }
-    100% { background-position: 120px 80px; }
+    0%, 100% { background-size: 400px 400px; opacity: 0.8; }
+    50% { background-size: 450px 450px; opacity: 1; }
 }
 
 @keyframes waveMotion {
@@ -444,6 +209,12 @@ body.theme-library {
     border-radius: 8px;
     min-height: 100px;
     overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.theme-preview:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
 .preview-content {
@@ -469,15 +240,83 @@ body.theme-library {
 }
 
 /* Theme-specific preview gradients */
-.theme-default .theme-preview { --preview-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.theme-cafe .theme-preview { --preview-gradient: linear-gradient(135deg, #a46437c4 0%, #D2691E 50%, #F4A460 100%); }
-.theme-pond .theme-preview { --preview-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #6be493 100%); }
-.theme-forest .theme-preview { --preview-gradient: linear-gradient(135deg, #77b88d 0%, #38f9d7 50%, #4facfe 100%); }
-.theme-sunset .theme-preview { --preview-gradient: linear-gradient(135deg, #fa709a 0%, #e6d157 100%); }
-.theme-space .theme-preview { --preview-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a237e 50%, #311b92 100%); }
-.theme-mountain .theme-preview { --preview-gradient: linear-gradient(135deg, #457747 0%, #5D4037 50%, #78909C 100%); }
-.theme-beach .theme-preview { --preview-gradient: linear-gradient(135deg, #4FC3F7 0%, #81D4FA 50%, #FFF176 100%); }
-.theme-library .theme-preview { --preview-gradient: linear-gradient(135deg, #5D4037 0%, #795548 50%, #BCAAA4 100%); }
+.theme-default .theme-preview { 
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+    animation: previewGlow 4s infinite ease-in-out;
+}
+.theme-cafe .theme-preview { 
+    background: linear-gradient(135deg, #a46437c4 0%, #D2691E 50%, #F4A460 100%); 
+    animation: previewSteam 6s infinite ease-in-out;
+}
+.theme-pond .theme-preview { 
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 50%, #6be493 100%); 
+    animation: previewRipple 5s infinite ease-in-out;
+}
+.theme-forest .theme-preview { 
+    background: linear-gradient(135deg, #77b88d 0%, #38f9d7 50%, #4facfe 100%); 
+    animation: previewRustle 7s infinite ease-in-out;
+}
+.theme-sunset .theme-preview { 
+    background: linear-gradient(135deg, #fa709a 0%, #e6d157 100%); 
+    animation: previewPulse 4s infinite ease-in-out;
+}
+.theme-space .theme-preview { 
+    background: linear-gradient(135deg, #0c0c0c 0%, #1a237e 50%, #311b92 100%); 
+    animation: previewTwinkle 3s infinite ease-in-out;
+}
+.theme-beach .theme-preview { 
+    background: linear-gradient(135deg, #4FC3F7 0%, #81D4FA 50%, #FFF176 100%); 
+    animation: previewWaves 6s infinite ease-in-out;
+}
+.theme-library .theme-preview { 
+    background: linear-gradient(135deg, #5D4037 0%, #795548 50%, #BCAAA4 100%); 
+    animation: previewPages 10s infinite ease-in-out;
+}
+/* Preview-specific animations */
+@keyframes previewGlow {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.1); }
+}
+
+@keyframes previewSteam {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.02); }
+}
+
+@keyframes previewRipple {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
+}
+
+@keyframes previewRustle {
+    0%, 100% { transform: rotate(0deg); }
+    50% { transform: rotate(0.5deg); }
+}
+
+@keyframes previewPulse {
+    0%, 100% { filter: saturate(1); }
+    50% { filter: saturate(1.3); }
+}
+
+@keyframes previewTwinkle {
+    0%, 100% { filter: brightness(1); }
+    50% { filter: brightness(1.4); }
+}
+
+@keyframes previewMist {
+    0%, 100% { opacity: 0.9; }
+    50% { opacity: 1; }
+}
+
+@keyframes previewWaves {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-2px); }
+}
+
+@keyframes previewPages {
+    0%, 100% { filter: contrast(1); }
+    50% { filter: contrast(1.1); }
+}
 
 /* ///////////////////////theme style ended//////////////////////////////// */
 

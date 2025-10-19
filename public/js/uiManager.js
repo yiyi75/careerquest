@@ -382,46 +382,6 @@ class UIManager {
                 `;
                 break;
                 
-            case 'mountain':
-                style.textContent = `
-                    :root {
-                        --header-bg: #2E7D32;
-                        --header-border: #1b5e20;
-                        --header-shadow: #1b5e20;
-                        --header-text: #78909C;
-                        
-                        --panel-bg: #5D4037;
-                        --panel-border: #2E7D32;
-                        
-                        --task-bg: #2E7D32;
-                        --task-border: #1b5e20;
-                        
-                        --button-primary-bg: #78909C;
-                        --button-primary-border: #5D4037;
-                        --button-primary-text: #f8f5f0;
-                        --button-primary-shadow: #5D4037;
-                        
-                        --progress-fill: #78909C;
-                        --progress-border: #5D4037;
-                        
-                        --stat-value: #BCAAA4;
-                        
-                        --roadmap-bg: #5D4037;
-                        --roadmap-border: #78909C;
-                        --roadmap-shadow: #78909C;
-                        
-                        --stage-title-color: #f8f5f0;
-                        --stage-progress-color: #f8f5f0;
-                        --stage-label-color: #78909C;
-                        --task-title-color: #f8f5f0;
-                        --task-completed-color: #C0C0C0;
-
-                        --progress-completed: #78909C;
-                        --progress-completed-border: #5D4037;
-                    }
-                `;
-                break;
-                
             case 'beach':
                 style.textContent = `
                     :root {
@@ -550,11 +510,6 @@ class UIManager {
                 root.style.setProperty('--theme-primary', '#0d1b2a');
                 root.style.setProperty('--theme-secondary', '#050a14');
                 root.style.setProperty('--theme-accent', '#415a77');
-                break;
-            case 'mountain':
-                root.style.setProperty('--theme-primary', '#2E7D32');
-                root.style.setProperty('--theme-secondary', '#1b5e20');
-                root.style.setProperty('--theme-accent', '#78909C');
                 break;
             case 'beach':
                 root.style.setProperty('--theme-primary', '#4FC3F7');

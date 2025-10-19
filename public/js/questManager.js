@@ -33,7 +33,6 @@ class QuestManager {
             'forest': { type: 'level', value: 1, description: 'Reach Level 4' },
             'sunset': { type: 'level', value: 1, description: 'Reach Level 5' },
             'space': { type: 'level', value: 1, description: 'Reach Level 6' },
-            'mountain': { type: 'streak', value: 1, description: '10-day streak' },
             'beach': { type: 'level', value: 1, description: 'Reach Level 3' },
             'library': { type: 'total_xp', value: 10, description: 'Earn 5000 XP' }
         };
@@ -107,7 +106,6 @@ class QuestManager {
             'forest': 'Forest',
             'sunset': 'Sunset',
             'space': 'Space',
-            'mountain': 'Mountain',
             'beach': 'Beach',
             'library': 'Library'
         };
@@ -123,7 +121,6 @@ class QuestManager {
             'forest': '🌲',
             'sunset': '🌅',
             'space': '🚀',
-            'mountain': '⛰️',
             'beach': '🏖️',
             'library': '📚'
         };
