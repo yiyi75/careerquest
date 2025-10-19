@@ -8,50 +8,45 @@
 }
 
 :root {
-    /* Default theme colors - will be overridden by theme system */
-    --header-bg: #6e9d78;
-    --header-border: #669270;
-    --header-shadow: #3a6b47;
-    --header-text: #e9b872;
-    
-    --panel-bg: #5d8c66;
-    --panel-border: #3a6b47;
-    
-    --task-bg: #6e9d78;
-    --task-border: #669270;
-    
-    --button-primary-bg: #ebc084;
-    --button-primary-border: #d9a862;
-    --button-primary-text: #2c5530;
-    --button-primary-shadow: #d9a862;
-    
-    --progress-fill: #e9b872;
-    --progress-border: #d9a862;
-    
-    --stat-value: #e9b872;
-    
-    --roadmap-bg: #5d8c66;
-    --roadmap-border: #e9b872;
-    --roadmap-shadow: #e9b872;
-    
-    --stage-title-color: #f8f5f0;
-    --stage-progress-color: #f8f5f0;
-    --stage-label-color: #e9b872;
-    --task-title-color: #f8f5f0;
-    --task-completed-color: #b8d4c0;
-    --text-color: #f8f5f0;
-    
-    /* Task states */
-    --task-completed-bg: #386641;
-    --task-completed-border: #6a994e;
-    --task-daily-bg: #a7c957;
-    --task-daily-border: #97b947;
-    
-    /* Progress states */
-    --progress-completed: #6a994e;
-    --progress-completed-border: #5a8542;
-}
+                        --header-bg: #7ba0abff;
+                        --header-border: #D1D3D4;
+                        --header-shadow: #80A1BA;
+                        --header-text: #F0BB78;
+                        
+                        --panel-bg: #86B0BD;
+                        --panel-border: #7ba0abff;
 
+                        --task-bg: #7ba0abff;
+                        --task-border: #D1D3D4;
+                        
+                        --button-primary-bg: #F0BB78;
+                        --button-primary-border: #E2A16F;
+                        --button-primary-text: #1B3C53;
+                        --button-primary-shadow: #d9a862;
+                        
+                        --progress-fill: #d1a465ff;
+                        --progress-border: #b38b53ff;
+                        
+                        --stat-value: #e5c79dff;
+                        
+                        --roadmap-bg: #86B0BD;
+                        --roadmap-border: #D1D3D4;
+                        --roadmap-shadow: #80A1BA;
+                        
+                        --stage-title-color: #f8f5f0;
+                        --stage-progress-color: #f8f5f0;
+                        --stage-label-color: #F0BB78;
+                        --task-title-color: #EEEFE0;
+                        --task-completed-color: #b8d4c0;
+
+                        --progress-completed: #d1a465ff;
+                        --progress-completed-border: #b38b53ff;
+
+                        --task-completed-bg: #5686a1ff;
+                        --task-completed-border: #93BFCF;
+                        --task-daily-bg: #93BFCF;
+                        --task-daily-border: #5686a1ff;
+}
 
 /* ===== Loader STYLES ===== */
 /* From Uiverse.io by esraaabdel-kareem */ 
@@ -917,7 +912,7 @@ body.theme-library {
     font-size: 0.9em;
     font-family: 'Press Start 2P', monospace;
     background: var(--panel-bg);
-    color: var(--text-color);
+    color: var(--stage-title-color);
     transition: all 0.3s ease;
 }
 
@@ -2022,12 +2017,12 @@ body.theme-library {
 
 /* Toast Messages */
 .toast-message {
-    background: #4a7c59;
+    background: var(--button-primary-bg);
     border: 3px solid;
     padding: 15px 20px;
     border-radius: 0;
     font-size: 0.7em;
-    box-shadow: 4px 4px 0px #3a6b47;
+    box-shadow: 4px 4px 0px var(--button-primary-shadow);
     font-weight: normal;
     position: relative;
 }
@@ -2039,23 +2034,23 @@ body.theme-library {
     left: -6px;
     right: 6px;
     bottom: 6px;
-    background: #3a6b47;
+    background: var(--button-primary-shadow);
     z-index: -1;
 }
 
 .toast-info {
-    border-color: #8db580;
-    color: #f8f5f0;
+    border-color: var(--button-primary-border);
+    color: var(--button-primary-text);
 }
 
 .toast-success {
-    border-color: #6a994e;
-    color: #f8f5f0;
+    border-color: var(--button-primary-border);
+    color: var(--button-primary-text);
 }
 
 .toast-warning {
-    border-color: #e9b872;
-    color: #f8f5f0;
+    border-color: var(--button-primary-border);
+    color: var(--button-primary-text);
 }
 
 /* Pixel animations for celebrations */
