@@ -1096,6 +1096,17 @@ body.theme-library {
     border-color: var(--task-daily-border);
 }
 
+.daily-toggle-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.daily-toggle-btn:disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
 /* Task Content */
 .task-content {
     display: flex;

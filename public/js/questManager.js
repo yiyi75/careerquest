@@ -245,48 +245,68 @@ class QuestManager {
 
         const level = chapter.steps[levelId];
         
-        if (!level.completedToday) {
-            level.completedToday = true;
-            
-            if (!this.dailyReset.todaysProgress[chapterId]) {
-                this.dailyReset.todaysProgress[chapterId] = new Set();
-            }
-            
-            this.dailyReset.todaysProgress[chapterId] = this.safeConvertToSet(this.dailyReset.todaysProgress[chapterId]);
-            this.dailyReset.todaysProgress[chapterId].add(levelId);
+        let xpGained = 0;
+        let leveledUp = false;
+        let chapterCompleted = false;
+        let autoCompleted = false;
 
-            const xpResult = this.addXP(level.xp);
-            this.updateStreak();
-            
-            let stageAutoCompleted = false;
-            if (!level.isDaily) {
-                stageAutoCompleted = this.checkStageCompletion(chapterId);
+        // For daily tasks: only track daily completion, not overall completion
+        if (level.isDaily) {
+            if (!level.completedToday) {
+                level.completedToday = true;
+                xpGained = level.xp;
+                
+                // Add XP and check for level up
+                const levelUpResult = this.addXP(xpGained);
+                leveledUp = levelUpResult.leveledUp;
             }
-
-            const questCompleted = this.currentQuest.stages.every(chapter => chapter.completed);
-            if (questCompleted && !this.currentQuest.completed) {
-                this.currentQuest.completed = true;
-                this.player.questsCompleted++;
+        } else {
+            // For regular tasks: track overall completion
+            if (!level.completed) {
+                level.completed = true;
+                level.completedToday = true; // Also mark as completed today for display
+                xpGained = level.xp;
+                
+                // Add XP and check for level up
+                const levelUpResult = this.addXP(xpGained);
+                leveledUp = levelUpResult.leveledUp;
+                
+                // Check if stage is now complete
+                const wasReadyBefore = this.getStageProgress(chapterId) === 100;
+                const isReadyNow = this.getStageProgress(chapterId) === 100;
+                
+                // Auto-complete stage if it just became ready
+                if (isReadyNow && !wasReadyBefore && !chapter.completed) {
+                    this.completeStage(chapterId);
+                    chapterCompleted = true;
+                    autoCompleted = true;
+                }
             }
-
-            // Check for theme unlocks
-            const newThemeUnlocks = this.checkThemeUnlocks();
-            
-            this.saveToFirebase();
-            
-            return {
-                xpGained: level.xp,
-                leveledUp: xpResult.leveledUp,
-                newLevel: xpResult.newLevel,
-                chapterCompleted: stageAutoCompleted,
-                questCompleted: questCompleted,
-                isDailyTask: level.isDaily,
-                autoCompleted: stageAutoCompleted,
-                themeUnlocks: newThemeUnlocks // Return new theme unlocks
-            };
         }
+
+        this.updateStreak();
         
-        return null;
+        const questCompleted = this.currentQuest.stages.every(chapter => chapter.completed);
+        if (questCompleted && !this.currentQuest.completed) {
+            this.currentQuest.completed = true;
+            this.player.questsCompleted++;
+        }
+
+        // Check for theme unlocks
+        const newThemeUnlocks = this.checkThemeUnlocks();
+        
+        this.saveToFirebase();
+        
+        return {
+            xpGained: xpGained,
+            leveledUp: leveledUp,
+            newLevel: this.player.level,
+            chapterCompleted: chapterCompleted,
+            questCompleted: questCompleted,
+            isDailyTask: level.isDaily,
+            autoCompleted: autoCompleted,
+            themeUnlocks: newThemeUnlocks
+        };
     }
 
     toggleDailyTask(chapterId, levelId) {
@@ -296,15 +316,23 @@ class QuestManager {
         const level = chapter.steps[levelId];
         
         if (chapter && level) {
+            // Store the current completion status BEFORE toggling
+            const wasCompleted = level.completed;
+            
+            // Toggle daily status
             level.isDaily = !level.isDaily;
             
-            if (!level.isDaily && level.completedToday) {
-                level.completed = true;
-            }
-            
             if (level.isDaily) {
+                // When making a task daily:
+                // - Keep the original completed status
+                // - Reset only the daily completion status
                 level.completedToday = false;
-                level.completed = false;
+                // level.completed remains unchanged - preserve the original completion!
+            } else {
+                // When removing daily status:
+                // - Keep the original completed status
+                // - Set completedToday to match the overall completion for display
+                level.completedToday = level.completed;
             }
             
             this.saveToFirebase();
@@ -369,7 +397,7 @@ class QuestManager {
         this.player.lastActivity = new Date();
     }
 
-    // In QuestManager class
+    // Updated to only count regular tasks for progress
     getStageProgress(stageIndex) {
         const stage = this.currentQuest.stages[stageIndex];
         if (!stage) {
@@ -380,13 +408,43 @@ class QuestManager {
             return 100;
         }
         
-        const completedTasks = stage.steps.filter(task => task.completed || task.completedToday).length;
+        // Count ALL tasks for progress calculation, but handle daily tasks differently
         const totalTasks = stage.steps.length;
-        
         if (totalTasks === 0) return 0;
         
-        const progress = (completedTasks / totalTasks) * 100;
+        let completedCount = 0;
+        
+        stage.steps.forEach(task => {
+            if (task.isDaily) {
+                // Daily tasks: count as completed if they were EVER completed (completed = true)
+                // This preserves progress even when task is set to daily
+                if (task.completed) {
+                    completedCount++;
+                }
+            } else {
+                // Regular tasks: count as completed if completed
+                if (task.completed) {
+                    completedCount++;
+                }
+            }
+        });
+        
+        const progress = (completedCount / totalTasks) * 100;
         const roundedProgress = Math.round(progress);
+        
+        console.log(`Stage ${stageIndex} progress:`, {
+            title: stage.title,
+            totalTasks: totalTasks,
+            completedCount: completedCount,
+            progress: roundedProgress + '%',
+            tasks: stage.steps.map(t => ({
+                title: t.title,
+                isDaily: t.isDaily,
+                completed: t.completed,
+                completedToday: t.completedToday
+            }))
+        });
+        
         return roundedProgress;
     }
 
@@ -394,20 +452,34 @@ class QuestManager {
         if (!this.currentQuest) return { overall: 0, chapters: [] };
         
         const chapterProgress = this.currentQuest.stages.map(chapter => {
-            const nonDailySteps = chapter.steps.filter(step => !step.isDaily);
-            const completedNonDailySteps = nonDailySteps.filter(step => step.completed || step.completedToday).length;
-            const totalNonDailySteps = nonDailySteps.length;
+            // Count ALL tasks, handling daily tasks appropriately
+            const totalSteps = chapter.steps.length;
+            let completedSteps = 0;
+            
+            chapter.steps.forEach(step => {
+                if (step.isDaily) {
+                    // Daily tasks count if they were ever completed
+                    if (step.completed) {
+                        completedSteps++;
+                    }
+                } else {
+                    // Regular tasks count if completed
+                    if (step.completed) {
+                        completedSteps++;
+                    }
+                }
+            });
             
             const progress = chapter.completed ? 100 : 
-                (totalNonDailySteps > 0 ? (completedNonDailySteps / totalNonDailySteps) * 100 : 0);
+                (totalSteps > 0 ? (completedSteps / totalSteps) * 100 : 0);
             
             return {
                 id: chapter.id,
                 title: chapter.title,
                 progress: progress,
-                completedSteps: completedNonDailySteps,
+                completedSteps: completedSteps,
                 completedToday: chapter.steps.filter(step => step.completedToday).length,
-                totalSteps: totalNonDailySteps,
+                totalSteps: totalSteps,
                 unlocked: chapter.unlocked,
                 completed: chapter.completed
             };
@@ -426,12 +498,20 @@ class QuestManager {
                 if (stage.completed) {
                     totalWeightedProgress += 100;
                 } else if (index <= completedStages) {
-                    const nonDailyTasks = stage.steps.filter(step => !step.isDaily);
-                    if (nonDailyTasks.length > 0) {
-                        const completedNonDaily = nonDailyTasks.filter(step => step.completed || step.completedToday).length;
-                        const stageProgress = (completedNonDaily / nonDailyTasks.length) * 100;
-                        totalWeightedProgress += stageProgress;
-                    }
+                    // Use the same progress calculation logic
+                    const totalTasks = stage.steps.length;
+                    let completedTasks = 0;
+                    
+                    stage.steps.forEach(task => {
+                        if (task.isDaily) {
+                            if (task.completed) completedTasks++;
+                        } else {
+                            if (task.completed) completedTasks++;
+                        }
+                    });
+                    
+                    const stageProgress = totalTasks > 0 ? (completedTasks / totalTasks) * 100 : 0;
+                    totalWeightedProgress += stageProgress;
                 }
             });
             
@@ -465,11 +545,19 @@ class QuestManager {
         
         if (completedStages < totalStages) {
             const currentStage = this.currentQuest.stages[completedStages];
-            const nonDailyTasks = currentStage.steps.filter(step => !step.isDaily);
+            const totalTasks = currentStage.steps.length;
             
-            if (nonDailyTasks.length > 0) {
-                const completedNonDailyTasks = nonDailyTasks.filter(step => step.completed || step.completedToday).length;
-                const currentStageProgress = (completedNonDailyTasks / nonDailyTasks.length) * 100;
+            if (totalTasks > 0) {
+                let completedTasks = 0;
+                currentStage.steps.forEach(task => {
+                    if (task.isDaily) {
+                        if (task.completed) completedTasks++;
+                    } else {
+                        if (task.completed) completedTasks++;
+                    }
+                });
+                
+                const currentStageProgress = (completedTasks / totalTasks) * 100;
                 totalProgress += (currentStageProgress / 100) * (100 / totalStages);
             }
         }
@@ -481,17 +569,28 @@ class QuestManager {
         const chapter = this.currentQuest.stages[chapterId];
         if (!chapter || chapter.completed) return false;
 
-        const nonDailyTasks = chapter.steps.filter(step => !step.isDaily);
-        
-        if (nonDailyTasks.length === 0) {
+        const totalTasks = chapter.steps.length;
+        if (totalTasks === 0) {
             return false;
         }
         
-        const allNonDailyTasksCompleted = nonDailyTasks.every(step => 
-            step.completed || step.completedToday
-        );
+        let allTasksCompleted = true;
         
-        if (allNonDailyTasksCompleted && !chapter.completed) {
+        chapter.steps.forEach(step => {
+            if (step.isDaily) {
+                // Daily tasks must have been completed at least once
+                if (!step.completed) {
+                    allTasksCompleted = false;
+                }
+            } else {
+                // Regular tasks must be completed
+                if (!step.completed) {
+                    allTasksCompleted = false;
+                }
+            }
+        });
+        
+        if (allTasksCompleted && !chapter.completed) {
             chapter.completed = true;
             
             chapter.steps.forEach(step => {

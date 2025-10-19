@@ -672,7 +672,6 @@ class UIManager {
     renderStageTasksInPanel(stageIndex, stage) {
         const tasksContainer = document.getElementById('stageTasks');
         
-        // Add null check to prevent errors when element doesn't exist
         if (!tasksContainer) {
             console.log('stageTasks container not found - quest progress panel may be hidden');
             return;
@@ -680,31 +679,46 @@ class UIManager {
         
         tasksContainer.innerHTML = '';
 
+        const quest = this.questManager.currentQuest;
+        const isQuestComplete = quest && this.questManager.getQuestProgress().overall === 100;
+
         stage.steps.forEach((task, taskIndex) => {
             const taskElement = document.createElement('div');
-            taskElement.className = `stage-task ${task.completedToday ? 'completed' : ''} ${task.isDaily ? 'daily' : ''}`;
             
-            const dailyTooltip = task.isDaily ? 'title="This task resets daily. Completing it counts toward stage progress for today."' : '';
+            // FIXED: Determine completion status for display
+            // For daily tasks: show completedToday status
+            // For regular tasks: show completed status
+            const isCompleted = task.isDaily ? task.completedToday : task.completed;
+            
+            taskElement.className = `stage-task ${isCompleted ? 'completed' : ''} ${task.isDaily ? 'daily' : ''}`;
+            
+            const dailyTooltip = task.isDaily ? 
+                'title="Daily task - resets each day. Does not affect overall progress."' : 
+                'title="Regular task - contributes to overall progress"';
+            
+            const isDailyButtonDisabled = isQuestComplete || stage.completed;
             
             taskElement.innerHTML = `
                 <div class="task-content">
                     <input type="checkbox" class="task-checkbox" 
                         data-stage-id="${stageIndex}" 
                         data-task-id="${taskIndex}"
-                        ${task.completedToday ? 'checked' : ''}
+                        ${isCompleted ? 'checked' : ''}
                         ${stage.completed ? 'disabled' : ''}
                         ${dailyTooltip}>
                     <span class="task-title">${task.title}</span>
                     <button class="btn btn-sm daily-toggle-btn ${task.isDaily ? 'btn-warning' : 'btn-outline'}" 
                             data-stage-id="${stageIndex}" 
                             data-task-id="${taskIndex}"
-                            title="${task.isDaily ? 'Remove daily status' : 'Make this a daily practice task'}">
+                            ${isDailyButtonDisabled ? 'disabled' : ''}
+                            title="${isDailyButtonDisabled ? 'Quest completed - no changes allowed' : (task.isDaily ? 'Remove daily status' : 'Make this a daily practice task')}">
                         ${task.isDaily ? '⭐ Daily' : 'Make Daily'}
                     </button>
                 </div>
                 <div class="task-info">
                     <span class="task-xp">+${task.xp} XP</span>
                     ${task.isDaily ? '<span class="daily-badge" title="Resets daily">Daily</span>' : ''}
+                    ${(!task.isDaily && task.completed) ? '<span class="completed-badge" title="Overall completion">✓</span>' : ''}
                 </div>
             `;
             tasksContainer.appendChild(taskElement);
@@ -1007,44 +1021,56 @@ class UIManager {
         const tasksContainer = document.getElementById(`tasks-${stageIndex}`);
         tasksContainer.innerHTML = '';
 
+        const quest = this.questManager.currentQuest;
+        const isQuestComplete = quest && this.questManager.getQuestProgress().overall === 100;
+
         stage.steps.forEach((task, taskIndex) => {
             const taskElement = document.createElement('div');
-            taskElement.className = `stage-task ${task.completedToday ? 'completed' : ''} ${task.isDaily ? 'daily' : ''}`;
             
-            // Show different tooltip for daily tasks
-            const dailyTooltip = task.isDaily ? 'title="This task resets daily. Completing it counts toward stage progress for today."' : '';
+            // FIXED: Use the same logic here
+            const isCompleted = task.isDaily ? task.completedToday : task.completed;
+            
+            taskElement.className = `stage-task ${isCompleted ? 'completed' : ''} ${task.isDaily ? 'daily' : ''}`;
+            
+            const dailyTooltip = task.isDaily ? 
+                'title="Daily task - resets each day. Does not affect overall progress."' : 
+                'title="Regular task - contributes to overall progress"';
+            
+            const isDailyButtonDisabled = isQuestComplete || stage.completed;
             
             taskElement.innerHTML = `
                 <div class="task-content">
                     <input type="checkbox" class="task-checkbox" 
-                           data-stage-id="${stageIndex}" 
-                           data-task-id="${taskIndex}"
-                           ${task.completedToday ? 'checked' : ''}
-                           ${stage.completed ? 'disabled' : ''}
-                           ${dailyTooltip}>
+                        data-stage-id="${stageIndex}" 
+                        data-task-id="${taskIndex}"
+                        ${isCompleted ? 'checked' : ''}
+                        ${stage.completed ? 'disabled' : ''}
+                        ${dailyTooltip}>
                     <span class="task-title">${task.title}</span>
                     <button class="btn btn-sm daily-toggle-btn ${task.isDaily ? 'btn-warning' : 'btn-outline'}" 
                             data-stage-id="${stageIndex}" 
                             data-task-id="${taskIndex}"
-                            title="${task.isDaily ? 'Remove daily status' : 'Make this a daily practice task'}">
+                            ${isDailyButtonDisabled ? 'disabled' : ''}
+                            title="${isDailyButtonDisabled ? 'Quest completed - no changes allowed' : (task.isDaily ? 'Remove daily status' : 'Make this a daily practice task')}">
                         ${task.isDaily ? '⭐ Daily' : 'Make Daily'}
                     </button>
                 </div>
                 <div class="task-info">
                     <span class="task-xp">+${task.xp} XP</span>
                     ${task.isDaily ? '<span class="daily-badge" title="Resets daily">Daily</span>' : ''}
+                    ${(!task.isDaily && task.completed) ? '<span class="completed-badge" title="Overall completion">✓</span>' : ''}
                 </div>
             `;
             tasksContainer.appendChild(taskElement);
         });
     }
 
-    getStageProgress(stage) {
-        if (stage.completed) return 100;
-        const completedTasks = stage.steps.filter(task => task.completed || task.completedToday).length;
-        const totalTasks = stage.steps.length;
-        return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-    }
+    // getStageProgress(stage) {
+    //     if (stage.completed) return 100;
+    //     const completedTasks = stage.steps.filter(task => task.completed || task.completedToday).length;
+    //     const totalTasks = stage.steps.length;
+    //     return totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+    // }
 
     // Method to show theme selector
     showThemeSelector() {
@@ -1135,13 +1161,26 @@ class UIManager {
         
         if (result) {
             const taskElement = checkbox.closest('.stage-task');
-            taskElement.classList.add('completed');
+            const task = this.questManager.currentQuest.stages[stageId].steps[taskId];
+            
+            // FIXED: Update the visual state based on task type
+            if (task.isDaily) {
+                // For daily tasks, toggle completedToday visual state
+                if (task.completedToday) {
+                    taskElement.classList.add('completed');
+                } else {
+                    taskElement.classList.remove('completed');
+                }
+            } else {
+                // For regular tasks, always show as completed once done
+                taskElement.classList.add('completed');
+            }
             
             this.animateXP(result.xpGained);
             
             // Refresh ALL UI components after task completion
             this.updateRoadProgress();
-            this.renderRoadmap(); // Add this line to refresh roadmap stops
+            this.renderRoadmap();
             this.renderAllStageDetails();
             this.updatePlayerStats();
             
@@ -1156,22 +1195,31 @@ class UIManager {
     }
 
     handleDailyToggle(button) {
-            const taskId = parseInt(button.getAttribute('data-task-id'));
-            const stageId = parseInt(button.getAttribute('data-stage-id'));
-            
-            const success = this.questManager.toggleDailyTask(stageId, taskId);
-            if (success) {
-                // Show feedback about what changed
-                const task = this.questManager.currentQuest.stages[stageId].steps[taskId];
-                if (task.isDaily) {
-                    this.showToast('Task marked as daily practice! It will reset each day.', 'info');
-                } else {
-                    this.showToast('Task removed from daily practice.', 'info');
-                }
-                
-                this.renderAllStageDetails();
-            }
+        // Check if quest is completed and prevent action
+        const quest = this.questManager.currentQuest;
+        const isQuestComplete = quest && this.questManager.getQuestProgress().overall === 100;
+        
+        if (isQuestComplete) {
+            this.showToast('Quest completed - no changes allowed', 'info');
+            return;
         }
+        
+        const taskId = parseInt(button.getAttribute('data-task-id'));
+        const stageId = parseInt(button.getAttribute('data-stage-id'));
+        
+        const success = this.questManager.toggleDailyTask(stageId, taskId);
+        if (success) {
+            // Show feedback about what changed
+            const task = this.questManager.currentQuest.stages[stageId].steps[taskId];
+            if (task.isDaily) {
+                this.showToast('Task marked as daily practice! It will reset each day.', 'info');
+            } else {
+                this.showToast('Task removed from daily practice.', 'info');
+            }
+            
+            this.renderAllStageDetails();
+        }
+    }
 
     // Show quick toast messages
     showToast(message, type = 'info') {
@@ -1183,8 +1231,6 @@ class UIManager {
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            background: ${type === 'info' ? '#2196F3' : type === 'success' ? '#4CAF50' : '#FF9800'};
-            color: white;
             padding: 12px 20px;
             border-radius: 8px;
             z-index: 2004;
