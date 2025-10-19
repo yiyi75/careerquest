@@ -684,11 +684,11 @@ class UIManager {
                         ${task.isDaily ? '⭐ Daily' : 'Make Daily'}
                     </button>
                 </div>
-                <div class="task-info">
-                    <span class="task-xp">+${task.xp} XP</span>
-                    ${task.isDaily ? '<span class="daily-badge" title="Resets daily">Daily</span>' : ''}
-                    ${(!task.isDaily && task.completed) ? '<span class="completed-badge" title="Overall completion">✓</span>' : ''}
-                </div>
+                // <div class="task-info">
+                //     <span class="task-xp">+${task.xp} XP</span>
+                //     ${task.isDaily ? '<span class="daily-badge" title="Resets daily">Daily</span>' : ''}
+                //     ${(!task.isDaily && task.completed) ? '<span class="completed-badge" title="Overall completion">✓</span>' : ''}
+                // </div>
             `;
             tasksContainer.appendChild(taskElement);
         });

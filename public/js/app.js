@@ -45,17 +45,26 @@ class App {
             
             // Try to load from Firebase first
             if (this.firebaseManager.isConnected && this.firebaseManager.userId) {
-                console.log('Waiting for Firebase data...');
-                // Firebase will load data via the realtime listener
+                console.log('Loading from Firebase...');
+                const firebaseData = await this.firebaseManager.loadQuestFromFirebase();
+                
+                if (firebaseData) {
+                    console.log('Firebase data loaded successfully');
+                    // Data will be automatically loaded via the realtime listener in FirebaseManager
+                    // No need to call loadFromFirebaseData manually here
+                } else {
+                    console.log('No Firebase data found, loading from localStorage');
+                    this.questManager.loadFromLocalStorage();
+                }
             } else {
                 // Fallback to localStorage
+                console.log('Firebase not connected, loading from localStorage');
                 this.questManager.loadFromLocalStorage();
             }
             
             // Initialize UI only after we know which panel to show
             this.initializeUI();
-            
-            // Add character to UI if we have one
+
             // this.characterManager.addCharacterToProgressPanel();
             
             // Apply theme after everything is loaded
