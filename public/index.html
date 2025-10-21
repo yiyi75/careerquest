@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Career Quest - Gamified Goal Tracker</title>
-    <!-- <link rel="stylesheet" href="styles/style.css"> -->
     <link rel="stylesheet" href="styles/calmstyle.css">
-
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Firebase SDK -->
@@ -16,6 +14,8 @@
 
 </head>
 <body>
+    <div id="liquidEtherRoot"></div>
+    
     <div class="app-container">
         <!-- Firebase Loading Indicator -->
         <div class="firebase-loading hidden" id="firebaseLoading">
@@ -49,45 +49,11 @@
                     </div>
                     <button class="btn btn-primary btn-sm" id="themeSelectorBtn">🎨 Themes</button>
                 </div>
-
-                <!-- <div class="quest-days">
-                    <div class="stat">
-                        <span class="stat-label">Current Day</span>
-                        <span class="stat-value" id="currentDay">1</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Total Days</span>
-                        <span class="stat-value" id="totalDays">0</span>
-                    </div>
-                </div> -->
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Character Selection Panel -->
-            <!-- <section class="panel character-selection-panel hidden" id="characterSelectionPanel">
-                <h2>👤 Choose Your Adventurer</h2>
-                <p class="selection-subtitle">Select a character to represent you on your career journey!</p>
-                
-                <div class="character-grid" id="characterGrid">
-                </div>
-                
-                <div class="character-preview">
-                    <div class="preview-container">
-                        <div class="pixel-character" id="selectedCharacterPreview">
-                        </div>
-                        <div class="character-info">
-                            <h3 id="selectedCharacterName">Select a Character</h3>
-                            <p id="selectedCharacterDescription">Choose an adventurer to begin your quest</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="selection-actions">
-                    <button class="btn btn-primary" id="confirmCharacterBtn" disabled>Confirm Character</button>
-                </div>
-            </section> -->
             <!-- Quest Creation Panel -->
             <section class="panel quest-creation-panel hidden" id="questCreationPanel">
                 <h2>🎯 Create Your Career Quest</h2>
@@ -102,7 +68,6 @@
                 
                 <button class="btn btn-primary" id="addStageBtn">+ Add Stage</button>
                 <button class="btn btn-success" id="startQuestBtn">Start Quest! 🚀</button>
-                <!-- <button class="btn btn-outline" id="toggleEditBtn">Edit Quest</button> -->
             </section>
 
             <!-- Quest Progress Panel -->
@@ -115,12 +80,6 @@
                             <button class="btn btn-danger" id="resetQuestBtn">Reset Quest</button>
                         </div>
                     </div>
-                    <!-- <div class="player-journey-stats">
-                        <div class="stat">
-                            <span class="stat-label">Distance Traveled</span>
-                            <span class="stat-value" id="distanceTraveled">0%</span>
-                        </div>
-                    </div> -->
                 </div>
 
                 <!-- Roadmap Container -->
@@ -152,12 +111,6 @@
                                 <p id="destinationTitle">Career Goal</p>
                             </div>
                         </div>
-
-                        <!-- Progress Traveler -->
-                        <!-- <div class="progress-traveler" id="progressTraveler">
-                            <div class="traveler-icon">🧭</div>
-                            <div class="traveler-tooltip" id="travelerTooltip">Starting journey...</div>
-                        </div> -->
 
                         <!-- Road Path -->
                         <div class="road-path">
@@ -226,8 +179,15 @@
                     <div class="task-content">
                         <input type="checkbox" class="task-checkbox">
                         <span class="task-title"></span>
+                        <button class="btn btn-sm daily-toggle-btn btn-outline" 
+                                title="Make this a daily practice task">
+                            Make Daily
+                        </button>
                     </div>
-                    <div class="task-xp">+<span>0</span> XP</div>
+                    <div class="task-info">
+                        <span class="task-xp">+<span>0</span> XP</span>
+                        <span class="daily-badge hidden" title="Resets daily">Daily</span>
+                    </div>
                 </div>
             </template>
 
@@ -248,23 +208,6 @@
                 <div class="edit-task">
                     <input type="text" class="edit-task-title" placeholder="Task description (e.g., Practice SQL)">
                     <button class="btn btn-danger remove-edit-task">×</button>
-                </div>
-            </template>
-
-            <template id="stageTaskTemplate">
-                <div class="stage-task" data-task-id="">
-                    <div class="task-content">
-                        <input type="checkbox" class="task-checkbox">
-                        <span class="task-title"></span>
-                        <button class="btn btn-sm daily-toggle-btn btn-outline" 
-                                title="Make this a daily practice task">
-                            Make Daily
-                        </button>
-                    </div>
-                    <div class="task-info">
-                        <span class="task-xp">+<span>0</span> XP</span>
-                        <span class="daily-badge hidden" title="Resets daily">Daily</span>
-                    </div>
                 </div>
             </template>
 
@@ -331,19 +274,10 @@
         </div>
     </template>
 
-    <!-- <template id="achievementTemplate">
-        <div class="achievement locked">
-            <div class="achievement-icon">🔒</div>
-            <div class="achievement-info">
-                <h4 class="achievement-title">Secret Achievement</h4>
-                <p class="achievement-description">Complete tasks to unlock</p>
-            </div>
-        </div>
-    </template> -->
-
     <script src="js/firebaseConfig.js"></script>
     <script src="js/questManager.js"></script>
     <script src="js/uiManager.js"></script>
     <script src="js/app.js"></script>
+
 </body>
 </html>

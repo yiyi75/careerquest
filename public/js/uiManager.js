@@ -1,44 +1,3 @@
-class DecorationsManager {
-    constructor(questManager) {
-        this.questManager = questManager;
-        this.unlockedThemes = new Set(['default']);
-        this.currentTheme = 'default';
-        this.unlockedDecorations = new Set();
-        this.loadProgress();
-    }
-
-    // Save/load progress
-    saveProgress() {
-        const progress = {
-            unlockedThemes: Array.from(this.unlockedThemes),
-            currentTheme: this.currentTheme,
-            unlockedDecorations: Array.from(this.unlockedDecorations)
-        };
-        localStorage.setItem('questDecorations', JSON.stringify(progress));
-    }
-
-    loadProgress() {
-        const saved = localStorage.getItem('questDecorations');
-        if (saved) {
-            const progress = JSON.parse(saved);
-            this.unlockedThemes = new Set(progress.unlockedThemes);
-            this.currentTheme = progress.currentTheme;
-            this.unlockedDecorations = new Set(progress.unlockedDecorations);
-            this.applyTheme(this.currentTheme);
-        }
-    }
-
-    // Get available themes for UI
-    getAvailableThemes() {
-        const conditions = this.getUnlockConditions();
-        return Object.keys(conditions).map(theme => ({
-            name: theme,
-            unlocked: this.unlockedThemes.has(theme),
-            condition: conditions[theme]
-        }));
-    }
-}
-
 class UIManager {
     constructor(questManager) {
         this.questManager = questManager;
@@ -46,6 +5,28 @@ class UIManager {
         this.initializeEventListeners();
         // Apply the current theme on initialization
         this.applyCurrentTheme();
+        
+        // Check for daily reset on initialization
+        this.checkAndHandleDailyReset();
+    }
+
+    // Add this method to check for daily reset and update UI
+    checkAndHandleDailyReset() {
+        const didReset = this.questManager.checkDailyReset();
+        if (didReset) {
+            console.log('Daily reset detected, updating UI...');
+            // Refresh the entire UI to reflect reset daily tasks
+            this.refreshUIAfterDailyReset();
+        }
+    }
+
+    // Add this method to refresh UI after daily reset
+    refreshUIAfterDailyReset() {
+        if (this.questManager.currentQuest) {
+            // Re-render all UI components to show unchecked daily tasks
+            this.renderQuestProgress();
+            this.showToast('Daily tasks have been reset!', 'info');
+        }
     }
 
     initializeEventListeners() {
@@ -105,6 +86,18 @@ class UIManager {
             } else if (e.target.classList.contains('remove-edit-task')) {
                 this.removeEditTask(e.target.closest('.edit-task'));
             }
+        });
+
+        // Add visibility change listener to check for daily reset when user returns to the app
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                this.checkAndHandleDailyReset();
+            }
+        });
+
+        // Also check when the window gains focus
+        window.addEventListener('focus', () => {
+            this.checkAndHandleDailyReset();
         });
     }
 
@@ -480,49 +473,6 @@ class UIManager {
         document.body.offsetHeight;
     }
 
-    // Helper method to update CSS variables
-    updateThemeCSSVariables(themeName) {
-        const root = document.documentElement;
-        
-        // Set CSS variables based on theme
-        switch(themeName) {
-            case 'cafe':
-                root.style.setProperty('--theme-primary', '#8B4513');
-                root.style.setProperty('--theme-secondary', '#5D4037');
-                root.style.setProperty('--theme-accent', '#D2691E');
-                break;
-            case 'pond':
-                root.style.setProperty('--theme-primary', '#1e3a5f');
-                root.style.setProperty('--theme-secondary', '#0d1b2a');
-                root.style.setProperty('--theme-accent', '#4facfe');
-                break;
-            case 'forest':
-                root.style.setProperty('--theme-primary', '#1b4332');
-                root.style.setProperty('--theme-secondary', '#0d1f14');
-                root.style.setProperty('--theme-accent', '#43e97b');
-                break;
-            case 'sunset':
-                root.style.setProperty('--theme-primary', '#6a0572');
-                root.style.setProperty('--theme-secondary', '#4a034f');
-                root.style.setProperty('--theme-accent', '#fa709a');
-                break;
-            case 'space':
-                root.style.setProperty('--theme-primary', '#0d1b2a');
-                root.style.setProperty('--theme-secondary', '#050a14');
-                root.style.setProperty('--theme-accent', '#415a77');
-                break;
-            case 'beach':
-                root.style.setProperty('--theme-primary', '#4FC3F7');
-                root.style.setProperty('--theme-secondary', '#29b6f6');
-                root.style.setProperty('--theme-accent', '#FFF176');
-                break;
-            case 'library':
-                root.style.setProperty('--theme-primary', '#5D4037');
-                root.style.setProperty('--theme-secondary', '#3E2723');
-                root.style.setProperty('--theme-accent', '#BCAAA4');
-                break;
-        }
-    }
     // ===== QUEST CREATION METHODS =====
     addStage() {
         const stagesContainer = document.getElementById('stagesContainer');
@@ -654,8 +604,8 @@ class UIManager {
         stage.steps.forEach((task, taskIndex) => {
             const taskElement = document.createElement('div');
             
-            // For daily tasks: show completedToday status
-            // For regular tasks: show completed status
+            // For daily tasks: show completedToday status (this gets reset daily)
+            // For regular tasks: show completed status (this persists)
             const isCompleted = task.isDaily ? task.completedToday : task.completed;
             
             taskElement.className = `stage-task ${isCompleted ? 'completed' : ''} ${task.isDaily ? 'daily' : ''}`;
@@ -683,11 +633,11 @@ class UIManager {
                         ${task.isDaily ? '⭐ Daily' : 'Make Daily'}
                     </button>
                 </div>
-                // <div class="task-info">
-                //     <span class="task-xp">+${task.xp} XP</span>
-                //     ${task.isDaily ? '<span class="daily-badge" title="Resets daily">Daily</span>' : ''}
-                //     ${(!task.isDaily && task.completed) ? '<span class="completed-badge" title="Overall completion">✓</span>' : ''}
-                // </div>
+                <div class="task-info">
+                    <span class="task-xp">+${task.xp} XP</span>
+                    ${task.isDaily ? '<span class="daily-badge" title="Resets daily">Daily</span>' : ''}
+                    ${(!task.isDaily && task.completed) ? '<span class="completed-badge" title="Overall completion">✓</span>' : ''}
+                </div>
             `;
             tasksContainer.appendChild(taskElement);
         });
@@ -995,6 +945,8 @@ class UIManager {
         stage.steps.forEach((task, taskIndex) => {
             const taskElement = document.createElement('div');
             
+            // For daily tasks: show completedToday status (this gets reset daily)
+            // For regular tasks: show completed status (this persists)
             const isCompleted = task.isDaily ? task.completedToday : task.completed;
             
             taskElement.className = `stage-task ${isCompleted ? 'completed' : ''} ${task.isDaily ? 'daily' : ''}`;
@@ -1127,12 +1079,15 @@ class UIManager {
                 // For daily tasks, toggle completedToday visual state
                 if (task.completedToday) {
                     taskElement.classList.add('completed');
+                    checkbox.checked = true;
                 } else {
                     taskElement.classList.remove('completed');
+                    checkbox.checked = false;
                 }
             } else {
                 // For regular tasks, always show as completed once done
                 taskElement.classList.add('completed');
+                checkbox.checked = true;
             }
             
             this.animateXP(result.xpGained);
@@ -1159,6 +1114,13 @@ class UIManager {
                     this.showToast(`🎨 Unlocked ${theme.displayName} theme!`, 'success');
                 });
             }
+
+            // Check if daily reset occurred during this action
+            if (result.dailyResetOccurred) {
+                this.showToast('Daily tasks have been reset!', 'info');
+                // Force a full UI refresh to show unchecked daily tasks
+                this.renderQuestProgress();
+            }
         }
     }
 
@@ -1179,9 +1141,6 @@ class UIManager {
         `;
         
         document.body.appendChild(message);
-        
-        // Remove the inline CSS styles that were overriding your theme variables
-        // Let CSS classes handle the styling instead
         
         message.querySelector('.close-message').addEventListener('click', () => {
             message.remove();
@@ -1530,36 +1489,6 @@ class UIManager {
             }
         }, 3000);
     }
-
-    // showStageCompleteAnimation(stageTitle, autoCompleted = false) {
-    //     const message = document.createElement('div');
-    //     message.className = 'stage-complete-message';
-        
-    //     if (autoCompleted) {
-    //         message.innerHTML = `
-    //             <div class="message-content">
-    //                 <h3>🎉 Stage Auto-Completed!</h3>
-    //                 <p>You finished all tasks in "${stageTitle}"!</p>
-    //                 <p class="auto-complete-note">The stage was automatically marked as complete.</p>
-    //                 <button class="btn btn-primary close-message">Continue Journey</button>
-    //             </div>
-    //         `;
-    //     } else {
-    //         message.innerHTML = `
-    //             <div class="message-content">
-    //                 <h3>🎉 Stage Complete!</h3>
-    //                 <p>You've completed "${stageTitle}"!</p>
-    //                 <button class="btn btn-primary close-message">Continue Journey</button>
-    //             </div>
-    //         `;
-    //     }
-        
-    //     document.body.appendChild(message);
-    //     message.querySelector('.close-message').addEventListener('click', () => {
-    //         message.remove();
-    //         this.renderQuestProgress();
-    //     });
-    // }
 
     animateXP(xpGained) {
         const xpElement = document.getElementById('playerXP');

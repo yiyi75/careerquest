@@ -11,8 +11,12 @@ class QuestManager {
             totalXP: 0,
             questsCompleted: 0
         };
+        
+        // Initialize timezone first, then use it for dailyReset
+        this.userTimezone = this.detectUserTimezone();
+        
         this.dailyReset = {
-            lastReset: new Date().toDateString(),
+            lastReset: this.getCurrentDateString(),
             todaysProgress: {}
         };
         
@@ -22,6 +26,119 @@ class QuestManager {
             currentTheme: 'default',
             unlockedDecorations: new Set()
         };
+    }
+
+    // Get current date string in user's timezone
+    getCurrentDateString() {
+        return new Date().toLocaleDateString('en-CA', { timeZone: this.userTimezone }); // YYYY-MM-DD format
+    }
+
+    // Detect user's timezone
+    detectUserTimezone() {
+        // Try to get from browser, fallback to system timezone
+        try {
+            return Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+        } catch (error) {
+            console.warn('Could not detect timezone, using UTC:', error);
+            return 'UTC';
+        }
+    }
+
+    // Check if it's a new day in user's timezone
+    isNewDay() {
+        const currentDate = this.getCurrentDateString();
+        return this.dailyReset.lastReset !== currentDate;
+    }
+
+    // Enhanced daily reset with timezone support
+    checkDailyReset() {
+        if (this.isNewDay()) {
+            console.log('Performing daily reset for new day:', this.getCurrentDateString());
+            this.performDailyReset();
+            return true;
+        }
+        return false;
+    }
+
+    // Perform the actual reset logic
+    performDailyReset() {
+        const previousDate = this.dailyReset.lastReset;
+        const currentDate = this.getCurrentDateString();
+        
+        this.dailyReset.lastReset = currentDate;
+        this.dailyReset.todaysProgress = {};
+        
+        // Update quest day counter
+        if (this.currentQuest) {
+            this.currentQuest.currentDay++;
+            
+            // Calculate total days based on start date considering timezone
+            if (this.currentQuest.startedAt) {
+                const startDate = new Date(this.currentQuest.startedAt);
+                const currentDateObj = new Date();
+                
+                // Convert both dates to user's timezone for accurate day calculation
+                const startInUserTz = new Date(startDate.toLocaleString('en-US', { timeZone: this.userTimezone }));
+                const currentInUserTz = new Date(currentDateObj.toLocaleString('en-US', { timeZone: this.userTimezone }));
+                
+                // Reset time components to compare just dates
+                startInUserTz.setHours(0, 0, 0, 0);
+                currentInUserTz.setHours(0, 0, 0, 0);
+                
+                const timeDiff = currentInUserTz - startInUserTz;
+                this.player.totalDays = Math.max(1, Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1);
+            }
+            
+            // Reset daily tasks
+            this.currentQuest.stages.forEach(chapter => {
+                chapter.steps.forEach(step => {
+                    if (step.isDaily) {
+                        step.completedToday = false;
+                    }
+                });
+            });
+        }
+        
+        // Update streak based on actual consecutive days
+        this.updateStreakWithTimezone(previousDate, currentDate);
+        
+        console.log(`Daily reset completed. Previous: ${previousDate}, Current: ${currentDate}`);
+        this.saveToFirebase();
+    }
+
+    updateStreakWithTimezone(previousDate, currentDate) {
+        if (!previousDate) {
+            this.player.streak = 1;
+            return;
+        }
+        
+        try {
+            // Parse dates in user's timezone
+            const prevDateObj = new Date(previousDate + 'T00:00:00');
+            const currentDateObj = new Date(currentDate + 'T00:00:00');
+            
+            // Calculate day difference
+            const timeDiff = currentDateObj - prevDateObj;
+            const dayDiff = timeDiff / (1000 * 60 * 60 * 24);
+            
+            if (dayDiff === 1) {
+                // Consecutive day - increment streak
+                this.player.streak++;
+                console.log(`Streak updated: ${this.player.streak} days`);
+            } else if (dayDiff > 1) {
+                // Missed one or more days - reset streak
+                this.player.streak = 1;
+                console.log('Streak reset - missed days');
+            }
+            // If dayDiff === 0, it's the same day - no change to streak
+            
+        } catch (error) {
+            console.error('Error calculating streak:', error);
+            // Fallback: simple increment if we can't parse dates
+            this.player.streak++;
+        }
+        
+        this.player.lastActivity = new Date();
     }
 
     // Theme unlock conditions - based on level progression
@@ -171,7 +288,7 @@ class QuestManager {
 
     initializeDailyReset() {
         this.dailyReset = {
-            lastReset: new Date().toDateString(),
+            lastReset: this.getCurrentDateString(),
             todaysProgress: {}
         };
         
@@ -186,38 +303,6 @@ class QuestManager {
         }
     }
 
-    checkDailyReset() {
-        const today = new Date().toDateString();
-        if (this.dailyReset.lastReset !== today) {
-            this.dailyReset.lastReset = today;
-            this.dailyReset.todaysProgress = {};
-            
-            this.currentQuest.currentDay++;
-            
-            // Calculate total days based on start date
-            if (this.currentQuest && this.currentQuest.startedAt) {
-                const startDate = new Date(this.currentQuest.startedAt);
-                const currentDate = new Date();
-                const timeDiff = currentDate - startDate;
-                this.player.totalDays = Math.max(1, Math.floor(timeDiff / (1000 * 60 * 60 * 24)) + 1);
-            }
-            
-            if (this.currentQuest) {
-                this.currentQuest.stages.forEach(chapter => {
-                    chapter.steps.forEach(step => {
-                        if (step.isDaily) {
-                            step.completedToday = false;
-                        }
-                    });
-                });
-            }
-            
-            this.saveToFirebase();
-            return true;
-        }
-        return false;
-    }
-
     calculateStepXP(totalSteps) {
         const baseXP = 100;
         return Math.max(25, Math.floor(baseXP / Math.sqrt(totalSteps)));
@@ -226,7 +311,8 @@ class QuestManager {
     completeStep(chapterId, levelId) {
         if (!this.currentQuest) return null;
 
-        this.checkDailyReset();
+        // Check for daily reset at the beginning of any user action
+        const didReset = this.checkDailyReset();
 
         if (chapterId < 0 || chapterId >= this.currentQuest.stages.length) {
             console.error('Invalid chapter ID:', chapterId);
@@ -258,7 +344,6 @@ class QuestManager {
                 leveledUp = levelUpResult.leveledUp;
                 
                 // mark daily task as completed (overall completion) when done for the first time
-                // This ensures daily tasks count toward stage completion after being completed at least once
                 if (!level.completed) {
                     level.completed = true;
                 }
@@ -277,12 +362,8 @@ class QuestManager {
         }
 
         // Check if stage is now complete (AFTER potentially updating completion status)
-        // This check applies to both daily and regular tasks
         if (!chapter.completed) {
             const allTasksCompleted = chapter.steps.every(step => {
-                // For a stage to be complete, ALL tasks must have been completed at least once
-                // This means daily tasks must have completed: true (completed at least once)
-                // and regular tasks must have completed: true
                 return step.completed === true;
             });
             
@@ -292,6 +373,7 @@ class QuestManager {
             }
         }
 
+        // Update streak (uses timezone-aware version)
         this.updateStreak();
         
         // Check if entire quest is completed (all stages completed)
@@ -314,7 +396,8 @@ class QuestManager {
             chapterCompleted: chapterCompleted,
             questCompleted: questCompleted,
             isDailyTask: level.isDaily,
-            themeUnlocks: newThemeUnlocks
+            themeUnlocks: newThemeUnlocks,
+            dailyResetOccurred: didReset
         };
     }
 
@@ -386,20 +469,26 @@ class QuestManager {
     }
 
     updateStreak() {
-        const today = new Date().toDateString();
+        const currentDate = this.getCurrentDateString();
         const lastActivity = this.player.lastActivity;
         
         if (!lastActivity) {
             this.player.streak = 1;
         } else {
-            const lastDate = new Date(lastActivity);
-            const yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
-            
-            if (lastDate.toDateString() === yesterday.toDateString()) {
-                this.player.streak++;
-            } else if (lastDate.toDateString() !== today) {
-                this.player.streak = 1;
+            try {
+                const lastActivityDate = new Date(lastActivity).toLocaleDateString('en-CA', { timeZone: this.userTimezone });
+                
+                if (lastActivityDate !== currentDate) {
+                    // Use the timezone-aware streak calculation
+                    this.updateStreakWithTimezone(lastActivityDate, currentDate);
+                }
+            } catch (error) {
+                console.error('Error in updateStreak:', error);
+                // Fallback to simple logic
+                const today = new Date().toDateString();
+                if (lastActivity.toDateString() !== today) {
+                    this.player.streak++;
+                }
             }
         }
         
@@ -657,7 +746,7 @@ class QuestManager {
                 this.currentQuest = data.currentQuest;
                 
                 this.dailyReset = {
-                    lastReset: data.dailyReset?.lastReset || new Date().toDateString(),
+                    lastReset: data.dailyReset?.lastReset || this.getCurrentDateString(),
                     todaysProgress: {}
                 };
                 
@@ -717,7 +806,7 @@ class QuestManager {
         };
         this.currentQuest = null;
         this.dailyReset = {
-            lastReset: new Date().toDateString(),
+            lastReset: this.getCurrentDateString(),
             todaysProgress: {}
         };
         this.decorations = {
@@ -790,7 +879,7 @@ class QuestManager {
     resetQuest() {
         this.currentQuest = null;
         this.dailyReset = {
-            lastReset: new Date().toDateString(),
+            lastReset: this.getCurrentDateString(),
             todaysProgress: {}
         };
         
@@ -802,5 +891,26 @@ class QuestManager {
         }
         
         localStorage.removeItem('careerQuest');
+    }
+
+    // Add method to force reset for testing
+    forceDailyResetForTesting() {
+        console.log('Forcing daily reset for testing');
+        // Set lastReset to yesterday to trigger reset
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        this.dailyReset.lastReset = yesterday.toLocaleDateString('en-CA', { timeZone: this.userTimezone });
+        this.performDailyReset();
+    }
+
+    // Get timezone info for debugging
+    getTimezoneInfo() {
+        return {
+            userTimezone: this.userTimezone,
+            currentDate: this.getCurrentDateString(),
+            lastReset: this.dailyReset.lastReset,
+            isNewDay: this.isNewDay(),
+            systemTime: new Date().toString()
+        };
     }
 }
