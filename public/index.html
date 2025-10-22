@@ -12,6 +12,269 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
+    <style>
+        /* Music Player Styles */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            z-index: 1000;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .music-player.minimized {
+            width: 50px;
+            height: 50px;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .music-player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .music-player.minimized .music-player-header {
+            margin-bottom: 0;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .music-player-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .music-player.minimized .music-player-title {
+            display: none;
+        }
+
+        .music-player-controls {
+            display: flex;
+            gap: 5px;
+        }
+
+        .music-player.minimized .music-player-controls {
+            display: none;
+        }
+
+        .player-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 5px;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .player-btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .player-btn.active {
+            background-color: rgba(74, 144, 226, 0.1);
+            color: #4a90e2;
+        }
+
+        .music-player.minimized .player-btn {
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+        }
+
+        .music-player-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .music-player.minimized .music-player-content {
+            display: none;
+        }
+
+        .now-playing {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .album-art {
+            width: 40px;
+            height: 40px;
+            border-radius: 6px;
+            background: linear-gradient(135deg, #6a89cc, #4a69bd);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+        }
+
+        .song-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .song-title {
+            font-size: 14px;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .song-artist {
+            font-size: 12px;
+            color: #666;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-time {
+            font-size: 11px;
+            color: #666;
+            min-width: 35px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background-color: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #4a90e2;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .volume-icon {
+            font-size: 14px;
+            color: #666;
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 4px;
+            background-color: #e0e0e0;
+            border-radius: 2px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .volume-level {
+            height: 100%;
+            background-color: #4a90e2;
+            width: 70%;
+            border-radius: 2px;
+        }
+
+        .playlist {
+            max-height: 150px;
+            overflow-y: auto;
+            border-top: 1px solid #e0e0e0;
+            padding-top: 10px;
+        }
+
+        .playlist-item {
+            padding: 8px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .playlist-item:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .playlist-item.active {
+            background-color: rgba(74, 144, 226, 0.1);
+            color: #4a90e2;
+        }
+
+        .playlist-item .album-art {
+            width: 30px;
+            height: 30px;
+            font-size: 12px;
+        }
+
+        .playlist-item .song-info {
+            flex: 1;
+        }
+
+        .playlist-item .song-title {
+            font-size: 13px;
+        }
+
+        .playlist-item .song-artist {
+            font-size: 11px;
+        }
+
+        /* Music Toggle Button */
+        .music-toggle-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 999;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .music-toggle-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .music-toggle-btn.hidden {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <div id="liquidEtherRoot"></div>
@@ -225,6 +488,50 @@
         </main>
     </div>
 
+    <!-- Music Player -->
+    <div class="music-player" id="musicPlayer">
+        <div class="music-player-header">
+            <div class="music-player-title">Background Music</div>
+            <div class="music-player-controls">
+                <button class="player-btn" id="minimizePlayer" title="Minimize">−</button>
+                <button class="player-btn" id="closePlayer" title="Close">×</button>
+            </div>
+        </div>
+        <div class="music-player-content">
+            <div class="now-playing">
+                <div class="album-art" id="currentAlbumArt">♪</div>
+                <div class="song-info">
+                    <div class="song-title" id="currentSongTitle">Select a song</div>
+                    <div class="song-artist" id="currentSongArtist">Artist</div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-time" id="currentTime">0:00</div>
+                <div class="progress-bar" id="progressBar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-time" id="durationTime">0:00</div>
+            </div>
+            <div class="player-controls">
+                <button class="player-btn" id="prevBtn" title="Previous">⏮</button>
+                <button class="player-btn" id="playPauseBtn" title="Play">▶</button>
+                <button class="player-btn" id="nextBtn" title="Next">⏭</button>
+            </div>
+            <div class="volume-control">
+                <div class="volume-icon">🔊</div>
+                <div class="volume-slider" id="volumeSlider">
+                    <div class="volume-level" id="volumeLevel"></div>
+                </div>
+            </div>
+            <div class="playlist" id="playlist">
+                <!-- Playlist items will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Music Toggle Button (Shows when player is minimized) -->
+    <div class="music-toggle-btn hidden" id="musicToggleBtn">♪</div>
+
     <!-- Templates -->
     <template id="stageTemplate">
         <div class="stage">
@@ -274,10 +581,253 @@
         </div>
     </template>
 
+    <template id="playlistItemTemplate">
+        <div class="playlist-item" data-song-index="">
+            <div class="album-art">♪</div>
+            <div class="song-info">
+                <div class="song-title"></div>
+                <div class="song-artist"></div>
+            </div>
+        </div>
+    </template>
+
     <script src="js/firebaseConfig.js"></script>
     <script src="js/questManager.js"></script>
     <script src="js/uiManager.js"></script>
-    <script src="js/app.js"></script>
+    <script>
+        // Music Player Functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const musicPlayer = document.getElementById('musicPlayer');
+            const musicToggleBtn = document.getElementById('musicToggleBtn');
+            const minimizeBtn = document.getElementById('minimizePlayer');
+            const closeBtn = document.getElementById('closePlayer');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressFill = document.getElementById('progressFill');
+            const currentTimeEl = document.getElementById('currentTime');
+            const durationTimeEl = document.getElementById('durationTime');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const volumeLevel = document.getElementById('volumeLevel');
+            const playlist = document.getElementById('playlist');
+            const currentSongTitle = document.getElementById('currentSongTitle');
+            const currentSongArtist = document.getElementById('currentSongArtist');
+            const currentAlbumArt = document.getElementById('currentAlbumArt');
 
+            const songs = [
+                {
+                    title: "Reflection",
+                    artist: "One Man Symphony",
+                    src: "sound/One Man Symphony - Downtempo & Lofi & Progressive Music Pack Vol - 2 (Free) - 01 Reflection Of Familiar Faces.mp3"
+                },
+                {
+                    title: "Focus",
+                    artist: "One Man Symphony",
+                    src: "sound/One Man Symphony - Downtempo & Lofi & Progressive Music Pack Vol - 2 (Free) - 02 After She Left.mp3"
+                },
+                {
+                    title: "Seoul",
+                    artist: "One Man Symphony",
+                    src: "sound/One Man Symphony - Downtempo & Lofi & Progressive Music Pack Vol - 2 (Free) - 03 Seoul.mp3"
+                },
+                {
+                    title: "Timekeeping",
+                    artist: "One Man Symphony",
+                    src: "sound/One Man Symphony - Downtempo & Lofi & Progressive Music Pack Vol - 2 (Free) - 04 Hyperfine Timekeeping.mp3"
+                },
+                {
+                    title: "Incorporeality",
+                    artist: "One Man Symphony",
+                    src: "sound/One Man Symphony - Downtempo & Lofi & Progressive Music Pack Vol - 2 (Free) - 05 Incorporeality.mp3"
+                }
+            ];
+
+            const audio = new Audio();
+            let currentSongIndex = 0;
+            let isPlaying = false;
+            let isMinimized = false;
+
+            // Initialize the player
+            function initPlayer() {
+                // Populate playlist
+                songs.forEach((song, index) => {
+                    const playlistItem = document.createElement('div');
+                    playlistItem.className = 'playlist-item';
+                    playlistItem.setAttribute('data-song-index', index);
+                    
+                    playlistItem.innerHTML = `
+                        <div class="album-art">♪</div>
+                        <div class="song-info">
+                            <div class="song-title">${song.title}</div>
+                            <div class="song-artist">${song.artist}</div>
+                        </div>
+                    `;
+                    
+                    playlistItem.addEventListener('click', () => {
+                        playSong(index);
+                    });
+                    
+                    playlist.appendChild(playlistItem);
+                });
+
+                // Set initial volume
+                audio.volume = 0.7;
+                updateVolumeDisplay();
+
+                // Set up event listeners
+                audio.addEventListener('loadedmetadata', updateDuration);
+                audio.addEventListener('timeupdate', updateProgress);
+                audio.addEventListener('ended', playNextSong);
+                
+                playPauseBtn.addEventListener('click', togglePlayPause);
+                prevBtn.addEventListener('click', playPrevSong);
+                nextBtn.addEventListener('click', playNextSong);
+                
+                progressBar.addEventListener('click', seek);
+                volumeSlider.addEventListener('click', setVolume);
+                
+                minimizeBtn.addEventListener('click', toggleMinimize);
+                closeBtn.addEventListener('click', closePlayer);
+                musicToggleBtn.addEventListener('click', expandPlayer);
+                
+                // Load the first song
+                loadSong(currentSongIndex);
+            }
+
+            function loadSong(index) {
+                currentSongIndex = index;
+                const song = songs[index];
+                
+                audio.src = song.src;
+                currentSongTitle.textContent = song.title;
+                currentSongArtist.textContent = song.artist;
+                
+                // Update active playlist item
+                document.querySelectorAll('.playlist-item').forEach((item, i) => {
+                    if (i === index) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+                
+                if (isPlaying) {
+                    audio.play();
+                }
+            }
+
+            function togglePlayPause() {
+                if (isPlaying) {
+                    audio.pause();
+                    playPauseBtn.innerHTML = '▶';
+                    playPauseBtn.setAttribute('title', 'Play');
+                } else {
+                    audio.play();
+                    playPauseBtn.innerHTML = '⏸';
+                    playPauseBtn.setAttribute('title', 'Pause');
+                }
+                isPlaying = !isPlaying;
+            }
+
+            function playNextSong() {
+                currentSongIndex = (currentSongIndex + 1) % songs.length;
+                loadSong(currentSongIndex);
+            }
+
+            function playPrevSong() {
+                currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+                loadSong(currentSongIndex);
+            }
+
+            function updateDuration() {
+                const duration = audio.duration;
+                durationTimeEl.textContent = formatTime(duration);
+            }
+
+            function updateProgress() {
+                const currentTime = audio.currentTime;
+                const duration = audio.duration;
+                
+                if (duration) {
+                    const progressPercent = (currentTime / duration) * 100;
+                    progressFill.style.width = `${progressPercent}%`;
+                    currentTimeEl.textContent = formatTime(currentTime);
+                }
+            }
+
+            function formatTime(seconds) {
+                const mins = Math.floor(seconds / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            }
+
+            function seek(e) {
+                const progressBarWidth = progressBar.clientWidth;
+                const clickX = e.offsetX;
+                const duration = audio.duration;
+                
+                if (duration) {
+                    audio.currentTime = (clickX / progressBarWidth) * duration;
+                }
+            }
+
+            function setVolume(e) {
+                const volumeSliderWidth = volumeSlider.clientWidth;
+                const clickX = e.offsetX;
+                const volume = clickX / volumeSliderWidth;
+                
+                audio.volume = volume;
+                updateVolumeDisplay();
+            }
+
+            function updateVolumeDisplay() {
+                const volume = audio.volume;
+                volumeLevel.style.width = `${volume * 100}%`;
+            }
+
+            function toggleMinimize() {
+                isMinimized = !isMinimized;
+                musicPlayer.classList.toggle('minimized', isMinimized);
+                musicToggleBtn.classList.toggle('hidden', !isMinimized);
+                
+                if (isMinimized) {
+                    minimizeBtn.innerHTML = '+';
+                    minimizeBtn.setAttribute('title', 'Expand');
+                } else {
+                    minimizeBtn.innerHTML = '−';
+                    minimizeBtn.setAttribute('title', 'Minimize');
+                }
+            }
+
+            function expandPlayer() {
+                isMinimized = false;
+                musicPlayer.classList.remove('minimized');
+                musicToggleBtn.classList.add('hidden');
+                minimizeBtn.innerHTML = '−';
+                minimizeBtn.setAttribute('title', 'Minimize');
+            }
+
+            function closePlayer() {
+                if (isPlaying) {
+                    audio.pause();
+                }
+                musicPlayer.style.display = 'none';
+                musicToggleBtn.classList.add('hidden');
+            }
+
+            // Play a specific song from the playlist
+            function playSong(index) {
+                loadSong(index);
+                if (!isPlaying) {
+                    togglePlayPause();
+                }
+            }
+
+            // Initialize the player when the page loads
+            initPlayer();
+        });
+    </script>
+    <script src="js/app.js"></script>
 </body>
 </html>
