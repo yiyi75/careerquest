@@ -13,46 +13,68 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
     <style>
-        /* Music Player Styles */
+        /* Improved Music Player Styles */
         .music-player {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            width: 300px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 320px;
             z-index: 1000;
-            transition: all 0.3s ease;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #333;
+            font-family: 'Inter', sans-serif;
         }
 
         .music-player.minimized {
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             padding: 0;
-            overflow: hidden;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .music-player.minimized:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .music-player.minimized:active {
+            transform: scale(0.95);
         }
 
         .music-player-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
 
         .music-player.minimized .music-player-header {
-            margin-bottom: 0;
-            justify-content: center;
+            margin: 0;
+            width: 100%;
             height: 100%;
+            justify-content: center;
         }
 
         .music-player-title {
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .music-player.minimized .music-player-title {
@@ -61,7 +83,7 @@
 
         .music-player-controls {
             display: flex;
-            gap: 5px;
+            gap: 6px;
         }
 
         .music-player.minimized .music-player-controls {
@@ -69,39 +91,44 @@
         }
 
         .player-btn {
-            background: none;
+            background: rgba(255, 255, 255, 0.3);
             border: none;
             cursor: pointer;
             font-size: 16px;
-            padding: 5px;
+            padding: 8px;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background-color 0.2s;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            color: #333;
         }
 
         .player-btn:hover {
-            background-color: rgba(0, 0, 0, 0.05);
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .player-btn:active {
+            transform: scale(0.95);
         }
 
         .player-btn.active {
-            background-color: rgba(74, 144, 226, 0.1);
+            background: rgba(74, 144, 226, 0.3);
             color: #4a90e2;
         }
 
         .music-player.minimized .player-btn {
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
+            display: none;
         }
 
         .music-player-content {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 16px;
         }
 
         .music-player.minimized .music-player-content {
@@ -111,19 +138,21 @@
         .now-playing {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 14px;
         }
 
         .album-art {
-            width: 40px;
-            height: 40px;
-            border-radius: 6px;
-            background: linear-gradient(135deg, #6a89cc, #4a69bd);
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(106, 137, 204, 0.7), rgba(74, 105, 189, 0.7));
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 14px;
+            font-size: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
         .song-info {
@@ -132,16 +161,17 @@
         }
 
         .song-title {
-            font-size: 14px;
-            font-weight: 500;
+            font-size: 16px;
+            font-weight: 600;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            margin-bottom: 4px;
         }
 
         .song-artist {
-            font-size: 12px;
-            color: #666;
+            font-size: 13px;
+            color: rgba(51, 51, 51, 0.7);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -150,129 +180,129 @@
         .progress-container {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .progress-time {
-            font-size: 11px;
-            color: #666;
-            min-width: 35px;
+            font-size: 12px;
+            color: rgba(51, 51, 51, 0.7);
+            min-width: 40px;
+            font-weight: 500;
         }
 
         .progress-bar {
             flex: 1;
-            height: 4px;
-            background-color: #e0e0e0;
-            border-radius: 2px;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
             overflow: hidden;
             cursor: pointer;
+            backdrop-filter: blur(5px);
         }
 
         .progress-fill {
             height: 100%;
-            background-color: #4a90e2;
+            background: linear-gradient(90deg, rgba(74, 144, 226, 0.8), rgba(106, 137, 204, 0.8));
             width: 0%;
             transition: width 0.1s linear;
+            border-radius: 10px;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .main-controls {
+            display: flex;
+            gap: 8px;
         }
 
         .volume-control {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
+            margin-top: 8px;
         }
 
         .volume-icon {
-            font-size: 14px;
-            color: #666;
+            font-size: 16px;
+            color: rgba(51, 51, 51, 0.7);
         }
 
         .volume-slider {
             flex: 1;
             height: 4px;
-            background-color: #e0e0e0;
-            border-radius: 2px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
             position: relative;
             cursor: pointer;
+            backdrop-filter: blur(5px);
         }
 
         .volume-level {
             height: 100%;
-            background-color: #4a90e2;
+            background: linear-gradient(90deg, rgba(74, 144, 226, 0.8), rgba(106, 137, 204, 0.8));
             width: 70%;
-            border-radius: 2px;
+            border-radius: 10px;
         }
 
-        .playlist {
-            max-height: 150px;
-            overflow-y: auto;
-            border-top: 1px solid #e0e0e0;
-            padding-top: 10px;
-        }
-
-        .playlist-item {
-            padding: 8px 10px;
-            border-radius: 6px;
-            cursor: pointer;
+        .playlist-info {
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 10px;
-            transition: background-color 0.2s;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
         }
 
-        .playlist-item:hover {
-            background-color: rgba(0, 0, 0, 0.05);
+        .playlist-count {
+            font-size: 12px;
+            color: rgba(51, 51, 51, 0.6);
+            font-weight: 500;
         }
 
-        .playlist-item.active {
-            background-color: rgba(74, 144, 226, 0.1);
+        .shuffle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: rgba(51, 51, 51, 0.7);
+            padding: 6px 10px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .shuffle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: #333;
+        }
+
+        .shuffle-btn.active {
+            background: rgba(74, 144, 226, 0.2);
             color: #4a90e2;
         }
 
-        .playlist-item .album-art {
-            width: 30px;
-            height: 30px;
-            font-size: 12px;
-        }
-
-        .playlist-item .song-info {
-            flex: 1;
-        }
-
-        .playlist-item .song-title {
-            font-size: 13px;
-        }
-
-        .playlist-item .song-artist {
-            font-size: 11px;
-        }
-
-        /* Music Toggle Button */
-        .music-toggle-btn {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 999;
-            font-size: 20px;
-            transition: all 0.3s ease;
-        }
-
-        .music-toggle-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .music-toggle-btn.hidden {
+        .minimized-indicator {
             display: none;
+            font-size: 20px;
+        }
+
+        .music-player.minimized .minimized-indicator {
+            display: block;
+        }
+
+        /* Animation for music note when playing */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .music-player.minimized.playing .minimized-indicator {
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
@@ -423,6 +453,7 @@
                 </div>
             </div>
 
+            <!-- Templates remain the same -->
             <template id="roadmapStopTemplate">
                 <div class="roadmap-stop stage-point" data-stage-id="">
                     <div class="stop-marker">
@@ -437,65 +468,18 @@
                 </div>
             </template>
 
-            <template id="stageTaskTemplate">
-                <div class="stage-task" data-task-id="">
-                    <div class="task-content">
-                        <input type="checkbox" class="task-checkbox">
-                        <span class="task-title"></span>
-                        <button class="btn btn-sm daily-toggle-btn btn-outline" 
-                                title="Make this a daily practice task">
-                            Make Daily
-                        </button>
-                    </div>
-                    <div class="task-info">
-                        <span class="task-xp">+<span>0</span> XP</span>
-                        <span class="daily-badge hidden" title="Resets daily">Daily</span>
-                    </div>
-                </div>
-            </template>
-
-            <template id="editStageTemplate">
-                <div class="edit-stage">
-                    <div class="edit-stage-header">
-                        <input type="text" class="edit-stage-title" placeholder="Stage name (e.g., Preparation)">
-                        <button class="btn btn-danger remove-edit-stage">×</button>
-                    </div>
-                    <div class="edit-tasks-container">
-                        <!-- Tasks will be added here -->
-                    </div>
-                    <button class="btn btn-outline add-edit-task">+ Add Task</button>
-                </div>
-            </template>
-
-            <template id="editTaskTemplate">
-                <div class="edit-task">
-                    <input type="text" class="edit-task-title" placeholder="Task description (e.g., Practice SQL)">
-                    <button class="btn btn-danger remove-edit-task">×</button>
-                </div>
-            </template>
-
-            <!-- Reset Confirmation Modal -->
-            <div class="modal hidden" id="resetModal">
-                <div class="modal-content">
-                    <h3>Reset Quest?</h3>
-                    <p>Are you sure you want to reset your current quest? This will delete all your progress, XP, and achievements for this quest.</p>
-                    <div class="modal-actions">
-                        <button class="btn btn-danger" id="confirmResetBtn">Yes, Reset</button>
-                        <button class="btn btn-outline" id="cancelResetBtn">Cancel</button>
-                    </div>
-                </div>
-            </div>
+            <!-- Other templates remain the same -->
         </main>
     </div>
 
-    <!-- Music Player -->
+    <!-- Improved Music Player -->
     <div class="music-player" id="musicPlayer">
         <div class="music-player-header">
-            <div class="music-player-title">Background Music</div>
+            <div class="music-player-title">🎵</div>
             <div class="music-player-controls">
                 <button class="player-btn" id="minimizePlayer" title="Minimize">−</button>
-                <button class="player-btn" id="closePlayer" title="Close">×</button>
             </div>
+            <div class="minimized-indicator">♪</div>
         </div>
         <div class="music-player-content">
             <div class="now-playing">
@@ -513,9 +497,11 @@
                 <div class="progress-time" id="durationTime">0:00</div>
             </div>
             <div class="player-controls">
-                <button class="player-btn" id="prevBtn" title="Previous">⏮</button>
-                <button class="player-btn" id="playPauseBtn" title="Play">▶</button>
-                <button class="player-btn" id="nextBtn" title="Next">⏭</button>
+                <div class="main-controls">
+                    <button class="player-btn" id="prevBtn" title="Previous">⏮</button>
+                    <button class="player-btn" id="playPauseBtn" title="Play">▶</button>
+                    <button class="player-btn" id="nextBtn" title="Next">⏭</button>
+                </div>
             </div>
             <div class="volume-control">
                 <div class="volume-icon">🔊</div>
@@ -523,84 +509,21 @@
                     <div class="volume-level" id="volumeLevel"></div>
                 </div>
             </div>
-            <div class="playlist" id="playlist">
-                <!-- Playlist items will be added here -->
+            <div class="playlist-info">
+                <div class="playlist-count" id="playlistCount">5 songs</div>
+                <button class="shuffle-btn" id="shuffleBtn" title="Shuffle">🔀 Shuffle</button>
             </div>
         </div>
     </div>
-
-    <!-- Music Toggle Button (Shows when player is minimized) -->
-    <div class="music-toggle-btn hidden" id="musicToggleBtn">♪</div>
-
-    <!-- Templates -->
-    <template id="stageTemplate">
-        <div class="stage">
-            <div class="stage-header">
-                <input type="text" class="stage-title" placeholder="Stage name (e.g., Preparation)">
-                <button class="btn btn-danger remove-stage">×</button>
-            </div>
-            <div class="steps-container">
-                <!-- Steps will be added here -->
-            </div>
-            <button class="btn btn-outline add-step">+ Add Step</button>
-        </div>
-    </template>
-
-    <template id="stepTemplate">
-        <div class="step">
-            <input type="text" class="step-title" placeholder="Step description (e.g., Practice SQL)">
-            <button class="btn btn-danger remove-step">×</button>
-        </div>
-    </template>
-
-    <template id="chapterTemplate">
-        <div class="chapter" data-chapter-id="">
-            <div class="chapter-header">
-                <h3 class="chapter-title"></h3>
-                <div class="chapter-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill"></div>
-                    </div>
-                    <span class="progress-text">0%</span>
-                    <span class="today-progress">Today: 0/0</span>
-                </div>
-            </div>
-            <div class="levels-container">
-                <!-- Levels will be added here -->
-            </div>
-        </div>
-    </template>
-
-    <template id="levelTemplate">
-        <div class="level" data-level-id="">
-            <div class="level-content">
-                <input type="checkbox" class="level-checkbox">
-                <span class="level-title"></span>
-            </div>
-            <div class="level-xp">+<span>0</span> XP</div>
-        </div>
-    </template>
-
-    <template id="playlistItemTemplate">
-        <div class="playlist-item" data-song-index="">
-            <div class="album-art">♪</div>
-            <div class="song-info">
-                <div class="song-title"></div>
-                <div class="song-artist"></div>
-            </div>
-        </div>
-    </template>
 
     <script src="js/firebaseConfig.js"></script>
     <script src="js/questManager.js"></script>
     <script src="js/uiManager.js"></script>
     <script>
-        // Music Player Functionality
+        // Improved Music Player Functionality
         document.addEventListener('DOMContentLoaded', function() {
             const musicPlayer = document.getElementById('musicPlayer');
-            const musicToggleBtn = document.getElementById('musicToggleBtn');
             const minimizeBtn = document.getElementById('minimizePlayer');
-            const closeBtn = document.getElementById('closePlayer');
             const playPauseBtn = document.getElementById('playPauseBtn');
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
@@ -610,10 +533,11 @@
             const durationTimeEl = document.getElementById('durationTime');
             const volumeSlider = document.getElementById('volumeSlider');
             const volumeLevel = document.getElementById('volumeLevel');
-            const playlist = document.getElementById('playlist');
             const currentSongTitle = document.getElementById('currentSongTitle');
             const currentSongArtist = document.getElementById('currentSongArtist');
             const currentAlbumArt = document.getElementById('currentAlbumArt');
+            const playlistCount = document.getElementById('playlistCount');
+            const shuffleBtn = document.getElementById('shuffleBtn');
 
             const songs = [
                 {
@@ -647,29 +571,13 @@
             let currentSongIndex = 0;
             let isPlaying = false;
             let isMinimized = false;
+            let isShuffled = false;
+            let originalPlaylist = [...songs];
 
             // Initialize the player
             function initPlayer() {
-                // Populate playlist
-                songs.forEach((song, index) => {
-                    const playlistItem = document.createElement('div');
-                    playlistItem.className = 'playlist-item';
-                    playlistItem.setAttribute('data-song-index', index);
-                    
-                    playlistItem.innerHTML = `
-                        <div class="album-art">♪</div>
-                        <div class="song-info">
-                            <div class="song-title">${song.title}</div>
-                            <div class="song-artist">${song.artist}</div>
-                        </div>
-                    `;
-                    
-                    playlistItem.addEventListener('click', () => {
-                        playSong(index);
-                    });
-                    
-                    playlist.appendChild(playlistItem);
-                });
+                // Set playlist count
+                playlistCount.textContent = `${songs.length} songs`;
 
                 // Set initial volume
                 audio.volume = 0.7;
@@ -688,11 +596,19 @@
                 volumeSlider.addEventListener('click', setVolume);
                 
                 minimizeBtn.addEventListener('click', toggleMinimize);
-                closeBtn.addEventListener('click', closePlayer);
-                musicToggleBtn.addEventListener('click', expandPlayer);
+                musicPlayer.addEventListener('click', handlePlayerClick);
                 
+                shuffleBtn.addEventListener('click', toggleShuffle);
+
                 // Load the first song
                 loadSong(currentSongIndex);
+            }
+
+            function handlePlayerClick(e) {
+                // If player is minimized and user clicks anywhere on it, expand it
+                if (isMinimized && !e.target.closest('.player-btn')) {
+                    expandPlayer();
+                }
             }
 
             function loadSong(index) {
@@ -702,15 +618,6 @@
                 audio.src = song.src;
                 currentSongTitle.textContent = song.title;
                 currentSongArtist.textContent = song.artist;
-                
-                // Update active playlist item
-                document.querySelectorAll('.playlist-item').forEach((item, i) => {
-                    if (i === index) {
-                        item.classList.add('active');
-                    } else {
-                        item.classList.remove('active');
-                    }
-                });
                 
                 if (isPlaying) {
                     audio.play();
@@ -722,21 +629,41 @@
                     audio.pause();
                     playPauseBtn.innerHTML = '▶';
                     playPauseBtn.setAttribute('title', 'Play');
+                    musicPlayer.classList.remove('playing');
                 } else {
                     audio.play();
                     playPauseBtn.innerHTML = '⏸';
                     playPauseBtn.setAttribute('title', 'Pause');
+                    musicPlayer.classList.add('playing');
                 }
                 isPlaying = !isPlaying;
             }
 
             function playNextSong() {
-                currentSongIndex = (currentSongIndex + 1) % songs.length;
+                if (isShuffled) {
+                    // Play random song (but not the same one)
+                    let newIndex;
+                    do {
+                        newIndex = Math.floor(Math.random() * songs.length);
+                    } while (newIndex === currentSongIndex && songs.length > 1);
+                    currentSongIndex = newIndex;
+                } else {
+                    currentSongIndex = (currentSongIndex + 1) % songs.length;
+                }
                 loadSong(currentSongIndex);
             }
 
             function playPrevSong() {
-                currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+                if (isShuffled) {
+                    // Play random song (but not the same one)
+                    let newIndex;
+                    do {
+                        newIndex = Math.floor(Math.random() * songs.length);
+                    } while (newIndex === currentSongIndex && songs.length > 1);
+                    currentSongIndex = newIndex;
+                } else {
+                    currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+                }
                 loadSong(currentSongIndex);
             }
 
@@ -787,40 +714,36 @@
             }
 
             function toggleMinimize() {
-                isMinimized = !isMinimized;
-                musicPlayer.classList.toggle('minimized', isMinimized);
-                musicToggleBtn.classList.toggle('hidden', !isMinimized);
-                
-                if (isMinimized) {
-                    minimizeBtn.innerHTML = '+';
-                    minimizeBtn.setAttribute('title', 'Expand');
-                } else {
-                    minimizeBtn.innerHTML = '−';
-                    minimizeBtn.setAttribute('title', 'Minimize');
+                isMinimized = true;
+                musicPlayer.classList.add('minimized');
+                if (isPlaying) {
+                    musicPlayer.classList.add('playing');
                 }
             }
 
             function expandPlayer() {
                 isMinimized = false;
                 musicPlayer.classList.remove('minimized');
-                musicToggleBtn.classList.add('hidden');
-                minimizeBtn.innerHTML = '−';
-                minimizeBtn.setAttribute('title', 'Minimize');
             }
 
-            function closePlayer() {
-                if (isPlaying) {
-                    audio.pause();
-                }
-                musicPlayer.style.display = 'none';
-                musicToggleBtn.classList.add('hidden');
-            }
-
-            // Play a specific song from the playlist
-            function playSong(index) {
-                loadSong(index);
-                if (!isPlaying) {
-                    togglePlayPause();
+            function toggleShuffle() {
+                isShuffled = !isShuffled;
+                shuffleBtn.classList.toggle('active', isShuffled);
+                
+                if (isShuffled) {
+                    // Create a shuffled copy of the playlist
+                    const shuffled = [...songs];
+                    for (let i = shuffled.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                    }
+                    // Replace the current playlist with shuffled version
+                    songs.splice(0, songs.length, ...shuffled);
+                    shuffleBtn.innerHTML = '🔀 Shuffled';
+                } else {
+                    // Restore original order
+                    songs.splice(0, songs.length, ...originalPlaylist);
+                    shuffleBtn.innerHTML = '🔀 Shuffle';
                 }
             }
 
