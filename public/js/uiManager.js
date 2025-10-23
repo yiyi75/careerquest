@@ -40,16 +40,7 @@ class UIManager {
         const closeCelebration = document.getElementById('closeCelebration');
         if (closeCelebration) closeCelebration.addEventListener('click', () => this.hideCelebration());
         
-        // Reset functionality elements (only exist in quest progress panel)
-        const resetQuestBtn = document.getElementById('resetQuestBtn');
-        const confirmResetBtn = document.getElementById('confirmResetBtn');
-        const cancelResetBtn = document.getElementById('cancelResetBtn');
-        
-        if (resetQuestBtn) resetQuestBtn.addEventListener('click', () => this.showResetConfirmation());
-        if (confirmResetBtn) confirmResetBtn.addEventListener('click', () => this.confirmReset());
-        if (cancelResetBtn) cancelResetBtn.addEventListener('click', () => this.hideResetConfirmation());
-
-        // Edit quest functionality elements (only exist when edit modal is open)
+        // Edit quest functionality elements - these exist in modals that are created dynamically
         const toggleEditBtn = document.getElementById('toggleEditBtn');
         const addEditStageBtn = document.getElementById('addEditStageBtn');
         const saveQuestBtn = document.getElementById('saveQuestBtn');
@@ -85,6 +76,14 @@ class UIManager {
                 this.addEditTask(e.target.closest('.edit-stage'));
             } else if (e.target.classList.contains('remove-edit-task')) {
                 this.removeEditTask(e.target.closest('.edit-task'));
+            }
+            // Reset functionality via event delegation
+            else if (e.target.id === 'resetQuestBtn' || e.target.closest('#resetQuestBtn')) {
+                this.showResetConfirmation();
+            } else if (e.target.id === 'confirmResetBtn' || e.target.closest('#confirmResetBtn')) {
+                this.confirmReset();
+            } else if (e.target.id === 'cancelResetBtn' || e.target.closest('#cancelResetBtn')) {
+                this.hideResetConfirmation();
             }
         });
 
@@ -1647,29 +1646,72 @@ class UIManager {
 
     // ===== RESET FUNCTIONALITY =====
     showResetConfirmation() {
-        document.getElementById('resetModal').classList.remove('hidden');
+        // Try to get existing modal first
+        let resetModal = document.getElementById('resetModal');
+        
+        if (!resetModal) {
+            // Create the modal dynamically if it doesn't exist
+            resetModal = this.createResetModal();
+        }
+        
+        if (resetModal) {
+            resetModal.classList.remove('hidden');
+        }
+    }
+
+    // Create reset modal dynamically
+    createResetModal() {
+        const modal = document.createElement('div');
+        modal.id = 'resetModal';
+        modal.className = 'modal hidden';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h3>Reset Quest</h3>
+                <p>Are you sure you want to reset your entire quest? This will delete all progress and cannot be undone.</p>
+                <div class="modal-actions">
+                    <button class="btn btn-danger" id="confirmResetBtn">Yes, Reset Everything</button>
+                    <button class="btn btn-outline" id="cancelResetBtn">Cancel</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        return modal;
     }
 
     hideResetConfirmation() {
-        document.getElementById('resetModal').classList.add('hidden');
+        const resetModal = document.getElementById('resetModal');
+        if (resetModal) {
+            resetModal.classList.add('hidden');
+        }
     }
 
     confirmReset() {
         this.hideResetConfirmation();
+        
+        // Find the reset button if it exists
         const resetBtn = document.getElementById('resetQuestBtn');
-        const originalText = resetBtn.textContent;
-        resetBtn.textContent = 'Resetting...';
-        resetBtn.disabled = true;
+        
+        if (resetBtn) {
+            const originalText = resetBtn.textContent;
+            resetBtn.textContent = 'Resetting...';
+            resetBtn.disabled = true;
 
-        setTimeout(() => {
+            setTimeout(() => {
+                this.questManager.resetQuest();
+                this.showResetMessage();
+                this.showQuestCreation();
+                resetBtn.textContent = originalText;
+                resetBtn.disabled = false;
+            }, 1000);
+        } else {
+            // Fallback if reset button doesn't exist
             this.questManager.resetQuest();
             this.showResetMessage();
             this.showQuestCreation();
-            resetBtn.textContent = originalText;
-            resetBtn.disabled = false;
-        }, 1000);
+        }
     }
-
+    
     showResetMessage() {
         const message = document.createElement('div');
         message.className = 'reset-message';
