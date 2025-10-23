@@ -12,303 +12,9 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
 
-    <style>
-        /* Improved Music Player Styles */
-        .music-player {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 18px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            width: 320px;
-            z-index: 1000;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: #333;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .music-player.minimized {
-            width: 60px;
-            height: 60px;
-            padding: 0;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-        }
-
-        .music-player.minimized:hover {
-            transform: scale(1.05);
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        .music-player.minimized:active {
-            transform: scale(0.95);
-        }
-
-        .music-player-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .music-player.minimized .music-player-header {
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            justify-content: center;
-        }
-
-        .music-player-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .music-player.minimized .music-player-title {
-            display: none;
-        }
-
-        .music-player-controls {
-            display: flex;
-            gap: 6px;
-        }
-
-        .music-player.minimized .music-player-controls {
-            display: none;
-        }
-
-        .player-btn {
-            background: rgba(255, 255, 255, 0.3);
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 8px;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-            color: #333;
-        }
-
-        .player-btn:hover {
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(1.1);
-        }
-
-        .player-btn:active {
-            transform: scale(0.95);
-        }
-
-        .player-btn.active {
-            background: rgba(74, 144, 226, 0.3);
-            color: #4a90e2;
-        }
-
-        .music-player.minimized .player-btn {
-            display: none;
-        }
-
-        .music-player-content {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .music-player.minimized .music-player-content {
-            display: none;
-        }
-
-        .now-playing {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .album-art {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(106, 137, 204, 0.7), rgba(74, 105, 189, 0.7));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .song-info {
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .song-title {
-            font-size: 16px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 4px;
-        }
-
-        .song-artist {
-            font-size: 13px;
-            color: rgba(51, 51, 51, 0.7);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .progress-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .progress-time {
-            font-size: 12px;
-            color: rgba(51, 51, 51, 0.7);
-            min-width: 40px;
-            font-weight: 500;
-        }
-
-        .progress-bar {
-            flex: 1;
-            height: 5px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            overflow: hidden;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, rgba(74, 144, 226, 0.8), rgba(106, 137, 204, 0.8));
-            width: 0%;
-            transition: width 0.1s linear;
-            border-radius: 10px;
-        }
-
-        .player-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .main-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .volume-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 8px;
-        }
-
-        .volume-icon {
-            font-size: 16px;
-            color: rgba(51, 51, 51, 0.7);
-        }
-
-        .volume-slider {
-            flex: 1;
-            height: 4px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            position: relative;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
-
-        .volume-level {
-            height: 100%;
-            background: linear-gradient(90deg, rgba(74, 144, 226, 0.8), rgba(106, 137, 204, 0.8));
-            width: 70%;
-            border-radius: 10px;
-        }
-
-        .playlist-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .playlist-count {
-            font-size: 12px;
-            color: rgba(51, 51, 51, 0.6);
-            font-weight: 500;
-        }
-
-        .shuffle-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            color: rgba(51, 51, 51, 0.7);
-            padding: 6px 10px;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .shuffle-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            color: #333;
-        }
-
-        .shuffle-btn.active {
-            background: rgba(74, 144, 226, 0.2);
-            color: #4a90e2;
-        }
-
-        .minimized-indicator {
-            display: none;
-            font-size: 20px;
-        }
-
-        .music-player.minimized .minimized-indicator {
-            display: block;
-        }
-
-        /* Animation for music note when playing */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .music-player.minimized.playing .minimized-indicator {
-            animation: pulse 2s infinite;
-        }
-    </style>
 </head>
 <body>
-    <div id="liquidEtherRoot"></div>
-    
+
     <div class="app-container">
         <!-- Firebase Loading Indicator -->
         <div class="firebase-loading hidden" id="firebaseLoading">
@@ -856,6 +562,391 @@
 
             // Initialize the player when the page loads
             initPlayer();
+        });
+    </script>
+    <!-- Lootbox Decoration System -->
+    <div class="decoration-system">
+        <div class="active-decoration" id="activeDecoration">
+            <img src="https://media.giphy.com/media/l0HlNQ03J5JxX6lva/giphy.gif" alt="Default Decoration">
+        </div>
+        
+        <div class="decoration-selector" id="decorationSelector">
+            <div class="selector-header">
+                <div class="selector-title">Gif</div>
+                <button class="close-selector" id="closeSelector">×</button>
+            </div>
+            
+            <div class="decorations-grid" id="decorationsGrid">
+                <!-- Decorations will be dynamically added here -->
+            </div>
+            
+            <div class="lootbox-container">
+                <button class="lootbox-btn" id="lootboxBtn">
+                    🎁 Open Lootbox (Cost: 100 XP)
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unlock Animation -->
+    <div class="unlock-animation" id="unlockAnimation">
+        <div class="unlocked-gif">
+            <img id="unlockedGif" src="" alt="Unlocked GIF">
+        </div>
+        <div class="unlock-title">New Gifs Unlocked!</div>
+        <div class="unlock-subtitle" id="unlockedName">Gif</div>
+        <button class="close-unlock" id="closeUnlock">Awesome!</button>
+    </div>
+    <script>
+        // Lootbox Decoration System
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const activeDecoration = document.getElementById('activeDecoration');
+            const decorationSelector = document.getElementById('decorationSelector');
+            const closeSelector = document.getElementById('closeSelector');
+            const decorationsGrid = document.getElementById('decorationsGrid');
+            const lootboxBtn = document.getElementById('lootboxBtn');
+            const unlockAnimation = document.getElementById('unlockAnimation');
+            const unlockedGif = document.getElementById('unlockedGif');
+            const unlockedName = document.getElementById('unlockedName');
+            const closeUnlock = document.getElementById('closeUnlock');
+
+
+            const gifLibrary = [
+                { id: 'chilling', name: 'Chilling', url: 'https://media.giphy.com/media/RSmg2jxRfgd0bXYTjD/giphy.gif', unlocked: true },
+                { id: 'celebration', name: 'Celebration', url: 'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGk5Ym1sNnFzeHIyOTJnbjlvZnF1bm0yOWF0cmJxZGg3cTRpM29nbyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/h2nEjhUn2RAA0ng0qx/giphy.gif', unlocked: false },
+                { id: 'work_hard', name: 'Work Hard', url: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExZWNlNjVudTd6dHA1YXZmeDJiYTZwN29nbW95ZTQxeHpnaW1lZTZkaCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/4CMgIxXh6GHAWRMyCC/giphy.gif', unlocked: false },
+                { id: 'fighting', name: 'Fighting', url: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXFvYm96cnU5Z3VpbmQyMHNwZ2xxZGxjMzFjYXpsaGVjZW41OTh5aCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/uapnU4QSD6GuS6qPvE/giphy.gif', unlocked: false },
+                { id: 'ttc', name: 'TTC', url: 'https://media.giphy.com/media/zlmbcQUYZFuYuh0zve/giphy.gif', unlocked: false },
+                { id: 'cute', name: 'Cute', url: 'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNGc1MTN1cGU4dGlnbXVzamE4M2c0bHhxc3Jicmd1ZXdsZmFhZjY5aSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/8KYoD46PYv5likrQfa/giphy.gif', unlocked: false },
+                { id: 'flower', name: 'Flower', url: 'https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExNXE0eTd2ZXoybnltd2ZibHJ5MW1rOHFsYWdkcDZ6MGdlamVpZW1zbiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/2p5FuOUeNzXouyPbzm/giphy.gif', unlocked: false },
+                { id: 'punch_computer', name: 'Punch', url: 'https://media.giphy.com/media/oA9I2ci8mAbkKnnoER/giphy.gif', unlocked: false },
+                { id: 'tired', name: 'Tired', url: 'https://media1.giphy.com/media/v1.Y2lkPTc5MGI3NjExYWNqenpwenhkaTFwNDE1cjk4dDV2d2h5d3B2bjdkdGJtemg4d2VuaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/AD7yI7iJz5UJ1P9tPt/giphy.gif', unlocked: false },
+                { id: 'elevator', name: 'Elevator', url: 'https://media.giphy.com/media/7zk3aJ54AaWQlZyoF4/giphy.gif', unlocked: false },
+                { id: 'eating_heart', name: 'Eating Hearts', url: 'https://media.giphy.com/media/YrszRrV75qcvhyAa1P/giphy.gif', unlocked: false },
+                { id: 'shy', name: 'Shy', url: 'https://media.giphy.com/media/SKQ5CWSYFbEG2uFZo8/giphy.gif', unlocked: false },
+                { id: 'crowded', name: 'Crowded TTC', url: 'https://media.giphy.com/media/1TupNFBv5jctmsqRGk/giphy.gif', unlocked: false },
+                { id: 'focus', name: 'Focus', url: 'https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bjFjbmRlNjN6c25rMmk2amxzZmx2b3V1eTF6Z2xsMXJhNXNpMTF4eCZlcD12MV9zdGlja2Vyc19yZWxhdGVkJmN0PXM/Aa3k6VDl2EDauCyE6U/giphy.gif', unlocked: false }
+            ];
+
+             // Current user data
+            let userDecorations = ['chilling'];
+            let userXP = 0;
+            let currentDecoration = 'chilling';
+let questManager = null;
+            let uiManager = null;
+
+            // Initialize the decoration system
+            function initDecorationSystem() {
+                // Wait for QuestManager and UIManager to be available
+                setTimeout(() => {
+                    if (window.questManager && window.uiManager) {
+                        questManager = window.questManager;
+                        uiManager = window.uiManager;
+                        loadUserData();
+                        
+                        // Set up XP change listener
+                        setupXPChangeListener();
+                    } else {
+                        // Retry after a short delay
+                        setTimeout(initDecorationSystem, 500);
+                    }
+                }, 100);
+                
+                // Event listeners
+                activeDecoration.addEventListener('click', toggleSelector);
+                closeSelector.addEventListener('click', closeSelectorModal);
+                lootboxBtn.addEventListener('click', openLootbox);
+                closeUnlock.addEventListener('click', closeUnlockModal);
+                
+                // Close selector when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!decorationSelector.contains(e.target) && 
+                        !activeDecoration.contains(e.target) && 
+                        decorationSelector.classList.contains('show')) {
+                        closeSelectorModal();
+                    }
+                });
+            }
+
+            function loadUserData() {
+                // Try to get user data from QuestManager first
+                if (questManager && questManager.player) {
+                    userXP = questManager.player.xp || 0;
+                    
+                    // Update XP display in header
+                    const playerXPElement = document.getElementById('playerXP');
+                    if (playerXPElement) {
+                        playerXPElement.textContent = userXP;
+                    }
+                }
+                
+                // Load from localStorage as fallback
+                const savedDecorations = localStorage.getItem('userDecorations');
+                const savedCurrent = localStorage.getItem('currentDecoration');
+                
+                if (savedDecorations) userDecorations = JSON.parse(savedDecorations);
+                if (savedCurrent) currentDecoration = savedCurrent;
+                
+                // Update active decoration
+                const currentGif = gifLibrary.find(g => g.id === currentDecoration);
+                if (currentGif) {
+                    activeDecoration.querySelector('img').src = currentGif.url;
+                }
+                
+                renderDecorationsGrid();
+                updateLootboxButton();
+            }
+
+            function saveUserData() {
+                localStorage.setItem('userDecorations', JSON.stringify(userDecorations));
+                localStorage.setItem('currentDecoration', currentDecoration);
+                
+                // Also save to QuestManager if available
+                if (questManager && questManager.player) {
+                    questManager.player.xp = userXP;
+                    // Trigger save to Firebase if available
+                    if (questManager.saveToFirebase) {
+                        questManager.saveToFirebase();
+                    }
+                }
+            }
+
+            function renderDecorationsGrid() {
+                decorationsGrid.innerHTML = '';
+                
+                gifLibrary.forEach(gif => {
+                    const isUnlocked = userDecorations.includes(gif.id);
+                    const isActive = currentDecoration === gif.id;
+                    
+                    const decorationItem = document.createElement('div');
+                    decorationItem.className = `decoration-item ${isUnlocked ? '' : 'locked'} ${isActive ? 'active' : ''}`;
+                    decorationItem.setAttribute('data-gif-id', gif.id);
+                    
+                    if (isUnlocked) {
+                        decorationItem.innerHTML = `
+                            <img src="${gif.url}" alt="${gif.name}">
+                            <div class="item-label">${gif.name}</div>
+                        `;
+                        decorationItem.addEventListener('click', () => selectDecoration(gif.id));
+                    } else {
+                        decorationItem.innerHTML = `
+                            <div style="width:100%;height:100%;background:linear-gradient(135deg, #f0f0f0, #e0e0e0);border-radius:8px;"></div>
+                            <div class="item-label">${gif.name}</div>
+                        `;
+                    }
+                    
+                    decorationsGrid.appendChild(decorationItem);
+                });
+            }
+
+            function selectDecoration(gifId) {
+                const gif = gifLibrary.find(g => g.id === gifId);
+                if (gif && userDecorations.includes(gifId)) {
+                    currentDecoration = gifId;
+                    activeDecoration.querySelector('img').src = gif.url;
+                    renderDecorationsGrid();
+                    saveUserData();
+                    closeSelectorModal();
+                }
+            }
+
+            function toggleSelector() {
+                decorationSelector.classList.toggle('show');
+            }
+
+            function closeSelectorModal() {
+                decorationSelector.classList.remove('show');
+            }
+
+            function updateLootboxButton() {
+                // Update XP from QuestManager if available
+                if (questManager && questManager.player) {
+                    userXP = questManager.player.xp || 0;
+                }
+                
+                // Enable/disable lootbox button based on XP
+                lootboxBtn.disabled = userXP < 100;
+                lootboxBtn.textContent = userXP >= 100 ? 
+                    '🎁 Open Lootbox (Cost: 100 XP)' : 
+                    `🎁 Need ${100 - userXP} more XP`;
+                
+                // Update XP display in header
+                const playerXPElement = document.getElementById('playerXP');
+                if (playerXPElement) {
+                    playerXPElement.textContent = userXP;
+                }
+            }
+
+            function openLootbox() {
+                if (userXP < 100) return;
+                
+                // Deduct XP
+                userXP -= 100;
+                
+                // Update QuestManager if available
+                if (questManager && questManager.player) {
+                    questManager.player.xp = userXP;
+                    // Update UI through UIManager if available
+                    if (uiManager && uiManager.updatePlayerStats) {
+                        uiManager.updatePlayerStats();
+                    }
+                }
+                
+                // Get locked GIFs
+                const lockedGifs = gifLibrary.filter(g => !userDecorations.includes(g.id));
+                
+                if (lockedGifs.length === 0) {
+                    alert('🎉 You already unlocked all decorations!');
+                    userXP += 100; // Refund XP
+                    updateLootboxButton();
+                    saveUserData();
+                    return;
+                }
+                
+                // Randomly select a locked GIF
+                const randomIndex = Math.floor(Math.random() * lockedGifs.length);
+                const unlockedGifData = lockedGifs[randomIndex];
+                
+                // Unlock it
+                userDecorations.push(unlockedGifData.id);
+                
+                // Show unlock animation
+                showUnlockAnimation(unlockedGifData);
+                
+                // Update UI
+                updateLootboxButton();
+                saveUserData();
+                
+                // Show toast notification if UIManager is available
+                if (uiManager && uiManager.showToast) {
+                    uiManager.showToast(`🎉 Unlocked "${unlockedGifData.name}" decoration!`, 'success');
+                }
+            }
+
+            function showUnlockAnimation(gifData) {
+                unlockedGif.src = gifData.url;
+                unlockedName.textContent = gifData.name;
+                unlockAnimation.classList.add('show');
+                createConfetti();
+            }
+
+            function closeUnlockModal() {
+                unlockAnimation.classList.remove('show');
+                renderDecorationsGrid();
+            }
+
+            function createConfetti() {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'];
+                for (let i = 0; i < 120; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-15px';
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    confetti.style.width = (6 + Math.random() * 6) + 'px';
+                    confetti.style.height = (6 + Math.random() * 6) + 'px';
+                    document.body.appendChild(confetti);
+                    
+                    // Animate
+                    const animation = confetti.animate([
+                        { top: '-15px', opacity: 1, transform: `rotate(0deg)` },
+                        { top: '100vh', opacity: 0, transform: `rotate(${Math.random() * 720}deg)` }
+                    ], {
+                        duration: 1800 + Math.random() * 2500,
+                        easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
+                    });
+                    
+                    animation.onfinish = () => confetti.remove();
+                }
+            }
+
+            // Listen for XP changes from the main app
+            function setupXPChangeListener() {
+                // Method 1: Override the handleTaskCompletion method in UIManager
+                if (window.uiManager && window.uiManager.handleTaskCompletion) {
+                    const originalHandleTaskCompletion = window.uiManager.handleTaskCompletion;
+                    window.uiManager.handleTaskCompletion = function(checkbox) {
+                        // Call the original method
+                        const result = originalHandleTaskCompletion.call(this, checkbox);
+                        
+                        // Update decoration system XP
+                        if (result && window.decorationSystem) {
+                            window.decorationSystem.refreshXP();
+                        }
+                        
+                        return result;
+                    };
+                }
+
+                // Method 2: Override the updatePlayerStats method
+                if (window.uiManager && window.uiManager.updatePlayerStats) {
+                    const originalUpdatePlayerStats = window.uiManager.updatePlayerStats;
+                    window.uiManager.updatePlayerStats = function() {
+                        if (originalUpdatePlayerStats) {
+                            originalUpdatePlayerStats.call(this);
+                        }
+                        // Sync XP with lootbox system
+                        if (questManager && questManager.player) {
+                            userXP = questManager.player.xp || 0;
+                            updateLootboxButton();
+                        }
+                    };
+                }
+
+                // Method 3: Listen for custom XP change events
+                document.addEventListener('xpChanged', function(event) {
+                    if (event.detail && event.detail.xp !== undefined) {
+                        userXP = event.detail.xp;
+                        updateLootboxButton();
+                    }
+                });
+
+                // Method 4: Poll for XP changes (fallback)
+                startXPPolling();
+            }
+
+            // Fallback: Poll for XP changes every second
+            function startXPPolling() {
+                setInterval(() => {
+                    if (questManager && questManager.player) {
+                        const currentXP = questManager.player.xp || 0;
+                        if (currentXP !== userXP) {
+                            userXP = currentXP;
+                            updateLootboxButton();
+                        }
+                    }
+                }, 1000);
+            }
+
+            // Initialize the system
+            initDecorationSystem();
+            
+            // Expose the decoration system to the global scope for integration
+            window.decorationSystem = {
+                updateXP: function(newXP) {
+                    userXP = newXP;
+                    updateLootboxButton();
+                },
+                getCurrentXP: function() {
+                    return userXP;
+                },
+                refreshXP: function() {
+                    // Force refresh XP from QuestManager
+                    if (questManager && questManager.player) {
+                        userXP = questManager.player.xp || 0;
+                        updateLootboxButton();
+                    }
+                }
+            };
+
+            // Also add a global function that can be called from anywhere
+            window.refreshDecorationXP = function() {
+                if (window.decorationSystem) {
+                    window.decorationSystem.refreshXP();
+                }
+            };
         });
     </script>
     <script src="js/app.js"></script>

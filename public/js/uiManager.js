@@ -10,7 +10,7 @@ class UIManager {
         this.checkAndHandleDailyReset();
     }
 
-    // Add this method to check for daily reset and update UI
+    // Check for daily reset and update UI
     checkAndHandleDailyReset() {
         const didReset = this.questManager.checkDailyReset();
         if (didReset) {
@@ -20,7 +20,7 @@ class UIManager {
         }
     }
 
-    // Add this method to refresh UI after daily reset
+    // Refresh UI after daily reset
     refreshUIAfterDailyReset() {
         if (this.questManager.currentQuest) {
             // Re-render all UI components to show unchecked daily tasks
@@ -1103,6 +1103,11 @@ class UIManager {
             this.renderRoadmap();
             this.renderAllStageDetails();
             this.updatePlayerStats();
+            
+            // refresh decoration XP display
+            if (window.refreshDecorationXP) {
+                window.refreshDecorationXP();
+            }
             
             if (result.leveledUp) {
                 this.showLevelUpAnimation(result.newLevel);

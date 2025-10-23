@@ -1812,7 +1812,655 @@ body.theme-library {
   touch-action: none;
 }
 
+/* Lootbox System Styles */
+        .decoration-system {
+            position: fixed;
+            bottom: 25px;
+            left: 25px;
+            z-index: 999;
+        }
 
+        .active-decoration {
+            width: 150px; /* Perfect middle ground: 120px (old) < 150px < 180px (new) */
+            height: 150px;
+            border-radius: 14px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+            position: relative;
+        }
+
+        .active-decoration:hover {
+            transform: scale(1.06);
+            border-color: rgba(74, 144, 226, 0.5);
+            box-shadow: 0 8px 28px rgba(74, 144, 226, 0.2);
+        }
+
+        .active-decoration img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: high-quality;
+        }
+
+        .decoration-label {
+            position: absolute;
+            bottom: 6px;
+            left: 6px;
+            right: 6px;
+            background: rgba(0, 0, 0, 0.75);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .active-decoration:hover .decoration-label {
+            opacity: 1;
+        }
+
+        .decoration-selector {
+            position: absolute;
+            bottom: 160px; /* Adjusted for perfect size */
+            left: 0;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(25px);
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+            width: 350px; /* Slightly smaller than 380px */
+            max-height: 450px;
+            overflow-y: auto;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            z-index: 1000;
+        }
+
+        .decoration-selector.show {
+            display: block;
+            animation: slideUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(25px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .selector-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+        }
+
+        .selector-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .close-selector {
+            background: rgba(0, 0, 0, 0.04);
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #666;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .close-selector:hover {
+            background: rgba(0, 0, 0, 0.08);
+            transform: rotate(90deg);
+        }
+
+        .decorations-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .decoration-item {
+            width: 90px; /* Perfect middle: 80px (old) < 90px < 100px (new) */
+            height: 90px;
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 2px solid transparent;
+            position: relative;
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        .decoration-item:hover {
+            transform: scale(1.12);
+            border-color: rgba(74, 144, 226, 0.25);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.15);
+            z-index: 2;
+        }
+
+        .decoration-item.active {
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.25);
+            transform: scale(1.08);
+        }
+
+        .decoration-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: high-quality;
+            border-radius: 8px;
+        }
+
+        .decoration-item.locked {
+            filter: grayscale(1) brightness(0.85);
+            cursor: not-allowed;
+        }
+
+        .decoration-item.locked::after {
+            content: "🔒";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.65);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .decoration-item.locked:hover {
+            transform: none;
+            border-color: transparent;
+            box-shadow: none;
+        }
+
+        .item-label {
+            position: absolute;
+            bottom: -18px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 10px;
+            color: #666;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .decoration-item:hover .item-label {
+            opacity: 1;
+        }
+
+        .lootbox-container {
+            margin-top: 20px;
+            padding-top: 18px;
+            border-top: 1px solid rgba(0, 0, 0, 0.07);
+        }
+
+        .lootbox-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6a89cc, #4a69bd);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 16px rgba(106, 137, 204, 0.35);
+        }
+
+        .lootbox-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(106, 137, 204, 0.5);
+        }
+
+        .lootbox-btn:active {
+            transform: translateY(0);
+        }
+
+        .lootbox-btn:disabled {
+            background: linear-gradient(135deg, #cccccc, #aaaaaa);
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .unlock-animation {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2000;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(35px);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .unlock-animation.show {
+            display: block;
+        }
+
+        @keyframes popIn {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
+            100% {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .unlocked-gif {
+            width: 180px; /* Perfect middle: 150px (old) < 180px < 200px (new) */
+            height: 180px;
+            margin: 0 auto 20px;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.4);
+        }
+
+        .unlocked-gif img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: high-quality;
+        }
+
+        .unlock-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #6a89cc, #4a69bd);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .unlock-subtitle {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+
+        .close-unlock {
+            padding: 12px 28px;
+            background: linear-gradient(135deg, #6a89cc, #4a69bd);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 16px rgba(106, 137, 204, 0.35);
+        }
+
+        .close-unlock:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(106, 137, 204, 0.5);
+        }
+
+        /* Improved Music Player Styles */
+        .music-player {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 18px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            width: 320px;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #333;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .music-player.minimized {
+            width: 60px;
+            height: 60px;
+            padding: 0;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .music-player.minimized:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .music-player.minimized:active {
+            transform: scale(0.95);
+        }
+
+        .music-player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .music-player.minimized .music-player-header {
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+        }
+
+        .music-player-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .music-player.minimized .music-player-title {
+            display: none;
+        }
+
+        .music-player-controls {
+            display: flex;
+            gap: 6px;
+        }
+
+        .music-player.minimized .music-player-controls {
+            display: none;
+        }
+
+        .player-btn {
+            background: rgba(255, 255, 255, 0.3);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 8px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            color: #333;
+        }
+
+        .player-btn:hover {
+            background: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .player-btn:active {
+            transform: scale(0.95);
+        }
+
+        .player-btn.active {
+            background: rgba(74, 144, 226, 0.3);
+            color: #4a90e2;
+        }
+
+        .music-player.minimized .player-btn {
+            display: none;
+        }
+
+        .music-player-content {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .music-player.minimized .music-player-content {
+            display: none;
+        }
+
+        .now-playing {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .album-art {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, rgba(106, 137, 204, 0.7), rgba(74, 105, 189, 0.7));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .song-info {
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .song-title {
+            font-size: 16px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 4px;
+        }
+
+        .song-artist {
+            font-size: 13px;
+            color: rgba(51, 51, 51, 0.7);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .progress-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .progress-time {
+            font-size: 12px;
+            color: rgba(51, 51, 51, 0.7);
+            min-width: 40px;
+            font-weight: 500;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 5px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, rgba(74, 144, 226, 0.8), rgba(106, 137, 204, 0.8));
+            width: 0%;
+            transition: width 0.1s linear;
+            border-radius: 10px;
+        }
+
+        .player-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .main-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .volume-icon {
+            font-size: 16px;
+            color: rgba(51, 51, 51, 0.7);
+        }
+
+        .volume-slider {
+            flex: 1;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+        }
+
+        .volume-level {
+            height: 100%;
+            background: linear-gradient(90deg, rgba(74, 144, 226, 0.8), rgba(106, 137, 204, 0.8));
+            width: 70%;
+            border-radius: 10px;
+        }
+
+        .playlist-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .playlist-count {
+            font-size: 12px;
+            color: rgba(51, 51, 51, 0.6);
+            font-weight: 500;
+        }
+
+        .shuffle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            color: rgba(51, 51, 51, 0.7);
+            padding: 6px 10px;
+            border-radius: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .shuffle-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            color: #333;
+        }
+
+        .shuffle-btn.active {
+            background: rgba(74, 144, 226, 0.2);
+            color: #4a90e2;
+        }
+
+        .minimized-indicator {
+            display: none;
+            font-size: 20px;
+        }
+
+        .music-player.minimized .minimized-indicator {
+            display: block;
+        }
+
+        /* Animation for music note when playing */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .music-player.minimized.playing .minimized-indicator {
+            animation: pulse 2s infinite;
+        }
+
+        /* Responsive adjustments */
+         @media (max-width: 768px) {
+            .decoration-system {
+                bottom: 20px;
+                left: 20px;
+            }
+            
+            .active-decoration {
+                width: 130px;
+                height: 130px;
+            }
+            
+            .decoration-selector {
+                width: 300px;
+                bottom: 140px;
+            }
+            
+            .decoration-item {
+                width: 80px;
+                height: 80px;
+            }
+        }
 /* ===== FIREBASE STYLES ===== */
 .firebase-loading {
     position: fixed;

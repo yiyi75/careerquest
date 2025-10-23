@@ -45,20 +45,15 @@ class App {
             
             // Try to load from Firebase first
             if (this.firebaseManager.isConnected && this.firebaseManager.userId) {
-                console.log('Loading from Firebase...');
                 const firebaseData = await this.firebaseManager.loadQuestFromFirebase();
                 
                 if (firebaseData) {
-                    console.log('Firebase data loaded successfully');
                     // Data will be automatically loaded via the realtime listener in FirebaseManager
-                    // No need to call loadFromFirebaseData manually here
                 } else {
-                    console.log('No Firebase data found, loading from localStorage');
                     this.questManager.loadFromLocalStorage();
                 }
             } else {
                 // Fallback to localStorage
-                console.log('Firebase not connected, loading from localStorage');
                 this.questManager.loadFromLocalStorage();
             }
             
@@ -95,8 +90,6 @@ class App {
         
         // Apply theme after initialization
         this.applyCurrentTheme();
-        
-        console.log('App initialized without Firebase (local storage only)');
     }
 
     initializeUI() {

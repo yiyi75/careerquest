@@ -53,7 +53,6 @@ class QuestManager {
     // Enhanced daily reset with timezone support
     checkDailyReset() {
         if (this.isNewDay()) {
-            console.log('Performing daily reset for new day:', this.getCurrentDateString());
             this.performDailyReset();
             return true;
         }
@@ -102,7 +101,6 @@ class QuestManager {
         // Update streak based on actual consecutive days
         this.updateStreakWithTimezone(previousDate, currentDate);
         
-        console.log(`Daily reset completed. Previous: ${previousDate}, Current: ${currentDate}`);
         this.saveToFirebase();
     }
 
@@ -124,11 +122,9 @@ class QuestManager {
             if (dayDiff === 1) {
                 // Consecutive day - increment streak
                 this.player.streak++;
-                console.log(`Streak updated: ${this.player.streak} days`);
             } else if (dayDiff > 1) {
                 // Missed one or more days - reset streak
                 this.player.streak = 1;
-                console.log('Streak reset - missed days');
             }
             // If dayDiff === 0, it's the same day - no change to streak
             
@@ -819,7 +815,6 @@ class QuestManager {
     saveToFirebase() {
         // Safety check before saving to Firebase
         if (!this.isReadyForFirebase()) {
-            console.log('Quest not ready for Firebase, using localStorage');
             this.saveToLocalStorage();
             return;
         }
@@ -827,7 +822,6 @@ class QuestManager {
         if (this.firebaseManager && typeof this.firebaseManager.saveQuestToFirebase === 'function') {
             this.firebaseManager.saveQuestToFirebase();
         } else {
-            console.log('Firebase manager not available, falling back to localStorage');
             this.saveToLocalStorage();
         }
     }
@@ -895,7 +889,6 @@ class QuestManager {
 
     // Add method to force reset for testing
     forceDailyResetForTesting() {
-        console.log('Forcing daily reset for testing');
         // Set lastReset to yesterday to trigger reset
         const yesterday = new Date();
         yesterday.setDate(yesterday.getDate() - 1);
