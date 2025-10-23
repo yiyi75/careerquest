@@ -453,7 +453,6 @@
                 </div>
             </div>
 
-            <!-- Templates remain the same -->
             <template id="roadmapStopTemplate">
                 <div class="roadmap-stop stage-point" data-stage-id="">
                     <div class="stop-marker">
@@ -468,7 +467,90 @@
                 </div>
             </template>
 
-            <!-- Other templates remain the same -->
+            <template id="stageTemplate">
+                <div class="stage">
+                    <div class="stage-header">
+                        <input type="text" class="stage-title" placeholder="Stage name (e.g., Preparation)">
+                        <button class="btn btn-danger remove-stage">×</button>
+                    </div>
+                    <div class="steps-container">
+                        <!-- Steps will be added here -->
+                    </div>
+                    <button class="btn btn-outline add-step">+ Add Step</button>
+                </div>
+            </template>
+
+            <template id="stepTemplate">
+                <div class="step">
+                    <input type="text" class="step-title" placeholder="Step description (e.g., Practice SQL)">
+                    <button class="btn btn-danger remove-step">×</button>
+                </div>
+            </template>
+
+            <template id="editStageTemplate">
+                <div class="edit-stage">
+                    <div class="edit-stage-header">
+                        <input type="text" class="edit-stage-title" placeholder="Stage name (e.g., Preparation)">
+                        <button class="btn btn-danger remove-edit-stage">×</button>
+                    </div>
+                    <div class="edit-tasks-container">
+                        <!-- Tasks will be added here -->
+                    </div>
+                    <button class="btn btn-outline add-edit-task">+ Add Task</button>
+                </div>
+            </template>
+
+            <template id="editTaskTemplate">
+                <div class="edit-task">
+                    <input type="text" class="edit-task-title" placeholder="Task description (e.g., Practice SQL)">
+                    <button class="btn btn-danger remove-edit-task">×</button>
+                </div>
+            </template>
+
+            <template id="stageTaskTemplate">
+                <div class="stage-task" data-task-id="">
+                    <div class="task-content">
+                        <input type="checkbox" class="task-checkbox">
+                        <span class="task-title"></span>
+                        <button class="btn btn-sm daily-toggle-btn btn-outline" 
+                                title="Make this a daily practice task">
+                            Make Daily
+                        </button>
+                    </div>
+                    <div class="task-info">
+                        <span class="task-xp">+<span>0</span> XP</span>
+                        <span class="daily-badge hidden" title="Resets daily">Daily</span>
+                    </div>
+                </div>
+            </template>
+
+            <template id="chapterTemplate">
+                <div class="chapter" data-chapter-id="">
+                    <div class="chapter-header">
+                        <h3 class="chapter-title"></h3>
+                        <div class="chapter-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill"></div>
+                            </div>
+                            <span class="progress-text">0%</span>
+                            <span class="today-progress">Today: 0/0</span>
+                        </div>
+                    </div>
+                    <div class="levels-container">
+                        <!-- Levels will be added here -->
+                    </div>
+                </div>
+            </template>
+
+            <template id="levelTemplate">
+                <div class="level" data-level-id="">
+                    <div class="level-content">
+                        <input type="checkbox" class="level-checkbox">
+                        <span class="level-title"></span>
+                    </div>
+                    <div class="level-xp">+<span>0</span> XP</div>
+                </div>
+            </template>
         </main>
     </div>
 
