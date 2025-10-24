@@ -612,8 +612,7 @@
             let dragOffsetY = 0;
             let currentScale = 1;
             let isVisible = true;
-            let dragTime = 0;
-            let dragDistance = 0;
+            let hasMoved = false;
 
             const gifLibrary = [
                 { id: 'chilling', name: 'Chilling', url: 'https://media.giphy.com/media/RSmg2jxRfgd0bXYTjD/giphy.gif', unlocked: true },
@@ -632,532 +631,522 @@
                 { id: 'focus', name: 'Focus', url: 'https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3bjFjbmRlNjN6c25rMmk2amxzZmx2b3V1eTF6Z2xsMXJhNXNpMTF4eCZlcD12MV9zdGlja2Vyc19yZWxhdGVkJmN0PXM/Aa3k6VDl2EDauCyE6U/giphy.gif', unlocked: false }
             ];
 
-             // Current user data
-    let userDecorations = ['chilling'];
-    let userXP = 0;
-    let currentDecoration = 'chilling';
-    let questManager = null;
-    let uiManager = null;
 
-    // Initialize the decoration system
-    function initDecorationSystem() {
-        // Wait for QuestManager and UIManager to be available
-        setTimeout(() => {
-            if (window.questManager && window.uiManager) {
-                questManager = window.questManager;
-                uiManager = window.uiManager;
-                loadUserData();
-                setupXPChangeListener();
-            } else {
-                setTimeout(initDecorationSystem, 500);
-            }
-        }, 100);
+            // Current user data
+            let userDecorations = ['chilling'];
+            let userXP = 0;
+            let currentDecoration = 'chilling';
+            let questManager = null;
+            let uiManager = null;
 
-        // Initialize drag and drop
-        initDragAndDrop();
-        
-        // Event listeners
-        activeDecoration.addEventListener('click', handleDecorationClick);
-        closeSelector.addEventListener('click', closeSelectorModal);
-        lootboxBtn.addEventListener('click', openLootbox);
-        closeUnlock.addEventListener('click', closeUnlockModal);
-        
-        // Close selector when clicking outside
-        document.addEventListener('click', function(e) {
-            if (!decorationSelector.contains(e.target) && 
-                !activeDecoration.contains(e.target) && 
-                decorationSelector.classList.contains('show')) {
-                closeSelectorModal();
-            }
-        });
-    }
+            // Initialize the decoration system
+            function initDecorationSystem() {
+                // Wait for QuestManager and UIManager to be available
+                setTimeout(() => {
+                    if (window.questManager && window.uiManager) {
+                        questManager = window.questManager;
+                        uiManager = window.uiManager;
+                        loadUserData();
+                        setupXPChangeListener();
+                    } else {
+                        setTimeout(initDecorationSystem, 500);
+                    }
+                }, 100);
 
-    function initDragAndDrop() {
-        // Mouse events
-        activeDecoration.addEventListener('mousedown', startDrag);
-        document.addEventListener('mousemove', drag);
-        document.addEventListener('mouseup', stopDrag);
-        
-        // Touch events for mobile
-        activeDecoration.addEventListener('touchstart', startDragTouch);
-        document.addEventListener('touchmove', dragTouch);
-        document.addEventListener('touchend', stopDrag);
-        
-        // Double click to reset position
-        activeDecoration.addEventListener('dblclick', resetPosition);
-        
-        // Add control buttons
-        addControlButtons();
-    }
-
-    function addControlButtons() {
-        // Create control buttons if they don't exist
-        if (!activeDecoration.querySelector('.decoration-controls')) {
-            const controls = document.createElement('div');
-            controls.className = 'decoration-controls';
-            controls.innerHTML = `
-                <button class="control-btn resize-btn" title="Resize">↔</button>
-                <button class="control-btn close-btn" title="Hide">×</button>
-            `;
-            activeDecoration.appendChild(controls);
-            
-            // Add event listeners to controls
-            const resizeBtn = controls.querySelector('.resize-btn');
-            const closeBtn = controls.querySelector('.close-btn');
-            
-            resizeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleSize();
-            });
-            
-            closeBtn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleVisibility();
-            });
-        }
-    }
-
-    function startDrag(e) {
-        if (e.target.closest('.control-btn')) return;
-        
-        isDragging = true;
-        dragStartTime = Date.now();
-        dragDistance = 0;
-        
-        const rect = activeDecoration.getBoundingClientRect();
-        dragOffsetX = e.clientX - rect.left;
-        dragOffsetY = e.clientY - rect.top;
-        
-        activeDecoration.classList.add('dragging');
-        e.preventDefault();
-    }
-
-    function startDragTouch(e) {
-        if (e.target.closest('.control-btn')) return;
-        
-        isDragging = true;
-        dragStartTime = Date.now();
-        dragDistance = 0;
-        
-        const touch = e.touches[0];
-        const rect = activeDecoration.getBoundingClientRect();
-        dragOffsetX = touch.clientX - rect.left;
-        dragOffsetY = touch.clientY - rect.top;
-        
-        activeDecoration.classList.add('dragging');
-        e.preventDefault();
-    }
-
-    function drag(e) {
-        if (!isDragging) return;
-        
-        const x = e.clientX - dragOffsetX;
-        const y = e.clientY - dragOffsetY;
-        
-        // Track drag distance
-        const startX = parseInt(activeDecoration.style.left) || 0;
-        const startY = parseInt(activeDecoration.style.top) || 0;
-        dragDistance += Math.abs(x - startX) + Math.abs(y - startY);
-        
-        updatePosition(x, y);
-    }
-
-    function dragTouch(e) {
-        if (!isDragging) return;
-        
-        const touch = e.touches[0];
-        const x = touch.clientX - dragOffsetX;
-        const y = touch.clientY - dragOffsetY;
-        
-        // Track drag distance
-        const startX = parseInt(activeDecoration.style.left) || 0;
-        const startY = parseInt(activeDecoration.style.top) || 0;
-        dragDistance += Math.abs(x - startX) + Math.abs(y - startY);
-        
-        updatePosition(x, y);
-        e.preventDefault();
-    }
-
-    function stopDrag() {
-        if (!isDragging) return;
-        
-        const dragDuration = Date.now() - dragStartTime;
-        const wasDrag = dragDistance > 10 || dragDuration > 200; // Consider it a drag if moved more than 10px or took longer than 200ms
-        
-        isDragging = false;
-        activeDecoration.classList.remove('dragging');
-        saveDecorationPosition();
-        
-        // Reset drag tracking
-        dragStartTime = 0;
-        dragDistance = 0;
-    }
-
-    function handleDecorationClick(e) {
-        // Don't open selector if this was a drag operation
-        if (isDragging) return;
-        
-        // Don't open selector if clicking on control buttons
-        if (e.target.closest('.control-btn')) return;
-        
-        toggleSelector();
-    }
-
-    function updatePosition(x, y) {
-        // Keep within viewport bounds
-        const maxX = window.innerWidth - activeDecoration.offsetWidth;
-        const maxY = window.innerHeight - activeDecoration.offsetHeight;
-        
-        const boundedX = Math.max(0, Math.min(x, maxX));
-        const boundedY = Math.max(0, Math.min(y, maxY));
-        
-        activeDecoration.style.left = boundedX + 'px';
-        activeDecoration.style.top = boundedY + 'px';
-    }
-
-    function toggleSize() {
-        currentScale = currentScale === 1 ? 1.5 : 1;
-        activeDecoration.style.transform = `scale(${currentScale})`;
-        saveDecorationPosition();
-    }
-
-    function toggleVisibility() {
-        isVisible = !isVisible;
-        activeDecoration.style.opacity = isVisible ? '1' : '0.3';
-        saveDecorationPosition();
-    }
-
-    function resetPosition() {
-        // Reset to default position (bottom left)
-        const defaultX = 25;
-        const defaultY = window.innerHeight - activeDecoration.offsetHeight - 25;
-        
-        activeDecoration.style.transition = 'left 0.5s ease, top 0.5s ease';
-        updatePosition(defaultX, defaultY);
-        
-        setTimeout(() => {
-            activeDecoration.style.transition = '';
-        }, 500);
-        
-        saveDecorationPosition();
-    }
-
-    function saveDecorationPosition() {
-        const position = {
-            x: parseInt(activeDecoration.style.left) || 0,
-            y: parseInt(activeDecoration.style.top) || 0,
-            scale: currentScale,
-            visible: isVisible
-        };
-        
-        localStorage.setItem('decorationPosition', JSON.stringify(position));
-    }
-
-    function loadDecorationPosition() {
-        const saved = localStorage.getItem('decorationPosition');
-        if (saved) {
-            try {
-                const position = JSON.parse(saved);
-                updatePosition(position.x, position.y);
-                currentScale = position.scale || 1;
-                isVisible = position.visible !== false;
+                // Initialize drag and drop
+                initDragAndDrop();
                 
+                // Event listeners
+                closeSelector.addEventListener('click', closeSelectorModal);
+                lootboxBtn.addEventListener('click', openLootbox);
+                closeUnlock.addEventListener('click', closeUnlockModal);
+                
+                // Close selector when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!decorationSelector.contains(e.target) && 
+                        !activeDecoration.contains(e.target) && 
+                        decorationSelector.classList.contains('show')) {
+                        closeSelectorModal();
+                    }
+                });
+            }
+
+            function initDragAndDrop() {
+                // Mouse events
+                activeDecoration.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', stopDrag);
+                
+                // Touch events for mobile
+                activeDecoration.addEventListener('touchstart', startDragTouch);
+                document.addEventListener('touchmove', dragTouch);
+                document.addEventListener('touchend', stopDrag);
+                
+                // Double click to reset position
+                activeDecoration.addEventListener('dblclick', resetPosition);
+                
+                // Click to open selector (with prevention during drag)
+                activeDecoration.addEventListener('click', handleClick);
+                
+                // Add control buttons
+                addControlButtons();
+            }
+
+            function addControlButtons() {
+                // Create control buttons if they don't exist
+                if (!activeDecoration.querySelector('.decoration-controls')) {
+                    const controls = document.createElement('div');
+                    controls.className = 'decoration-controls';
+                    controls.innerHTML = `
+                        <button class="control-btn resize-btn" title="Resize">↔</button>
+                        <button class="control-btn close-btn" title="Hide">×</button>
+                    `;
+                    activeDecoration.appendChild(controls);
+                    
+                    // Add event listeners to controls
+                    const resizeBtn = controls.querySelector('.resize-btn');
+                    const closeBtn = controls.querySelector('.close-btn');
+                    
+                    resizeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleSize();
+                    });
+                    
+                    closeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        toggleVisibility();
+                    });
+                }
+            }
+
+            function startDrag(e) {
+                if (e.target.closest('.control-btn')) return;
+                
+                isDragging = true;
+                hasMoved = false;
+                
+                const rect = activeDecoration.getBoundingClientRect();
+                dragOffsetX = e.clientX - rect.left;
+                dragOffsetY = e.clientY - rect.top;
+                
+                activeDecoration.classList.add('dragging');
+                e.preventDefault();
+            }
+
+            function startDragTouch(e) {
+                if (e.target.closest('.control-btn')) return;
+                
+                isDragging = true;
+                hasMoved = false;
+                
+                const touch = e.touches[0];
+                const rect = activeDecoration.getBoundingClientRect();
+                dragOffsetX = touch.clientX - rect.left;
+                dragOffsetY = touch.clientY - rect.top;
+                
+                activeDecoration.classList.add('dragging');
+                e.preventDefault();
+            }
+
+            function drag(e) {
+                if (!isDragging) return;
+                
+                const x = e.clientX - dragOffsetX;
+                const y = e.clientY - dragOffsetY;
+                
+                // Mark that we've moved (so it's a drag, not a click)
+                hasMoved = true;
+                
+                updatePosition(x, y);
+            }
+
+            function dragTouch(e) {
+                if (!isDragging) return;
+                
+                const touch = e.touches[0];
+                const x = touch.clientX - dragOffsetX;
+                const y = touch.clientY - dragOffsetY;
+                
+                // Mark that we've moved (so it's a drag, not a click)
+                hasMoved = true;
+                
+                updatePosition(x, y);
+                e.preventDefault();
+            }
+
+            function stopDrag() {
+                if (!isDragging) return;
+                
+                isDragging = false;
+                activeDecoration.classList.remove('dragging');
+                saveDecorationPosition();
+            }
+
+            function handleClick(e) {
+                // Don't open selector if this was a drag operation
+                if (hasMoved) return;
+                
+                // Don't open selector if clicking on control buttons
+                if (e.target.closest('.control-btn')) return;
+                
+                toggleSelector();
+            }
+
+            function updatePosition(x, y) {
+                // Keep within viewport bounds
+                const maxX = window.innerWidth - activeDecoration.offsetWidth;
+                const maxY = window.innerHeight - activeDecoration.offsetHeight;
+                
+                const boundedX = Math.max(0, Math.min(x, maxX));
+                const boundedY = Math.max(0, Math.min(y, maxY));
+                
+                activeDecoration.style.left = boundedX + 'px';
+                activeDecoration.style.top = boundedY + 'px';
+            }
+
+            function toggleSize() {
+                currentScale = currentScale === 1 ? 1.5 : 1;
                 activeDecoration.style.transform = `scale(${currentScale})`;
+                saveDecorationPosition();
+            }
+
+            function toggleVisibility() {
+                isVisible = !isVisible;
                 activeDecoration.style.opacity = isVisible ? '1' : '0.3';
-            } catch (e) {
-                console.error('Error loading decoration position:', e);
-                // Set default position
-                resetPosition();
+                saveDecorationPosition();
             }
-        } else {
-            // Set default position
-            resetPosition();
-        }
-    }
 
-    function toggleSelector() {
-        decorationSelector.classList.toggle('show');
-    }
-
-    function closeSelectorModal() {
-        decorationSelector.classList.remove('show');
-    }
-
-    function loadUserData() {
-        // Try to get user data from QuestManager first
-        if (questManager && questManager.player) {
-            userXP = questManager.player.xp || 0;
-            
-            // Update XP display in header
-            const playerXPElement = document.getElementById('playerXP');
-            if (playerXPElement) {
-                playerXPElement.textContent = userXP;
-            }
-        }
-        
-        // Load from localStorage as fallback
-        const savedDecorations = localStorage.getItem('userDecorations');
-        const savedCurrent = localStorage.getItem('currentDecoration');
-        
-        if (savedDecorations) userDecorations = JSON.parse(savedDecorations);
-        if (savedCurrent) currentDecoration = savedCurrent;
-        
-        // Update active decoration
-        const currentGif = gifLibrary.find(g => g.id === currentDecoration);
-        if (currentGif) {
-            activeDecoration.querySelector('img').src = currentGif.url;
-        }
-        
-        // Load saved position
-        loadDecorationPosition();
-        
-        renderDecorationsGrid();
-        updateLootboxButton();
-    }
-
-    function saveUserData() {
-        localStorage.setItem('userDecorations', JSON.stringify(userDecorations));
-        localStorage.setItem('currentDecoration', currentDecoration);
-        
-        // Also save to QuestManager if available
-        if (questManager && questManager.player) {
-            questManager.player.xp = userXP;
-            // Trigger save to Firebase if available
-            if (questManager.saveToFirebase) {
-                questManager.saveToFirebase();
-            }
-        }
-    }
-
-    function renderDecorationsGrid() {
-        decorationsGrid.innerHTML = '';
-        
-        gifLibrary.forEach(gif => {
-            const isUnlocked = userDecorations.includes(gif.id);
-            const isActive = currentDecoration === gif.id;
-            
-            const decorationItem = document.createElement('div');
-            decorationItem.className = `decoration-item ${isUnlocked ? '' : 'locked'} ${isActive ? 'active' : ''}`;
-            decorationItem.setAttribute('data-gif-id', gif.id);
-            
-            if (isUnlocked) {
-                decorationItem.innerHTML = `
-                    <img src="${gif.url}" alt="${gif.name}">
-                    <div class="item-label">${gif.name}</div>
-                `;
-                decorationItem.addEventListener('click', () => selectDecoration(gif.id));
-            } else {
-                decorationItem.innerHTML = `
-                    <div style="width:100%;height:100%;background:linear-gradient(135deg, #f0f0f0, #e0e0e0);border-radius:8px;"></div>
-                    <div class="item-label">${gif.name}</div>
-                `;
-            }
-            
-            decorationsGrid.appendChild(decorationItem);
-        });
-    }
-
-    function selectDecoration(gifId) {
-        const gif = gifLibrary.find(g => g.id === gifId);
-        if (gif && userDecorations.includes(gifId)) {
-            currentDecoration = gifId;
-            activeDecoration.querySelector('img').src = gif.url;
-            renderDecorationsGrid();
-            saveUserData();
-            closeSelectorModal();
-        }
-    }
-
-    function updateLootboxButton() {
-        // Update XP from QuestManager if available
-        if (questManager && questManager.player) {
-            userXP = questManager.player.xp || 0;
-        }
-        
-        // Enable/disable lootbox button based on XP
-        lootboxBtn.disabled = userXP < 100;
-        lootboxBtn.textContent = userXP >= 100 ? 
-            '🎁 Open Lootbox (Cost: 100 XP)' : 
-            `🎁 Need ${100 - userXP} more XP`;
-        
-        // Update XP display in header
-        const playerXPElement = document.getElementById('playerXP');
-        if (playerXPElement) {
-            playerXPElement.textContent = userXP;
-        }
-    }
-
-    function openLootbox() {
-        if (userXP < 100) return;
-        
-        // Deduct XP
-        userXP -= 100;
-        
-        // Update QuestManager if available
-        if (questManager && questManager.player) {
-            questManager.player.xp = userXP;
-            // Update UI through UIManager if available
-            if (uiManager && uiManager.updatePlayerStats) {
-                uiManager.updatePlayerStats();
-            }
-        }
-        
-        // Get locked GIFs
-        const lockedGifs = gifLibrary.filter(g => !userDecorations.includes(g.id));
-        
-        if (lockedGifs.length === 0) {
-            alert('🎉 You already unlocked all decorations!');
-            userXP += 100; // Refund XP
-            updateLootboxButton();
-            saveUserData();
-            return;
-        }
-        
-        // Randomly select a locked GIF
-        const randomIndex = Math.floor(Math.random() * lockedGifs.length);
-        const unlockedGifData = lockedGifs[randomIndex];
-        
-        // Unlock it
-        userDecorations.push(unlockedGifData.id);
-        
-        // Show unlock animation
-        showUnlockAnimation(unlockedGifData);
-        
-        // Update UI
-        updateLootboxButton();
-        saveUserData();
-        
-        // Show toast notification if UIManager is available
-        if (uiManager && uiManager.showToast) {
-            uiManager.showToast(`🎉 Unlocked "${unlockedGifData.name}" decoration!`, 'success');
-        }
-    }
-
-    function showUnlockAnimation(gifData) {
-        unlockedGif.src = gifData.url;
-        unlockedName.textContent = gifData.name;
-        unlockAnimation.classList.add('show');
-        createConfetti();
-    }
-
-    function closeUnlockModal() {
-        unlockAnimation.classList.remove('show');
-        renderDecorationsGrid();
-    }
-
-    function createConfetti() {
-        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'];
-        for (let i = 0; i < 120; i++) {
-            const confetti = document.createElement('div');
-            confetti.className = 'confetti';
-            confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-            confetti.style.left = Math.random() * 100 + 'vw';
-            confetti.style.top = '-15px';
-            confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
-            confetti.style.width = (6 + Math.random() * 6) + 'px';
-            confetti.style.height = (6 + Math.random() * 6) + 'px';
-            document.body.appendChild(confetti);
-            
-            // Animate
-            const animation = confetti.animate([
-                { top: '-15px', opacity: 1, transform: `rotate(0deg)` },
-                { top: '100vh', opacity: 0, transform: `rotate(${Math.random() * 720}deg)` }
-            ], {
-                duration: 1800 + Math.random() * 2500,
-                easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
-            });
-            
-            animation.onfinish = () => confetti.remove();
-        }
-    }
-
-    // Listen for XP changes from the main app
-    function setupXPChangeListener() {
-        // Method 1: Override the handleTaskCompletion method in UIManager
-        if (window.uiManager && window.uiManager.handleTaskCompletion) {
-            const originalHandleTaskCompletion = window.uiManager.handleTaskCompletion;
-            window.uiManager.handleTaskCompletion = function(checkbox) {
-                // Call the original method
-                const result = originalHandleTaskCompletion.call(this, checkbox);
+            function resetPosition() {
+                // Reset to default position (bottom left)
+                const defaultX = 25;
+                const defaultY = window.innerHeight - activeDecoration.offsetHeight - 25;
                 
-                // Update decoration system XP
-                if (result && window.decorationSystem) {
-                    window.decorationSystem.refreshXP();
-                }
+                activeDecoration.style.transition = 'left 0.5s ease, top 0.5s ease';
+                updatePosition(defaultX, defaultY);
                 
-                return result;
-            };
-        }
+                setTimeout(() => {
+                    activeDecoration.style.transition = '';
+                }, 500);
+                
+                saveDecorationPosition();
+            }
 
-        // Method 2: Override the updatePlayerStats method
-        if (window.uiManager && window.uiManager.updatePlayerStats) {
-            const originalUpdatePlayerStats = window.uiManager.updatePlayerStats;
-            window.uiManager.updatePlayerStats = function() {
-                if (originalUpdatePlayerStats) {
-                    originalUpdatePlayerStats.call(this);
+            function saveDecorationPosition() {
+                const position = {
+                    x: parseInt(activeDecoration.style.left) || 0,
+                    y: parseInt(activeDecoration.style.top) || 0,
+                    scale: currentScale,
+                    visible: isVisible
+                };
+                
+                localStorage.setItem('decorationPosition', JSON.stringify(position));
+            }
+
+            function loadDecorationPosition() {
+                const saved = localStorage.getItem('decorationPosition');
+                if (saved) {
+                    try {
+                        const position = JSON.parse(saved);
+                        updatePosition(position.x, position.y);
+                        currentScale = position.scale || 1;
+                        isVisible = position.visible !== false;
+                        
+                        activeDecoration.style.transform = `scale(${currentScale})`;
+                        activeDecoration.style.opacity = isVisible ? '1' : '0.3';
+                    } catch (e) {
+                        console.error('Error loading decoration position:', e);
+                        // Set default position
+                        resetPosition();
+                    }
+                } else {
+                    // Set default position
+                    resetPosition();
                 }
-                // Sync XP with lootbox system
+            }
+
+            function toggleSelector() {
+                decorationSelector.classList.toggle('show');
+            }
+
+            function closeSelectorModal() {
+                decorationSelector.classList.remove('show');
+            }
+
+            function loadUserData() {
+                // Try to get user data from QuestManager first
                 if (questManager && questManager.player) {
                     userXP = questManager.player.xp || 0;
+                    
+                    // Update XP display in header
+                    const playerXPElement = document.getElementById('playerXP');
+                    if (playerXPElement) {
+                        playerXPElement.textContent = userXP;
+                    }
+                }
+                
+                // Load from localStorage as fallback
+                const savedDecorations = localStorage.getItem('userDecorations');
+                const savedCurrent = localStorage.getItem('currentDecoration');
+                
+                if (savedDecorations) userDecorations = JSON.parse(savedDecorations);
+                if (savedCurrent) currentDecoration = savedCurrent;
+                
+                // Update active decoration
+                const currentGif = gifLibrary.find(g => g.id === currentDecoration);
+                if (currentGif) {
+                    activeDecoration.querySelector('img').src = currentGif.url;
+                }
+                
+                // Load saved position
+                loadDecorationPosition();
+                
+                renderDecorationsGrid();
+                updateLootboxButton();
+            }
+
+            function saveUserData() {
+                localStorage.setItem('userDecorations', JSON.stringify(userDecorations));
+                localStorage.setItem('currentDecoration', currentDecoration);
+                
+                // Also save to QuestManager if available
+                if (questManager && questManager.player) {
+                    questManager.player.xp = userXP;
+                    // Trigger save to Firebase if available
+                    if (questManager.saveToFirebase) {
+                        questManager.saveToFirebase();
+                    }
+                }
+            }
+
+            function renderDecorationsGrid() {
+                decorationsGrid.innerHTML = '';
+                
+                gifLibrary.forEach(gif => {
+                    const isUnlocked = userDecorations.includes(gif.id);
+                    const isActive = currentDecoration === gif.id;
+                    
+                    const decorationItem = document.createElement('div');
+                    decorationItem.className = `decoration-item ${isUnlocked ? '' : 'locked'} ${isActive ? 'active' : ''}`;
+                    decorationItem.setAttribute('data-gif-id', gif.id);
+                    
+                    if (isUnlocked) {
+                        decorationItem.innerHTML = `
+                            <img src="${gif.url}" alt="${gif.name}">
+                            <div class="item-label">${gif.name}</div>
+                        `;
+                        decorationItem.addEventListener('click', () => selectDecoration(gif.id));
+                    } else {
+                        decorationItem.innerHTML = `
+                            <div style="width:100%;height:100%;background:linear-gradient(135deg, #f0f0f0, #e0e0e0);border-radius:8px;"></div>
+                            <div class="item-label">${gif.name}</div>
+                        `;
+                    }
+                    
+                    decorationsGrid.appendChild(decorationItem);
+                });
+            }
+
+            function selectDecoration(gifId) {
+                const gif = gifLibrary.find(g => g.id === gifId);
+                if (gif && userDecorations.includes(gifId)) {
+                    currentDecoration = gifId;
+                    activeDecoration.querySelector('img').src = gif.url;
+                    renderDecorationsGrid();
+                    saveUserData();
+                    closeSelectorModal();
+                }
+            }
+
+            function updateLootboxButton() {
+                // Update XP from QuestManager if available
+                if (questManager && questManager.player) {
+                    userXP = questManager.player.xp || 0;
+                }
+                
+                // Enable/disable lootbox button based on XP
+                lootboxBtn.disabled = userXP < 100;
+                lootboxBtn.textContent = userXP >= 100 ? 
+                    '🎁 Open Lootbox (Cost: 100 XP)' : 
+                    `🎁 Need ${100 - userXP} more XP`;
+                
+                // Update XP display in header
+                const playerXPElement = document.getElementById('playerXP');
+                if (playerXPElement) {
+                    playerXPElement.textContent = userXP;
+                }
+            }
+
+            function openLootbox() {
+                if (userXP < 100) return;
+                
+                // Deduct XP
+                userXP -= 100;
+                
+                // Update QuestManager if available
+                if (questManager && questManager.player) {
+                    questManager.player.xp = userXP;
+                    // Update UI through UIManager if available
+                    if (uiManager && uiManager.updatePlayerStats) {
+                        uiManager.updatePlayerStats();
+                    }
+                }
+                
+                // Get locked GIFs
+                const lockedGifs = gifLibrary.filter(g => !userDecorations.includes(g.id));
+                
+                if (lockedGifs.length === 0) {
+                    alert('🎉 You already unlocked all decorations!');
+                    userXP += 100; // Refund XP
                     updateLootboxButton();
+                    saveUserData();
+                    return;
+                }
+                
+                // Randomly select a locked GIF
+                const randomIndex = Math.floor(Math.random() * lockedGifs.length);
+                const unlockedGifData = lockedGifs[randomIndex];
+                
+                // Unlock it
+                userDecorations.push(unlockedGifData.id);
+                
+                // Show unlock animation
+                showUnlockAnimation(unlockedGifData);
+                
+                // Update UI
+                updateLootboxButton();
+                saveUserData();
+                
+                // Show toast notification if UIManager is available
+                if (uiManager && uiManager.showToast) {
+                    uiManager.showToast(`🎉 Unlocked "${unlockedGifData.name}" decoration!`, 'success');
+                }
+            }
+
+            function showUnlockAnimation(gifData) {
+                unlockedGif.src = gifData.url;
+                unlockedName.textContent = gifData.name;
+                unlockAnimation.classList.add('show');
+                createConfetti();
+            }
+
+            function closeUnlockModal() {
+                unlockAnimation.classList.remove('show');
+                renderDecorationsGrid();
+            }
+
+            function createConfetti() {
+                const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff', '#ff8800', '#8800ff'];
+                for (let i = 0; i < 120; i++) {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.top = '-15px';
+                    confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+                    confetti.style.width = (6 + Math.random() * 6) + 'px';
+                    confetti.style.height = (6 + Math.random() * 6) + 'px';
+                    document.body.appendChild(confetti);
+                    
+                    // Animate
+                    const animation = confetti.animate([
+                        { top: '-15px', opacity: 1, transform: `rotate(0deg)` },
+                        { top: '100vh', opacity: 0, transform: `rotate(${Math.random() * 720}deg)` }
+                    ], {
+                        duration: 1800 + Math.random() * 2500,
+                        easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
+                    });
+                    
+                    animation.onfinish = () => confetti.remove();
+                }
+            }
+
+            // Listen for XP changes from the main app
+            function setupXPChangeListener() {
+                // Method 1: Override the handleTaskCompletion method in UIManager
+                if (window.uiManager && window.uiManager.handleTaskCompletion) {
+                    const originalHandleTaskCompletion = window.uiManager.handleTaskCompletion;
+                    window.uiManager.handleTaskCompletion = function(checkbox) {
+                        // Call the original method
+                        const result = originalHandleTaskCompletion.call(this, checkbox);
+                        
+                        // Update decoration system XP
+                        if (result && window.decorationSystem) {
+                            window.decorationSystem.refreshXP();
+                        }
+                        
+                        return result;
+                    };
+                }
+
+                // Method 2: Override the updatePlayerStats method
+                if (window.uiManager && window.uiManager.updatePlayerStats) {
+                    const originalUpdatePlayerStats = window.uiManager.updatePlayerStats;
+                    window.uiManager.updatePlayerStats = function() {
+                        if (originalUpdatePlayerStats) {
+                            originalUpdatePlayerStats.call(this);
+                        }
+                        // Sync XP with lootbox system
+                        if (questManager && questManager.player) {
+                            userXP = questManager.player.xp || 0;
+                            updateLootboxButton();
+                        }
+                    };
+                }
+
+                // Method 3: Listen for custom XP change events
+                document.addEventListener('xpChanged', function(event) {
+                    if (event.detail && event.detail.xp !== undefined) {
+                        userXP = event.detail.xp;
+                        updateLootboxButton();
+                    }
+                });
+
+                // Method 4: Poll for XP changes (fallback)
+                startXPPolling();
+            }
+
+            // Fallback: Poll for XP changes every second
+            function startXPPolling() {
+                setInterval(() => {
+                    if (questManager && questManager.player) {
+                        const currentXP = questManager.player.xp || 0;
+                        if (currentXP !== userXP) {
+                            userXP = currentXP;
+                            updateLootboxButton();
+                        }
+                    }
+                }, 1000);
+            }
+
+            // Initialize the system
+            initDecorationSystem();
+            
+            // Expose the decoration system to the global scope
+            window.decorationSystem = {
+                updateXP: function(newXP) {
+                    userXP = newXP;
+                    updateLootboxButton();
+                },
+                getCurrentXP: function() {
+                    return userXP;
+                },
+                refreshXP: function() {
+                    if (questManager && questManager.player) {
+                        userXP = questManager.player.xp || 0;
+                        updateLootboxButton();
+                    }
+                },
+                resetPosition: resetPosition,
+                toggleVisibility: toggleVisibility,
+                toggleSize: toggleSize
+            };
+
+            window.refreshDecorationXP = function() {
+                if (window.decorationSystem) {
+                    window.decorationSystem.refreshXP();
                 }
             };
-        }
-
-        // Method 3: Listen for custom XP change events
-        document.addEventListener('xpChanged', function(event) {
-            if (event.detail && event.detail.xp !== undefined) {
-                userXP = event.detail.xp;
-                updateLootboxButton();
-            }
         });
-
-        // Method 4: Poll for XP changes (fallback)
-        startXPPolling();
-    }
-
-    // Fallback: Poll for XP changes every second
-    function startXPPolling() {
-        setInterval(() => {
-            if (questManager && questManager.player) {
-                const currentXP = questManager.player.xp || 0;
-                if (currentXP !== userXP) {
-                    userXP = currentXP;
-                    updateLootboxButton();
-                }
-            }
-        }, 1000);
-    }
-
-    // Initialize the system
-    initDecorationSystem();
-    
-    // Expose the decoration system to the global scope
-    window.decorationSystem = {
-        updateXP: function(newXP) {
-            userXP = newXP;
-            updateLootboxButton();
-        },
-        getCurrentXP: function() {
-            return userXP;
-        },
-        refreshXP: function() {
-            if (questManager && questManager.player) {
-                userXP = questManager.player.xp || 0;
-                updateLootboxButton();
-            }
-        },
-        resetPosition: resetPosition,
-        toggleVisibility: toggleVisibility,
-        toggleSize: toggleSize
-    };
-
-    window.refreshDecorationXP = function() {
-        if (window.decorationSystem) {
-            window.decorationSystem.refreshXP();
-        }
-    };
-    });
     </script>
     <script src="js/app.js"></script>
 </body>
