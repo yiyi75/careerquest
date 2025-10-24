@@ -1977,9 +1977,7 @@ body.theme-library {
 
 /* Rest of your existing CSS remains the same */
 .decoration-selector {
-    position: absolute;
-    bottom: 160px;
-    left: 0;
+    position: fixed;
     background: rgba(255, 255, 255, 0.96);
     backdrop-filter: blur(25px);
     border-radius: 18px;

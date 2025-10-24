@@ -372,6 +372,16 @@
                     title: "Cozy",
                     artist: "One Man Symphony",
                     src: "sound/One Man Symphony - Downtempo & Lofi & Progressive Music Pack Vol - 1 (Free) - 05 Cozy.mp3"
+                },
+                {
+                    title: "Serene",
+                    artist: "One Man Symphony",
+                    src: "sound/One Man Symphony - Reflective District (Free) - 02 Serene (BGM 03).mp3"
+                },
+                {
+                    title: "Memories",
+                    artist: "One Man Symphony",
+                    src: "sound/One Man Symphony - Reflective District (Free) - 03 Memories (BGM 09).mp3"
                 }
             ];
 
@@ -865,7 +875,42 @@
             }
 
             function toggleSelector() {
-                decorationSelector.classList.toggle('show');
+                const isShowing = decorationSelector.classList.toggle('show');
+                
+                if (isShowing) {
+                    positionSelectorToRight();
+                }
+            }
+
+            function positionSelectorToRight() {
+                const decorationRect = activeDecoration.getBoundingClientRect();
+                const selectorRect = decorationSelector.getBoundingClientRect();
+                const viewport = {
+                    width: window.innerWidth,
+                    height: window.innerHeight
+                };
+
+                // Position to the right of the decoration
+                let targetX = decorationRect.right + 10;
+                let targetY = decorationRect.top;
+
+                // If not enough space to the right, position to the left
+                if (targetX + selectorRect.width > viewport.width - 10) {
+                    targetX = decorationRect.left - selectorRect.width - 10;
+                }
+
+                // Ensure vertical positioning stays within viewport
+                if (targetY + selectorRect.height > viewport.height - 10) {
+                    targetY = viewport.height - selectorRect.height - 10;
+                }
+                if (targetY < 10) {
+                    targetY = 10;
+                }
+
+                // Apply the position
+                decorationSelector.style.left = targetX + 'px';
+                decorationSelector.style.top = targetY + 'px';
+                decorationSelector.style.transform = 'none';
             }
 
             function closeSelectorModal() {
