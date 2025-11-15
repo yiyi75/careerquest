@@ -19,6 +19,9 @@ js/firebaseConfig.js
 public/js/firebaseConfig.js
 firebaseConfig.js
 
+.spotifyManager.js
+public/js/spotifyManager.js
+
 # style
 style.css
 pixelartstyle.css
