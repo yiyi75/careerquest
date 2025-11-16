@@ -270,13 +270,21 @@
     <!-- Improved Music Player -->
     <div class="music-player" id="musicPlayer">
         <div class="music-player-header">
-            <div class="music-player-title">🎵</div>
+            <div class="music-player-title">🎵 Music Player</div>
             <div class="music-player-controls">
                 <button class="player-btn" id="minimizePlayer" title="Minimize">−</button>
             </div>
             <div class="minimized-indicator">♪</div>
         </div>
-        <div class="music-player-content">
+        
+        <!-- Music Source Selector -->
+        <div class="music-source-selector">
+            <button class="music-source-btn active" id="localMusicBtn">Local Music</button>
+            <button class="music-source-btn" id="spotifyMusicBtn">Spotify</button>
+        </div>
+
+        <!-- Local Music Player Content -->
+        <div class="music-player-content" id="localPlayerContent">
             <div class="now-playing">
                 <div class="album-art" id="currentAlbumArt">♪</div>
                 <div class="song-info">
@@ -309,31 +317,332 @@
                 <button class="shuffle-btn" id="shuffleBtn" title="Shuffle">🔀 Shuffle</button>
             </div>
         </div>
-    </div>
 
-    <script src="js/firebaseConfig.js"></script>
-    <script src="js/questManager.js"></script>
-    <script src="js/uiManager.js"></script>
+        <!-- Spotify Player Content -->
+        <div class="spotify-player-content hidden" id="spotifyPlayerContent">
+            <div id="spotifyAuthArea">
+                <div id="spotifyStatus" class="hidden">
+                    <div class="spotify-status">
+                        <div class="spotify-avatar" id="spotifyAvatar">S</div>
+                        <div class="spotify-user-info">
+                            <div class="spotify-user-name" id="spotifyUserName">User Name</div>
+                        </div>
+                        <button class="spotify-logout-btn" id="spotifyLogoutBtn">Logout</button>
+                    </div>
+                    
+                    <div class="spotify-playlist-selector">
+                        <select id="spotifyPlaylistSelect">
+                            <option value="">Select a playlist</option>
+                        </select>
+                    </div>
+                    
+                    <!-- <div class="spotify-device-selector">
+                        <select id="spotifyDeviceSelect">
+                            <option value="">Select playback device</option>
+                        </select>
+                    </div> -->
+                    
+                    <div id="spotifyNowPlaying" class="spotify-now-playing hidden">
+                        <div class="spotify-track-info">
+                            <img id="spotifyTrackImage" src="" alt="Track" class="spotify-track-image">
+                            <div class="spotify-track-details">
+                                <div class="spotify-track-name" id="spotifyTrackName">Track Name</div>
+                                <div class="spotify-track-artist" id="spotifyTrackArtist">Artist Name</div>
+                            </div>
+                        </div>
+                        <div class="spotify-progress">
+                            <div class="spotify-progress-bar">
+                                <div class="spotify-progress-fill" id="spotifyProgressFill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="player-controls">
+                        <div class="main-controls">
+                            <button class="player-btn" id="spotifyPrevBtn" title="Previous">⏮</button>
+                            <button class="player-btn" id="spotifyPlayPauseBtn" title="Play">▶</button>
+                            <button class="player-btn" id="spotifyNextBtn" title="Next">⏭</button>
+                        </div>
+                    </div>
+                    
+                    <!-- Volume control for Spotify -->
+                    <div class="volume-control">
+                        <div class="volume-icon">🔊</div>
+                        <div class="volume-slider" id="spotifyVolumeSlider">
+                            <div class="volume-level" id="spotifyVolumeLevel"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="spotifyLoginArea">
+                    <button class="spotify-login-btn" id="spotifyLoginBtn">
+                        <span class="spotify-icon">♫</span>
+                        Connect to Spotify
+                    </button>
+                    <div id="spotifyLoading" class="spotify-loading hidden">Connecting to Spotify...</div>
+                    <div id="spotifyError" class="spotify-error hidden"></div>
+                </div>
+            </div>
+        </div>
+
     <script>
-        // Improved Music Player Functionality
-        document.addEventListener('DOMContentLoaded', function() {
-            const musicPlayer = document.getElementById('musicPlayer');
-            const minimizeBtn = document.getElementById('minimizePlayer');
-            const playPauseBtn = document.getElementById('playPauseBtn');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const progressBar = document.getElementById('progressBar');
-            const progressFill = document.getElementById('progressFill');
-            const currentTimeEl = document.getElementById('currentTime');
-            const durationTimeEl = document.getElementById('durationTime');
-            const volumeSlider = document.getElementById('volumeSlider');
-            const volumeLevel = document.getElementById('volumeLevel');
-            const currentSongTitle = document.getElementById('currentSongTitle');
-            const currentSongArtist = document.getElementById('currentSongArtist');
-            const currentAlbumArt = document.getElementById('currentAlbumArt');
-            const playlistCount = document.getElementById('playlistCount');
-            const shuffleBtn = document.getElementById('shuffleBtn');
+            document.addEventListener('DOMContentLoaded', function() {
+        const musicPlayer = document.getElementById('musicPlayer');
+        const minimizeBtn = document.getElementById('minimizePlayer');
+        const minimizedIndicator = document.querySelector('.minimized-indicator');
+        
+        // Fix minimize functionality
+        minimizeBtn.addEventListener('click', function() {
+            musicPlayer.classList.toggle('minimized');
+            minimizedIndicator.classList.toggle('hidden');
+        });
 
+        // Local player elements (your existing code)
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressFill = document.getElementById('progressFill');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationTimeEl = document.getElementById('durationTime');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const volumeLevel = document.getElementById('volumeLevel');
+        const currentSongTitle = document.getElementById('currentSongTitle');
+        const currentSongArtist = document.getElementById('currentSongArtist');
+        const currentAlbumArt = document.getElementById('currentAlbumArt');
+        const playlistCount = document.getElementById('playlistCount');
+        const shuffleBtn = document.getElementById('shuffleBtn');
+
+        // Source switching elements
+        const localMusicBtn = document.getElementById('localMusicBtn');
+        const spotifyMusicBtn = document.getElementById('spotifyMusicBtn');
+        const localPlayerContent = document.getElementById('localPlayerContent');
+        const spotifyPlayerContent = document.getElementById('spotifyPlayerContent');
+
+        // Spotify elements
+        //const spotifyDeviceSelect = document.getElementById('spotifyDeviceSelect');
+        const spotifyPlayPauseBtn = document.getElementById('spotifyPlayPauseBtn');
+        const spotifyPrevBtn = document.getElementById('spotifyPrevBtn');
+        const spotifyNextBtn = document.getElementById('spotifyNextBtn');
+        const spotifyPlaylistSelect = document.getElementById('spotifyPlaylistSelect');
+        const spotifyLoginBtn = document.getElementById('spotifyLoginBtn');
+        const spotifyLogoutBtn = document.getElementById('spotifyLogoutBtn');
+        const spotifyStatus = document.getElementById('spotifyStatus');
+        const spotifyLoginArea = document.getElementById('spotifyLoginArea');
+        const spotifyVolumeSlider = document.getElementById('spotifyVolumeSlider');
+        const spotifyVolumeLevel = document.getElementById('spotifyVolumeLevel');
+
+        let spotifyManager = null;
+        let isSpotifyPlaying = false;
+        let playbackStateInterval = null;
+
+        // Initialize source switching
+        function initializeSourceSwitching() {
+            localPlayerContent.classList.remove('hidden');
+            spotifyPlayerContent.classList.add('hidden');
+            
+            localMusicBtn.addEventListener('click', switchToLocalPlayer);
+            spotifyMusicBtn.addEventListener('click', switchToSpotifyPlayer);
+        }
+
+        function switchToLocalPlayer() {
+            localMusicBtn.classList.add('active');
+            spotifyMusicBtn.classList.remove('active');
+            localPlayerContent.classList.remove('hidden');
+            spotifyPlayerContent.classList.add('hidden');
+            stopPlaybackStatePolling();
+        }
+
+        function switchToSpotifyPlayer() {
+            spotifyMusicBtn.classList.add('active');
+            localMusicBtn.classList.remove('active');
+            localPlayerContent.classList.add('hidden');
+            spotifyPlayerContent.classList.remove('hidden');
+            
+            if (!spotifyManager && window.SpotifyManager) {
+                initializeSpotifyManager();
+            } else if (spotifyManager) {
+                startPlaybackStatePolling();
+            }
+        }
+
+        function initializeSpotifyManager() {
+            if (!window.SpotifyManager) {
+                console.error('SpotifyManager not found');
+                return;
+            }
+            
+            try {
+                spotifyManager = new SpotifyManager(window.SPOTIFY_CONFIG);
+                spotifyManager.init();
+                
+                // Setup Spotify volume control
+                if (spotifyVolumeSlider) {
+                    spotifyVolumeSlider.addEventListener('click', setSpotifyVolume);
+                    updateSpotifyVolumeDisplay(0.5);
+                }
+            
+                
+                // Setup other Spotify controls
+                if (spotifyPrevBtn) {
+                    spotifyPrevBtn.addEventListener('click', () => {
+                        if (spotifyManager) spotifyManager.previousTrack();
+                    });
+                }
+                
+                if (spotifyNextBtn) {
+                    spotifyNextBtn.addEventListener('click', () => {
+                        if (spotifyManager) spotifyManager.nextTrack();
+                    });
+                }
+
+                // Setup Spotify logout
+                if (spotifyLogoutBtn) {
+                    spotifyLogoutBtn.addEventListener('click', () => {
+                        if (spotifyManager) {
+                            spotifyManager.logout();
+                            showSpotifyLoggedOutState();
+                        }
+                    });
+                }
+
+                // Setup device selection
+                // if (spotifyDeviceSelect) {
+                //     spotifyDeviceSelect.addEventListener('change', (e) => {
+                //         if (spotifyManager && e.target.value) {
+                //             spotifyManager.transferToDevice(e.target.value);
+                //         }
+                //     });
+                // }
+
+                // Setup playlist selection
+                if (spotifyPlaylistSelect) {
+                    spotifyPlaylistSelect.addEventListener('change', (e) => {
+                        if (spotifyManager && e.target.value) {
+                            spotifyManager.loadPlaylist(e.target.value); // Loads but does NOT play
+                        }
+                    });
+                }
+
+            } catch (error) {
+                console.error('Failed to initialize Spotify manager:', error);
+                showSpotifyError('Failed to initialize Spotify: ' + error.message);
+            }
+        }
+
+        // Spotify volume control
+        function setSpotifyVolume(e) {
+            if (!spotifyManager || !spotifyManager.player) {
+                showSpotifyError('Spotify player not connected');
+                return;
+            }
+            
+            const volumeSliderWidth = e.currentTarget.clientWidth;
+            const clickX = e.offsetX;
+            const volume = Math.max(0, Math.min(1, clickX / volumeSliderWidth));
+            
+            spotifyManager.setVolume(volume).then(() => {
+                updateSpotifyVolumeDisplay(volume);
+            }).catch(err => {
+                console.error('Failed to set Spotify volume:', err);
+                showSpotifyError('Failed to set volume');
+            });
+        }
+
+        function updateSpotifyVolumeDisplay(volume) {
+            if (spotifyVolumeLevel) {
+                spotifyVolumeLevel.style.width = `${volume * 100}%`;
+            }
+        }
+
+        function showSpotifyError(message) {
+            const errorElement = document.getElementById('spotifyError');
+            if (errorElement) {
+                errorElement.textContent = message;
+                errorElement.classList.remove('hidden');
+                setTimeout(() => {
+                    errorElement.classList.add('hidden');
+                }, 5000);
+            }
+        }
+
+        function updateSpotifyPlaybackState() {
+            if (!spotifyManager) return;
+            
+            spotifyManager.getPlaybackState().then(state => {
+                if (state) {
+                    const wasPlaying = isSpotifyPlaying;
+                    isSpotifyPlaying = state.is_playing || false;
+                    
+                    // Only update button if state changed
+                    if (wasPlaying !== isSpotifyPlaying) {
+                        updateSpotifyPlayPauseButton();
+                    }
+                    
+                    // Update progress
+                    if (state.progress_ms && state.item && state.item.duration_ms) {
+                        const progressPercent = (state.progress_ms / state.item.duration_ms) * 100;
+                        const progressFill = document.getElementById('spotifyProgressFill');
+                        if (progressFill) {
+                            progressFill.style.width = `${progressPercent}%`;
+                        }
+                    }
+                    
+                    // Update track info
+                    if (state.item) {
+                        const trackName = document.getElementById('spotifyTrackName');
+                        const trackArtist = document.getElementById('spotifyTrackArtist');
+                        const trackImage = document.getElementById('spotifyTrackImage');
+                        const nowPlaying = document.getElementById('spotifyNowPlaying');
+                        
+                        if (trackName) trackName.textContent = state.item.name || 'Unknown Track';
+                        if (trackArtist) trackArtist.textContent = state.item.artists?.[0]?.name || 'Unknown Artist';
+                        if (trackImage && state.item.album?.images?.[0]?.url) {
+                            trackImage.src = state.item.album.images[0].url;
+                        }
+                        if (nowPlaying) nowPlaying.classList.remove('hidden');
+                    }
+                    
+                    // Update volume display if available
+                    if (state.volume !== undefined) {
+                        this.updateVolumeDisplay(state.volume); // Spotify volume is 0-100
+                    }
+                }
+            }).catch(error => {
+                console.error('Error getting playback state:', error);
+            });
+        }
+
+        function startPlaybackStatePolling() {
+            updateSpotifyPlaybackState();
+            playbackStateInterval = setInterval(updateSpotifyPlaybackState, 3000);
+        }
+
+        function stopPlaybackStatePolling() {
+            if (playbackStateInterval) {
+                clearInterval(playbackStateInterval);
+                playbackStateInterval = null;
+            }
+        }
+
+        function showSpotifyLoggedInState() {
+            if (spotifyStatus) spotifyStatus.classList.remove('hidden');
+            if (spotifyLoginArea) spotifyLoginArea.classList.add('hidden');
+            startPlaybackStatePolling();
+        }
+
+        function showSpotifyLoggedOutState() {
+            if (spotifyStatus) spotifyStatus.classList.add('hidden');
+            if (spotifyLoginArea) spotifyLoginArea.classList.remove('hidden');
+            isSpotifyPlaying = false;
+            updateSpotifyPlayPauseButton();
+            stopPlaybackStatePolling();
+        }
+
+        // Initialize source switching
+        initializeSourceSwitching();
+
+            // Local Music Player Functionality
             const songs = [
                 {
                     title: "Reflection",
@@ -389,6 +698,16 @@
                     title: "Memories",
                     artist: "One Man Symphony",
                     src: "sound/One Man Symphony - Reflective District (Free) - 03 Memories (BGM 09).mp3"
+                },
+                {
+                    title: "Bird & Sun",
+                    artist: "Benjamin Shaw",
+                    src: "sound/Benjamin Shaw - The Birds Chirp & the Sun Shines.mp3"
+                },
+                {
+                    title: "You & Me",
+                    artist: "Benjamin Shaw",
+                    src: "sound/Benjamin Shaw - You & Me.mp3"
                 }
             ];
 
@@ -399,7 +718,7 @@
             let isShuffled = false;
             let originalPlaylist = [...songs];
 
-            // Initialize the player
+            // Initialize the local player
             function initPlayer() {
                 // Set playlist count
                 playlistCount.textContent = `${songs.length} songs`;
@@ -572,10 +891,11 @@
                 }
             }
 
-            // Initialize the player when the page loads
+            // Initialize the local player when the page loads
             initPlayer();
         });
     </script>
+    </div>
     <!-- Lootbox Decoration System -->
     <div class="decoration-system">
         <div class="active-decoration" id="activeDecoration">
@@ -1219,6 +1539,13 @@
             };
         });
     </script>
+    <script src="js/firebaseConfig.js"></script>
+    
+    <script src="js/spotifyConfig.js"></script>
+    <script src="js/spotifyManager.js"></script>
+    
+    <script src="js/questManager.js"></script>
+    <script src="js/uiManager.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>

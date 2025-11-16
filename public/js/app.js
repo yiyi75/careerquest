@@ -64,6 +64,9 @@ class App {
             // Apply theme after everything is loaded
             this.applyCurrentTheme();
             
+            // Initialize Spotify integration AFTER UI is ready
+            this.initializeSpotify();
+            
             // Make available globally for debugging
             window.app = this;
             window.questManager = this.questManager;
@@ -90,6 +93,9 @@ class App {
         
         // Apply theme after initialization
         this.applyCurrentTheme();
+        
+        // Initialize Spotify integration
+        this.initializeSpotify();
     }
 
     initializeUI() {
@@ -104,6 +110,35 @@ class App {
             this.uiManager.renderQuestProgress();
         }
     }
+
+    // In app.js - update initializeSpotify method
+initializeSpotify() {
+    console.log('Initializing Spotify integration...');
+    
+    // Wait for everything to be ready
+    setTimeout(() => {
+        if (window.spotifyIntegration && window.SPOTIFY_CONFIG) {
+            console.log('Spotify integration available, initializing...');
+            
+            try {
+                window.spotifyIntegration.init(window.SPOTIFY_CONFIG);
+                console.log('Spotify integration initialized successfully');
+                
+                // Check if we need to process an authorization code
+                if (window.location.search.includes('code=')) {
+                    console.log('Authorization code found, processing...');
+                    setTimeout(() => {
+                        window.spotifyIntegration.checkAuthentication();
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Error initializing Spotify integration:', error);
+            }
+        } else {
+            console.error('Spotify integration not available');
+        }
+    }, 1500);
+}
 
     showMainContent() {
         // Hide character selection
@@ -182,5 +217,6 @@ class App {
 
 // Initialize the app when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM Content Loaded - Starting App initialization');
     new App();
 });

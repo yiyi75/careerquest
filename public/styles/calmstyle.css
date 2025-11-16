@@ -2253,320 +2253,6 @@ body.theme-library {
     box-shadow: 0 6px 20px rgba(106, 137, 204, 0.5);
 }
 
-        /* Improved Music Player Styles */
-        .music-player {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            border-radius: 20px;
-            padding: 18px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            width: 320px;
-            z-index: 1000;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            color: #333;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .music-player.minimized {
-            width: 60px;
-            height: 60px;
-            padding: 0;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.25);
-        }
-
-        .music-player.minimized:hover {
-            transform: scale(1.05);
-            background: rgba(255, 255, 255, 0.25);
-        }
-
-        .music-player.minimized:active {
-            transform: scale(0.95);
-        }
-
-        .music-player-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .music-player.minimized .music-player-header {
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            justify-content: center;
-        }
-
-        .music-player-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .music-player.minimized .music-player-title {
-            display: none;
-        }
-
-        .music-player-controls {
-            display: flex;
-            gap: 6px;
-        }
-
-        .music-player.minimized .music-player-controls {
-            display: none;
-        }
-
-        .player-btn {
-            background: rgba(255, 255, 255, 0.3);
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            padding: 8px;
-            border-radius: 50%;
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            backdrop-filter: blur(10px);
-            color: #333;
-        }
-
-        .player-btn:hover {
-            background: rgba(255, 255, 255, 0.5);
-            transform: scale(1.1);
-        }
-
-        .player-btn:active {
-            transform: scale(0.95);
-        }
-
-        .player-btn.active {
-            background: rgba(74, 144, 226, 0.3);
-            color: #4a90e2;
-        }
-
-        .music-player.minimized .player-btn {
-            display: none;
-        }
-
-        .music-player-content {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .music-player.minimized .music-player-content {
-            display: none;
-        }
-
-        .now-playing {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .album-art {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, rgba(106, 137, 204, 0.7), rgba(74, 105, 189, 0.7));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .song-info {
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .song-title {
-            font-size: 16px;
-            font-weight: 600;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            margin-bottom: 4px;
-        }
-
-        .song-artist {
-            font-size: 13px;
-            color: rgba(51, 51, 51, 0.7);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .progress-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .progress-time {
-            font-size: 12px;
-            color: rgba(51, 51, 51, 0.7);
-            min-width: 40px;
-            font-weight: 500;
-        }
-
-        .progress-bar {
-            flex: 1;
-            height: 5px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            overflow: hidden;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, rgba(74, 144, 226, 0.8), rgba(106, 137, 204, 0.8));
-            width: 0%;
-            transition: width 0.1s linear;
-            border-radius: 10px;
-        }
-
-        .player-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .main-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .volume-control {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 8px;
-        }
-
-        .volume-icon {
-            font-size: 16px;
-            color: rgba(51, 51, 51, 0.7);
-        }
-
-        .volume-slider {
-            flex: 1;
-            height: 4px;
-            background-color: rgba(255, 255, 255, 0.3);
-            border-radius: 10px;
-            position: relative;
-            cursor: pointer;
-            backdrop-filter: blur(5px);
-        }
-
-        .volume-level {
-            height: 100%;
-            background: linear-gradient(90deg, rgba(74, 144, 226, 0.8), rgba(106, 137, 204, 0.8));
-            width: 70%;
-            border-radius: 10px;
-        }
-
-        .playlist-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .playlist-count {
-            font-size: 12px;
-            color: rgba(51, 51, 51, 0.6);
-            font-weight: 500;
-        }
-
-        .shuffle-btn {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            color: rgba(51, 51, 51, 0.7);
-            padding: 6px 10px;
-            border-radius: 12px;
-            transition: all 0.2s ease;
-        }
-
-        .shuffle-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-            color: #333;
-        }
-
-        .shuffle-btn.active {
-            background: rgba(74, 144, 226, 0.2);
-            color: #4a90e2;
-        }
-
-        .minimized-indicator {
-            display: none;
-            font-size: 20px;
-        }
-
-        .music-player.minimized .minimized-indicator {
-            display: block;
-        }
-
-        /* Animation for music note when playing */
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        .music-player.minimized.playing .minimized-indicator {
-            animation: pulse 2s infinite;
-        }
-
-        /* Responsive adjustments */
-         @media (max-width: 768px) {
-            .decoration-system {
-                bottom: 20px;
-                left: 20px;
-            }
-            
-            .active-decoration {
-                width: 130px;
-                height: 130px;
-            }
-            
-            .decoration-selector {
-                width: 300px;
-                bottom: 140px;
-            }
-            
-            .decoration-item {
-                width: 80px;
-                height: 80px;
-            }
-        }
 /* ===== FIREBASE STYLES ===== */
 .firebase-loading {
     position: fixed;
@@ -2786,4 +2472,621 @@ body.theme-library {
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--progress-border);
+}
+
+
+
+/* Audio - Improved Music Player Styles */
+.music-player {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 18px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    width: 320px;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1000;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #333;
+    font-family: 'Inter', sans-serif;
+}
+
+/* FIXED: Improved minimized state */
+.music-player.minimized {
+    width: 60px;
+    height: 60px;
+    padding: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    overflow: hidden;
+}
+
+.music-player.minimized:hover {
+    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.25);
+}
+
+.music-player.minimized:active {
+    transform: scale(0.95);
+}
+
+.music-player-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.music-player.minimized .music-player-header {
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    justify-content: center;
+    align-items: center;
+}
+
+.music-player-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.music-player.minimized .music-player-title {
+    display: none;
+}
+
+.music-player-controls {
+    display: flex;
+    gap: 6px;
+}
+
+.music-player.minimized .music-player-controls {
+    display: none;
+}
+
+.player-btn {
+    background: rgba(255, 255, 255, 0.3);
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 8px;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    backdrop-filter: blur(10px);
+    color: #333;
+}
+
+.player-btn:hover {
+    background: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+.player-btn:active {
+    transform: scale(0.95);
+}
+
+.player-btn.active {
+    background: rgba(74, 144, 226, 0.3);
+    color: #4a90e2;
+}
+
+.music-player.minimized .player-btn {
+    display: none;
+}
+
+/* FIXED: Ensure content is hidden when minimized */
+.music-player.minimized .music-player-content,
+.music-player.minimized .spotify-player-content,
+.music-player.minimized .music-source-selector {
+    display: none !important;
+}
+
+.music-player-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+/* FIXED: Spotify player content visibility */
+.spotify-player-content {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.spotify-player-content.hidden {
+    display: none !important;
+}
+
+.now-playing {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.album-art {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(106, 137, 204, 0.7), rgba(74, 105, 189, 0.7));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 20px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.song-info {
+    flex: 1;
+    overflow: hidden;
+}
+
+.song-title {
+    font-size: 16px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 4px;
+}
+
+.song-artist {
+    font-size: 13px;
+    color: rgba(51, 51, 51, 0.7);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.progress-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.progress-time {
+    font-size: 12px;
+    color: rgba(51, 51, 51, 0.7);
+    min-width: 40px;
+    font-weight: 500;
+}
+
+.progress-bar {
+    flex: 1;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(74, 144, 226, 0.8), rgba(106, 137, 204, 0.8));
+    width: 0%;
+    transition: width 0.1s linear;
+    border-radius: 10px;
+}
+
+.player-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.main-controls {
+    display: flex;
+    gap: 8px;
+}
+
+.volume-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+}
+
+.volume-icon {
+    font-size: 16px;
+    color: rgba(51, 51, 51, 0.7);
+}
+
+.volume-slider {
+    flex: 1;
+    height: 4px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+}
+
+.volume-level {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(74, 144, 226, 0.8), rgba(106, 137, 204, 0.8));
+    width: 70%;
+    border-radius: 10px;
+}
+
+.playlist-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.playlist-count {
+    font-size: 12px;
+    color: rgba(51, 51, 51, 0.6);
+    font-weight: 500;
+}
+
+.shuffle-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    color: rgba(51, 51, 51, 0.7);
+    padding: 6px 10px;
+    border-radius: 12px;
+    transition: all 0.2s ease;
+}
+
+.shuffle-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    color: #333;
+}
+
+.shuffle-btn.active {
+    background: rgba(74, 144, 226, 0.2);
+    color: #4a90e2;
+}
+
+.minimized-indicator {
+    display: none;
+    font-size: 20px;
+    color: #333;
+}
+
+.music-player.minimized .minimized-indicator {
+    display: block;
+}
+
+/* Animation for music note when playing */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.music-player.minimized.playing .minimized-indicator {
+    animation: pulse 2s infinite;
+}
+
+/* ============================= */
+/* Spotify Integration Styles    */
+/* ============================= */
+
+/* FIXED: Utility hidden class - make sure it's at the top */
+.hidden {
+    display: none !important;
+}
+
+/* Music source selector buttons */
+.music-source-selector {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.music-source-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(255, 255, 255, 0.85);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.music-source-btn.active {
+    background: #1DB954;
+    color: white;
+}
+
+.music-source-btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 1);
+}
+
+/* Spotify Login Button */
+.spotify-login-btn {
+    background: #1DB954;
+    color: white;
+    border: none;
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.spotify-login-btn:hover {
+    background: #1ed760;
+    transform: translateY(-2px);
+}
+
+.spotify-login-btn:disabled {
+    background: #535353;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.spotify-icon {
+    font-size: 16px;
+}
+
+/* Spotify Status (when logged in) */
+.spotify-status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.spotify-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #1DB954;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    background-size: cover;
+    background-position: center;
+}
+
+.spotify-user-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.spotify-user-name {
+    font-weight: 600;
+    color: #1DB954;
+    font-size: 14px;
+}
+
+.spotify-logout-btn {
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s ease;
+}
+
+.spotify-logout-btn:hover {
+    background: #cc3333;
+}
+
+/* Playlist & Device Selectors */
+.spotify-playlist-selector,
+.spotify-device-selector {
+    margin-bottom: 12px;
+}
+
+.spotify-playlist-selector select,
+.spotify-device-selector select {
+    width: 100%;
+    padding: 8px 12px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    color: #333;
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+}
+
+/* Now Playing Section */
+.spotify-now-playing {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border-radius: 10px;
+    background: rgba(29, 185, 84, 0.08);
+    border: 1px solid rgba(29, 185, 84, 0.25);
+    max-width: 100%;
+}
+
+.spotify-track-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.spotify-track-image {
+    width: 50px;
+    height: 50px;
+    border-radius: 6px;
+    object-fit: cover;
+}
+
+.spotify-track-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-width: 0; /* FIXED: Allow text truncation */
+}
+
+.spotify-track-name {
+    font-weight: 600;
+    color: #1DB954;
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.spotify-track-artist {
+    font-size: 11px;
+    opacity: 0.8;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Spotify Progress Bar */
+.spotify-progress {
+    margin-top: 6px;
+}
+
+.spotify-progress-bar {
+    width: 100%;
+    height: 5px;
+    background-color: rgba(255, 255, 255, 0.3);
+    border-radius: 10px;
+    overflow: hidden;
+    cursor: pointer;
+    backdrop-filter: blur(5px);
+}
+
+.spotify-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #1DB954, #1ed760);
+    width: 0%;
+    transition: width 0.1s linear;
+    border-radius: 10px;
+}
+
+/* Loading & Error */
+.spotify-loading {
+    text-align: center;
+    padding: 10px;
+    color: #1DB954;
+    font-size: 12px;
+}
+
+.spotify-error {
+    text-align: center;
+    padding: 10px;
+    color: #ff4444;
+    background: rgba(255, 68, 68, 0.1);
+    border-radius: 6px;
+    margin-top: 10px;
+    font-size: 12px;
+}
+
+/* Spotify volume control alignment */
+.spotify-player-content .volume-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+    padding: 0 10px;
+}
+
+.spotify-player-content .volume-slider {
+    flex: 1;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 2px;
+    position: relative;
+    cursor: pointer;
+}
+
+.spotify-player-content .volume-level {
+    position: absolute;
+    height: 100%;
+    background: #1DB954;
+    border-radius: 2px;
+    width: 50%;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 480px) {
+    .music-player {
+        width: 280px;
+        right: 10px;
+        bottom: 10px;
+        max-height: 70vh;
+    }
+    
+    .spotify-player-content {
+        max-height: 300px;
+    }
+    
+    .spotify-status {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .spotify-user-info {
+        width: 100%;
+    }
+}
+
+/* Add this to handle the player when it gets too tall */
+@media (max-height: 600px) {
+    .music-player {
+        max-height: 60vh;
+    }
+    
+    .music-player-content {
+        max-height: 300px;
+    }
+    
+    .spotify-player-content {
+        max-height: 300px;
+    }
+}
+
+.spotify-auth-section {
+    /* Remove this as it's not in your HTML structure */
+    display: none;
 }

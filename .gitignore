@@ -19,8 +19,11 @@ js/firebaseConfig.js
 public/js/firebaseConfig.js
 firebaseConfig.js
 
+.spotifyConfig.js
+
 .spotifyManager.js
 public/js/spotifyManager.js
+public/js/spotifyConfig.js
 
 # style
 style.css
